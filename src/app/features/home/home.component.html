@@ -1,0 +1,172 @@
+<div class="home-page">
+
+  <!-- Header -->
+  <app-header />
+
+
+  <!-- Search -->
+  <app-search-bar />
+
+
+  <!-- Categories -->
+  <app-category-list />
+
+
+  <main class="home-content">
+
+
+    <!-- Welcome -->
+    <section class="welcome-section">
+
+      <h1>
+        Welcome to Foodie 🍔
+      </h1>
+
+      <p>
+        Discover delicious food near you
+      </p>
+
+    </section>
+
+
+    <!-- Promotional Banner -->
+    <section class="promotion-banner">
+
+      <div class="promotion-content">
+
+        <span class="discount">
+          30% OFF
+        </span>
+
+        <h2>
+          Your First Order
+        </h2>
+
+        <p>
+          Enjoy delicious food with an amazing discount.
+        </p>
+
+        <button>
+          Order Now
+        </button>
+
+      </div>
+
+
+      <div class="promotion-image">
+        🍔
+      </div>
+
+    </section>
+
+
+    <!-- Popular Restaurants -->
+    <section class="section">
+
+      <div class="section-header">
+
+        <h2>
+          Popular Restaurants
+        </h2>
+
+        <a href="#">
+          See all
+        </a>
+
+      </div>
+
+
+      <div class="restaurant-grid">
+
+        @for (
+          restaurant of restaurants;
+          track restaurant.id
+        ) {
+
+          <app-restaurant-card
+            [restaurant]="restaurant"
+          />
+
+        }
+
+      </div>
+
+    </section>
+
+
+    <!-- Deals -->
+    <section class="section">
+
+      <div class="section-header">
+
+        <h2>
+          Top Deals For You
+        </h2>
+
+        <a href="#">
+          See all
+        </a>
+
+      </div>
+
+
+      <div class="deals-placeholder">
+
+        <div class="deal-card">
+
+          <span class="deal-icon">
+            🍔
+          </span>
+
+          <strong>
+            40% OFF
+          </strong>
+
+          <p>
+            On selected burgers
+          </p>
+
+        </div>
+
+
+        <div class="deal-card">
+
+          <span class="deal-icon">
+            🍕
+          </span>
+
+          <strong>
+            Buy 1 Get 1
+          </strong>
+
+          <p>
+            On selected pizzas
+          </p>
+
+        </div>
+
+
+        <div class="deal-card">
+
+          <span class="deal-icon">
+            🛵
+          </span>
+
+          <strong>
+            Free Delivery
+          </strong>
+
+          <p>
+            On orders above Rs. 999
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+</div>

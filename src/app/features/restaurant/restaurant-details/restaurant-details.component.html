@@ -1,0 +1,291 @@
+@if (restaurant) {
+
+  <div class="details-page">
+
+    <!-- ==========================
+         HERO
+    =========================== -->
+
+    <section class="hero">
+
+      <img
+        [src]="restaurant.image"
+        [alt]="restaurant.name"
+        class="hero-image"
+      >
+
+      <div class="hero-overlay">
+
+        <a
+          routerLink="/home"
+          class="back-button"
+        >
+          ←
+        </a>
+
+        <button
+          class="favorite-button"
+          type="button"
+        >
+          ♡
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================
+         RESTAURANT CONTENT
+    =========================== -->
+
+    <main class="details-content">
+
+
+      <!-- Title -->
+
+      <div class="restaurant-title">
+
+        <div>
+
+          <h1>
+            {{ restaurant.name }}
+          </h1>
+
+          <p>
+            {{ restaurant.cuisine }}
+          </p>
+
+        </div>
+
+        <div class="rating">
+
+          ⭐ {{ restaurant.rating }}
+
+        </div>
+
+      </div>
+
+
+      <!-- Delivery Information -->
+
+      <div class="delivery-info">
+
+        <div class="info-item">
+
+          <span class="info-icon">
+            🛵
+          </span>
+
+          <div>
+
+            <strong>
+              {{ restaurant.deliveryTime }}
+            </strong>
+
+            <small>
+              Delivery time
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="info-item">
+
+          <span class="info-icon">
+            💜
+          </span>
+
+          <div>
+
+            <strong>
+              {{ restaurant.deliveryFee }}
+            </strong>
+
+            <small>
+              Delivery fee
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Discount -->
+
+      <div class="discount-banner">
+
+        <span class="discount-icon">
+          🏷️
+        </span>
+
+        <div>
+
+          <strong>
+            {{ restaurant.discount }}
+          </strong>
+
+          <p>
+            Special discount available
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- Popular Items -->
+
+      <section class="popular-section">
+
+        <div class="section-header">
+
+          <h2>
+            Popular Items
+          </h2>
+
+        </div>
+
+
+        <div class="food-list">
+
+          <div class="food-item">
+
+            <div class="food-image">
+              🍔
+            </div>
+
+            <div class="food-info">
+
+              <h3>
+                Classic Burger
+              </h3>
+
+              <p>
+                Juicy beef burger with cheese
+              </p>
+
+              <strong>
+                Rs. 650
+              </strong>
+
+            </div>
+
+            <button
+              class="add-button"
+              type="button"
+            >
+              +
+            </button>
+
+          </div>
+
+
+          <div class="food-item">
+
+            <div class="food-image">
+              🍕
+            </div>
+
+            <div class="food-info">
+
+              <h3>
+                Special Pizza
+              </h3>
+
+              <p>
+                Loaded pizza with fresh toppings
+              </p>
+
+              <strong>
+                Rs. 950
+              </strong>
+
+            </div>
+
+            <button
+              class="add-button"
+              type="button"
+            >
+              +
+            </button>
+
+          </div>
+
+
+          <div class="food-item">
+
+            <div class="food-image">
+              🍗
+            </div>
+
+            <div class="food-info">
+
+              <h3>
+                BBQ Platter
+              </h3>
+
+              <p>
+                Delicious grilled BBQ selection
+              </p>
+
+              <strong>
+                Rs. 1,250
+              </strong>
+
+            </div>
+
+            <button
+              class="add-button"
+              type="button"
+            >
+              +
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ==========================
+           VIEW MENU
+      =========================== -->
+
+      <a
+        [routerLink]="[
+          '/restaurant',
+          restaurant.id,
+          'menu'
+        ]"
+        class="menu-button"
+      >
+        View Full Menu
+      </a>
+
+    </main>
+
+  </div>
+
+}
+
+@else {
+
+  <div class="not-found">
+
+    <h2>
+      Restaurant not found
+    </h2>
+
+    <a routerLink="/home">
+      Back to Home
+    </a>
+
+  </div>
+
+}

@@ -1,0 +1,244 @@
+<div class="login-page">
+
+  <!-- Decorative background -->
+  <div class="background-circle circle-one"></div>
+  <div class="background-circle circle-two"></div>
+
+  <div class="login-wrapper">
+
+    <!-- Left Branding Section -->
+    <div class="branding-section">
+
+      <div class="brand-logo">
+        🍔
+      </div>
+
+      <h1>Foodie</h1>
+
+      <h2>
+        Your favorite food,
+        <span>delivered.</span>
+      </h2>
+
+      <p>
+        Discover delicious meals from your favorite
+        restaurants and get them delivered right to
+        your doorstep.
+      </p>
+
+      <div class="food-icons">
+        <span>🍕</span>
+        <span>🍔</span>
+        <span>🍗</span>
+        <span>🍟</span>
+      </div>
+
+    </div>
+
+
+    <!-- Login Card -->
+    <div class="login-card">
+
+      <div class="welcome-section">
+
+        <span class="welcome-icon">
+          👋
+        </span>
+
+        <h2>
+          Welcome Back!
+        </h2>
+
+        <p>
+          Login to continue ordering delicious food.
+        </p>
+
+      </div>
+
+
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="login()"
+        class="login-form"
+      >
+
+
+        <!-- Username -->
+
+        <div class="form-group">
+
+          <label for="userName">
+            Mobile Number
+          </label>
+
+          <div class="input-wrapper">
+
+            <span class="input-icon">
+              📱
+            </span>
+
+            <input
+              id="userName"
+              type="tel"
+              formControlName="userName"
+              placeholder="Enter your Mobile Number"
+              autocomplete="username"
+            >
+
+          </div>
+
+          @if (
+            loginForm.get('userName')?.touched &&
+            loginForm.get('userName')?.invalid
+          ) {
+
+            <small class="field-error">
+              Username is required.
+            </small>
+
+          }
+
+        </div>
+
+
+        <!-- Password -->
+
+        <div class="form-group">
+
+          <div class="label-row">
+
+            <label for="password">
+              Password
+            </label>
+
+            <a href="javascript:void(0)">
+              Forgot password?
+            </a>
+
+          </div>
+
+
+          <div class="input-wrapper">
+
+            <span class="input-icon">
+              🔒
+            </span>
+
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            >
+
+          </div>
+
+          @if (
+            loginForm.get('password')?.touched &&
+            loginForm.get('password')?.invalid
+          ) {
+
+            <small class="field-error">
+              Password is required.
+            </small>
+
+          }
+
+        </div>
+
+
+        <!-- API Error -->
+
+        @if (errorMessage) {
+
+          <div class="api-error">
+
+            <span>
+              ⚠️
+            </span>
+
+            <span>
+              {{ errorMessage }}
+            </span>
+
+          </div>
+
+        }
+
+
+        <!-- Login -->
+
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="isLoading"
+        >
+
+          @if (isLoading) {
+
+            <span class="loading-content">
+
+              <span class="spinner"></span>
+
+              Logging in...
+
+            </span>
+
+          }
+          @else {
+
+            <span>
+              Login
+            </span>
+
+            <span class="arrow">
+              →
+            </span>
+
+          }
+
+        </button>
+
+
+      </form>
+
+
+      <!-- Register -->
+
+      <div class="register-section">
+
+        <span>
+          Don't have an account?
+        </span>
+
+        <a routerLink="/register">
+          Create an account
+        </a>
+
+      </div>
+
+
+      <!-- Footer -->
+
+      <div class="login-footer">
+
+        <span>
+          🔒 Secure login
+        </span>
+
+        <span>
+          •
+        </span>
+
+        <span>
+          Fast & reliable
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

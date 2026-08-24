@@ -1,0 +1,338 @@
+.home-page {
+  min-height: 100vh;
+
+  background: #f8f7fc;
+
+  color: #241b2f;
+
+  padding-bottom: 40px;
+}
+
+
+.home-content {
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 25px;
+}
+
+
+.welcome-section {
+  margin-bottom: 25px;
+}
+
+
+.welcome-section h1 {
+  margin: 0;
+
+  font-size: 28px;
+
+  color: #241b2f;
+}
+
+
+.welcome-section p {
+  margin: 7px 0 0;
+
+  color: #888;
+
+  font-size: 14px;
+}
+
+
+/* ===========================
+   PROMOTION
+=========================== */
+
+.promotion-banner {
+  min-height: 190px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  overflow: hidden;
+
+  margin-bottom: 35px;
+
+  padding: 30px 40px;
+
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #5a189a,
+      #7b2cbf,
+      #9d4edd
+    );
+
+  color: white;
+
+  box-sizing: border-box;
+
+  box-shadow:
+    0 12px 30px rgba(123, 44, 191, 0.22);
+}
+
+
+.promotion-content {
+  max-width: 500px;
+}
+
+
+.discount {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 34px;
+
+  font-weight: 800;
+}
+
+
+.promotion-content h2 {
+  margin: 0 0 8px;
+
+  font-size: 22px;
+
+  text-transform: uppercase;
+}
+
+
+.promotion-content p {
+  margin: 0 0 20px;
+
+  color: #eee;
+
+  font-size: 14px;
+}
+
+
+.promotion-content button {
+  padding: 12px 22px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: white;
+
+  color: #6a1b9a;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+.promotion-image {
+  width: 150px;
+
+  height: 150px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  border-radius: 50%;
+
+  background: rgba(255,255,255,0.15);
+
+  font-size: 90px;
+}
+
+
+/* ===========================
+   SECTIONS
+=========================== */
+
+.section {
+  margin-bottom: 35px;
+}
+
+
+.section-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 15px;
+}
+
+
+.section-header h2 {
+  margin: 0;
+
+  font-size: 20px;
+}
+
+
+.section-header a {
+  color: #7b2cbf;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  text-decoration: none;
+}
+
+
+/* ===========================
+   RESTAURANTS
+=========================== */
+
+.restaurant-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+
+/* ===========================
+   DEALS
+=========================== */
+
+.deals-placeholder {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 15px;
+}
+
+
+.deal-card {
+  min-height: 150px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 20px;
+
+  border-radius: 18px;
+
+  background: white;
+
+  text-align: center;
+
+  box-shadow:
+    0 5px 20px rgba(0,0,0,0.05);
+}
+
+
+.deal-icon {
+  margin-bottom: 10px;
+
+  font-size: 40px;
+}
+
+
+.deal-card strong {
+  color: #7b2cbf;
+
+  font-size: 15px;
+}
+
+
+.deal-card p {
+  margin: 7px 0 0;
+
+  color: #888;
+
+  font-size: 12px;
+}
+
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 768px) {
+
+  .home-content {
+    padding: 20px;
+  }
+
+  .promotion-banner {
+    padding: 25px;
+  }
+
+  .restaurant-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .deals-placeholder {
+    grid-template-columns: 1fr 1fr;
+  }
+
+}
+
+
+@media (max-width: 500px) {
+
+  .home-content {
+    padding: 15px;
+  }
+
+  .welcome-section h1 {
+    font-size: 23px;
+  }
+
+  .promotion-banner {
+    min-height: 200px;
+
+    padding: 22px;
+  }
+
+  .promotion-content {
+    max-width: 65%;
+  }
+
+  .discount {
+    font-size: 24px;
+  }
+
+  .promotion-content h2 {
+    font-size: 17px;
+  }
+
+  .promotion-content p {
+    font-size: 12px;
+  }
+
+  .promotion-image {
+    width: 90px;
+
+    height: 90px;
+
+    font-size: 50px;
+  }
+
+  .restaurant-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deals-placeholder {
+    grid-template-columns: 1fr;
+  }
+
+}

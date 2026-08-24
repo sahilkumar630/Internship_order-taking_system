@@ -1,0 +1,232 @@
+@if (restaurant) {
+
+  <div class="menu-page">
+
+
+    <!-- ==========================
+         HEADER
+    =========================== -->
+
+    <header class="menu-header">
+
+      <a
+        [routerLink]="[
+          '/restaurant',
+          restaurant.id
+        ]"
+        class="back-button"
+      >
+        ←
+      </a>
+
+
+      <div class="header-title">
+
+        <h1>
+          {{ restaurant.name }}
+        </h1>
+
+        <span>
+          Menu
+        </span>
+
+      </div>
+
+
+      <a
+        routerLink="/cart"
+        class="cart-button"
+      >
+        🛒
+
+        @if (cartItemCount > 0) {
+
+          <span class="cart-badge">
+            {{ cartItemCount }}
+          </span>
+
+        }
+
+      </a>
+
+    </header>
+
+
+    <!-- ==========================
+         CATEGORIES
+    =========================== -->
+
+    <div class="category-container">
+
+      @for (
+        category of categories;
+        track category
+      ) {
+
+        <button
+          type="button"
+          class="category-button"
+          [class.active]="
+            selectedCategory === category
+          "
+          (click)="selectCategory(category)"
+        >
+          {{ category }}
+        </button>
+
+      }
+
+    </div>
+
+
+    <!-- ==========================
+         MENU
+    =========================== -->
+
+    <main class="menu-content">
+
+      <div class="menu-heading">
+
+        <h2>
+          {{ selectedCategory }}
+        </h2>
+
+        <span>
+          {{ filteredMenuItems.length }} items
+        </span>
+
+      </div>
+
+
+      <div class="menu-list">
+
+        @for (
+          item of filteredMenuItems;
+          track item.id
+        ) {
+
+          <article class="menu-item">
+
+
+            <!-- Food Image -->
+
+            <div class="food-image">
+
+              {{ item.image }}
+
+              @if (item.isPopular) {
+
+                <span class="popular-badge">
+                  Popular
+                </span>
+
+              }
+
+            </div>
+
+
+            <!-- Food Details -->
+
+            <div class="food-details">
+
+              <h3>
+                {{ item.name }}
+              </h3>
+
+              <p>
+                {{ item.description }}
+              </p>
+
+              <strong>
+                Rs. {{ item.price }}
+              </strong>
+
+            </div>
+
+
+            <!-- Add Button -->
+
+            <button
+              type="button"
+              class="add-button"
+              (click)="addToCart(item)"
+            >
+              +
+            </button>
+
+          </article>
+
+        }
+
+
+        @if (filteredMenuItems.length === 0) {
+
+          <div class="empty-menu">
+
+            <span>
+              🍽️
+            </span>
+
+            <h3>
+              No items found
+            </h3>
+
+            <p>
+              Try another category.
+            </p>
+
+          </div>
+
+        }
+
+      </div>
+
+    </main>
+
+
+    <!-- ==========================
+         CART BUTTON
+    =========================== -->
+
+    <a
+      routerLink="/cart"
+      class="floating-cart"
+    >
+
+      <span>
+        🛒
+      </span>
+
+      <strong>
+        View Cart
+      </strong>
+
+      @if (cartItemCount > 0) {
+
+        <span class="floating-cart-count">
+          {{ cartItemCount }}
+        </span>
+
+      }
+
+    </a>
+
+  </div>
+
+}
+
+@else {
+
+  <div class="not-found">
+
+    <h2>
+      Restaurant not found
+    </h2>
+
+    <a routerLink="/home">
+      Back to Home
+    </a>
+
+  </div>
+
+}
