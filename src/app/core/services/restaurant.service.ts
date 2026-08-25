@@ -1,74 +1,269 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, throwError } from 'rxjs';
 
 import { Restaurant }
   from '../../shared/models/restaurant.model';
+
+import { ApiResponse }
+  from '../../shared/models/api-response.model';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestaurantService {
 
-  private restaurants: Restaurant[] = [
+  // =========================================
+  // API
+  // =========================================
 
-    {
-      id: 1,
-      name: 'Hot N Spicy',
-      cuisine: 'Pakistani • BBQ • Fast Food',
-      rating: 4.5,
-      deliveryTime: '30-40 min',
-      deliveryFee: 'Free Delivery',
-      discount: '20% OFF',
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38'
-    },
-
-    {
-      id: 2,
-      name: 'Pizza Max',
-      cuisine: 'Pizza • Fast Food',
-      rating: 4.3,
-      deliveryTime: '25-35 min',
-      deliveryFee: 'Free Delivery',
-      discount: '15% OFF',
-      image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002'
-    },
-
-    {
-      id: 3,
-      name: 'Burger Lab',
-      cuisine: 'Burgers • Fast Food',
-      rating: 4.6,
-      deliveryTime: '25-35 min',
-      deliveryFee: 'Rs. 60',
-      discount: '25% OFF',
-      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd'
-    },
-
-    {
-      id: 4,
-      name: 'Biryani of Karachi',
-      cuisine: 'Biryani • Pakistani',
-      rating: 4.7,
-      deliveryTime: '30-40 min',
-      deliveryFee: 'Free Delivery',
-      discount: '10% OFF',
-      image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe'
-    }
-
-  ];
+  private readonly apiUrl =
+    'https://dev.makglobalps.com/TAJApi/api/BusinessLocation';
 
 
-  getRestaurants(): Restaurant[] {
+  // =========================================
+  // RESTAURANT BUSINESS ID
+  //
+  // Business ID 2 = Restaurant
+  // =========================================
 
-    return this.restaurants;
+  private readonly restaurantBusinessId = 2;
+
+
+  constructor(
+    private http: HttpClient
+  ) {}
+
+
+  // =========================================
+  // GET ALL RESTAURANTS
+  //
+  // GET:
+  // /api/BusinessLocation?BusinessId=2
+  // =========================================
+
+  getRestaurants(): Observable<Restaurant[]> {
+
+    return this.http
+      .get<ApiResponse<Restaurant[]>>(
+        `${this.apiUrl}?BusinessId=${this.restaurantBusinessId}`
+      )
+      .pipe(
+
+        map(response => {
+
+          if (
+            !response.data ||
+            !Array.isArray(response.data)
+          ) {
+
+            return [];
+
+          }
+
+
+          return response.data.map(
+            restaurant =>
+              this.mapRestaurant(restaurant)
+          );
+
+        })
+
+      );
 
   }
 
 
-  getRestaurantById(id: number): Restaurant | undefined {
+  // =========================================
+  // GET RESTAURANT BY LOCATION ID
+  //
+  // Example:
+  // /restaurant/228
+  //
+  // 228 is the location ID.
+  //
+  // We retrieve all restaurants from
+  // Business ID 2 and find the matching
+  // location locally.
+  // =========================================
 
-    return this.restaurants.find(
-      restaurant => restaurant.id === id
-    );
+  getRestaurantById(
+    id: number
+  ): Observable<Restaurant> {
+
+    return this.getRestaurants()
+      .pipe(
+
+        map(restaurants => {
+
+          const restaurant =
+            restaurants.find(
+              item =>
+                item.id === id
+            );
+
+
+          if (!restaurant) {
+
+            throw new Error(
+              `Restaurant with ID ${id} not found.`
+            );
+
+          }
+
+
+          return restaurant;
+
+        })
+
+      );
+
+  }
+
+
+  // =========================================
+  // GET RESTAURANTS BY BUSINESS ID
+  // =========================================
+
+  getRestaurantsByBusinessId(
+    businessId: number
+  ): Observable<Restaurant[]> {
+
+    return this.http
+      .get<ApiResponse<Restaurant[]>>(
+        `${this.apiUrl}?BusinessId=${businessId}`
+      )
+      .pipe(
+
+        map(response => {
+
+          if (
+            !response.data ||
+            !Array.isArray(response.data)
+          ) {
+
+            return [];
+
+          }
+
+
+          return response.data.map(
+            restaurant =>
+              this.mapRestaurant(restaurant)
+          );
+
+        })
+
+      );
+
+  }
+
+
+  // =========================================
+  // MAP API RESPONSE
+  // TO FRONTEND RESTAURANT MODEL
+  // =========================================
+
+  private mapRestaurant(
+    data: Restaurant
+  ): Restaurant {
+
+    // =========================================
+    // IMAGE
+    // =========================================
+
+    let image = '';
+
+
+    if (
+      data.images &&
+      data.images.length > 0
+    ) {
+
+      const imagePath =
+        data.images[0].imageUrl;
+
+
+      if (
+        imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://')
+      ) {
+
+        image = imagePath;
+
+      }
+      else {
+
+        image =
+          `https://dev.makglobalps.com/TAJApi${imagePath}`;
+
+      }
+
+    }
+    else if (
+      data.logoUrl
+    ) {
+
+      image =
+        data.logoUrl;
+
+    }
+
+
+    // =========================================
+    // WORKING HOURS
+    // =========================================
+
+    let deliveryTime =
+      'Not available';
+
+
+    if (
+      data.todayDayRange &&
+      data.todayDayRange.length > 0
+    ) {
+
+      const range =
+        data.todayDayRange[0];
+
+
+      deliveryTime =
+        `${range.start} - ${range.end}`;
+
+    }
+
+
+    // =========================================
+    // FRONTEND MODEL
+    // =========================================
+
+    return {
+
+      ...data,
+
+      name:
+        data.locationName ||
+        data.businessName ||
+        data.name,
+
+      image,
+
+      cuisine:
+        data.businessCategoryName ||
+        'Restaurant',
+
+      deliveryTime,
+
+      deliveryFee:
+        'Available',
+
+      discount:
+        data.isOpen
+          ? 'OPEN NOW'
+          : 'CLOSED'
+
+    };
 
   }
 

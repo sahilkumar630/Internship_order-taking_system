@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { HeaderComponent }
   from '../../shared/components/header/header.component';
@@ -18,10 +19,12 @@ import { Restaurant }
 import { RestaurantService }
   from '../../core/services/restaurant.service';
 
+
 @Component({
   selector: 'app-home',
 
   imports: [
+    RouterLink,
     HeaderComponent,
     SearchBarComponent,
     CategoryListComponent,
@@ -29,22 +32,107 @@ import { RestaurantService }
   ],
 
   templateUrl: './home.component.html',
+
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit {
 
+
+  // =========================================
+  // RESTAURANTS
+  // =========================================
+
   restaurants: Restaurant[] = [];
 
+
+  // =========================================
+  // UI STATE
+  // =========================================
+
+  isLoading = false;
+
+  errorMessage = '';
+
+
+  // =========================================
+  // CONSTRUCTOR
+  // =========================================
 
   constructor(
     private restaurantService: RestaurantService
   ) {}
 
 
+  // =========================================
+  // INITIALIZATION
+  // =========================================
+
   ngOnInit(): void {
 
-    this.restaurants =
-      this.restaurantService.getRestaurants();
+    this.loadRestaurants();
+
+  }
+
+
+  // =========================================
+  // LOAD RESTAURANTS
+  // =========================================
+
+  private loadRestaurants(): void {
+
+    this.isLoading = true;
+
+    this.errorMessage = '';
+
+
+    this.restaurantService
+      .getRestaurants()
+      .subscribe({
+
+        // -------------------------------------
+        // SUCCESS
+        // -------------------------------------
+
+        next: (
+          restaurants: Restaurant[]
+        ) => {
+
+          this.restaurants =
+            restaurants;
+
+          this.isLoading = false;
+
+
+          console.log(
+            'Restaurants loaded:',
+            restaurants
+          );
+
+        },
+
+
+        // -------------------------------------
+        // ERROR
+        // -------------------------------------
+
+        error: error => {
+
+          this.isLoading = false;
+
+
+          console.error(
+            'Restaurant API Error:',
+            error
+          );
+
+
+          this.errorMessage =
+            error?.error?.message ||
+            'Unable to load restaurants.';
+
+        }
+
+      });
 
   }
 

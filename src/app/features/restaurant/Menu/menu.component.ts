@@ -16,6 +16,7 @@ import { MenuService }
 import { CartService }
   from '../../../core/services/cart.service';
 
+
 @Component({
   selector: 'app-menu',
 
@@ -24,19 +25,40 @@ import { CartService }
   ],
 
   templateUrl: './menu.component.html',
+
   styleUrl: './menu.component.css'
 })
 export class MenuComponent implements OnInit {
 
+
+  // =========================================
+  // RESTAURANT
+  // =========================================
+
   restaurantId!: number;
 
   restaurant?: Restaurant;
+
+
+  // =========================================
+  // MENU
+  // =========================================
 
   menuItems: MenuItem[] = [];
 
   categories: string[] = [];
 
   selectedCategory = 'All';
+
+
+  // =========================================
+  // UI STATE
+  // =========================================
+
+  isLoadingRestaurant = false;
+
+  restaurantError = '';
+
 
 
   constructor(
@@ -50,11 +72,17 @@ export class MenuComponent implements OnInit {
   ) {}
 
 
+
+  // =========================================
+  // INITIALIZATION
+  // =========================================
+
   ngOnInit(): void {
 
     this.route.paramMap.subscribe(params => {
 
       const id = params.get('id');
+
 
       if (!id) {
 
@@ -62,64 +90,155 @@ export class MenuComponent implements OnInit {
 
       }
 
+
       this.restaurantId = Number(id);
 
 
-      this.restaurant =
-        this.restaurantService.getRestaurantById(
-          this.restaurantId
-        );
+      this.loadRestaurant();
 
-
-      this.menuItems =
-        this.menuService.getMenuByRestaurantId(
-          this.restaurantId
-        );
-
-
-      this.categories = [
-        'All',
-        ...new Set(
-          this.menuItems.map(
-            item => item.category
-          )
-        )
-      ];
+      this.loadMenu();
 
     });
 
   }
 
 
+
+  // =========================================
+  // LOAD RESTAURANT
+  // =========================================
+
+  private loadRestaurant(): void {
+
+    this.isLoadingRestaurant = true;
+
+    this.restaurantError = '';
+
+
+    this.restaurantService
+      .getRestaurantById(this.restaurantId)
+      .subscribe({
+
+        next: (restaurant: Restaurant) => {
+
+          this.restaurant = restaurant;
+
+          this.isLoadingRestaurant = false;
+
+
+          console.log(
+            'Restaurant Details:',
+            restaurant
+          );
+
+        },
+
+
+        error: (error) => {
+
+          this.isLoadingRestaurant = false;
+
+          console.error(
+            'Restaurant API Error:',
+            error
+          );
+
+
+          this.restaurantError =
+            error?.error?.message ||
+            'Unable to load restaurant.';
+
+        }
+
+      });
+
+  }
+
+
+
+  // =========================================
+  // LOAD MENU
+  // =========================================
+
+  private loadMenu(): void {
+
+    this.menuItems =
+      this.menuService.getMenuByRestaurantId(
+        this.restaurantId
+      );
+
+
+    this.categories = [
+      'All',
+
+      ...new Set(
+        this.menuItems.map(
+          item => item.category
+        )
+      )
+
+    ];
+
+  }
+
+
+
+  // =========================================
+  // FILTER MENU
+  // =========================================
+
   get filteredMenuItems(): MenuItem[] {
 
-    if (this.selectedCategory === 'All') {
+    if (
+      this.selectedCategory === 'All'
+    ) {
 
       return this.menuItems;
 
     }
 
+
     return this.menuItems.filter(
       item =>
-        item.category === this.selectedCategory
+        item.category ===
+        this.selectedCategory
     );
 
   }
 
 
-  selectCategory(category: string): void {
+
+  // =========================================
+  // SELECT CATEGORY
+  // =========================================
+
+  selectCategory(
+    category: string
+  ): void {
 
     this.selectedCategory = category;
 
   }
 
 
-  addToCart(item: MenuItem): void {
+
+  // =========================================
+  // ADD TO CART
+  // =========================================
+
+  addToCart(
+    item: MenuItem
+  ): void {
 
     this.cartService.addItem(item);
 
   }
 
+
+
+  // =========================================
+  // CART COUNT
+  // =========================================
 
   get cartItemCount(): number {
 

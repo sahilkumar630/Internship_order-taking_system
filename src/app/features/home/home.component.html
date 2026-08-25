@@ -1,21 +1,33 @@
 <div class="home-page">
 
-  <!-- Header -->
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
   <app-header />
 
 
-  <!-- Search -->
+  <!-- =========================================
+       SEARCH
+  ========================================== -->
+
   <app-search-bar />
 
 
-  <!-- Categories -->
+  <!-- =========================================
+       CATEGORIES
+  ========================================== -->
+
   <app-category-list />
 
 
   <main class="home-content">
 
 
-    <!-- Welcome -->
+    <!-- =========================================
+         WELCOME
+    ========================================== -->
+
     <section class="welcome-section">
 
       <h1>
@@ -29,7 +41,10 @@
     </section>
 
 
-    <!-- Promotional Banner -->
+    <!-- =========================================
+         PROMOTIONAL BANNER
+    ========================================== -->
+
     <section class="promotion-banner">
 
       <div class="promotion-content">
@@ -46,7 +61,7 @@
           Enjoy delicious food with an amazing discount.
         </p>
 
-        <button>
+        <button type="button">
           Order Now
         </button>
 
@@ -60,8 +75,14 @@
     </section>
 
 
-    <!-- Popular Restaurants -->
+    <!-- =========================================
+         POPULAR RESTAURANTS
+    ========================================== -->
+
     <section class="section">
+
+
+      <!-- Section Header -->
 
       <div class="section-header">
 
@@ -69,33 +90,97 @@
           Popular Restaurants
         </h2>
 
-        <a href="#">
+
+        <a routerLink="/restaurants">
           See all
         </a>
 
       </div>
 
 
-      <div class="restaurant-grid">
+      <!-- =========================================
+           LOADING STATE
+      ========================================== -->
 
-        @for (
-          restaurant of restaurants;
-          track restaurant.id
-        ) {
+      @if (isLoading) {
 
-          <app-restaurant-card
-            [restaurant]="restaurant"
-          />
+        <div class="loading-message">
 
-        }
+          <span class="loading-spinner"></span>
 
-      </div>
+          <span>
+            Loading restaurants...
+          </span>
+
+        </div>
+
+      }
+
+
+      <!-- =========================================
+           ERROR STATE
+      ========================================== -->
+
+      @else if (errorMessage) {
+
+        <div class="error-message">
+
+          {{ errorMessage }}
+
+        </div>
+
+      }
+
+
+      <!-- =========================================
+           RESTAURANTS
+      ========================================== -->
+
+      @else if (restaurants.length > 0) {
+
+        <div class="restaurant-grid">
+
+          @for (
+            restaurant of restaurants;
+            track restaurant.id
+          ) {
+
+            <app-restaurant-card
+              [restaurant]="restaurant"
+            />
+
+          }
+
+        </div>
+
+      }
+
+
+      <!-- =========================================
+           EMPTY STATE
+      ========================================== -->
+
+      @else {
+
+        <div class="empty-message">
+
+          No restaurants available.
+
+        </div>
+
+      }
 
     </section>
 
 
-    <!-- Deals -->
+    <!-- =========================================
+         TOP DEALS
+    ========================================== -->
+
     <section class="section">
+
+
+      <!-- Section Header -->
 
       <div class="section-header">
 
@@ -103,14 +188,22 @@
           Top Deals For You
         </h2>
 
-        <a href="#">
+
+        <a routerLink="/deals">
           See all
         </a>
 
       </div>
 
 
+      <!-- =========================================
+           DEAL CARDS
+      ========================================== -->
+
       <div class="deals-placeholder">
+
+
+        <!-- Burger Deal -->
 
         <div class="deal-card">
 
@@ -129,6 +222,8 @@
         </div>
 
 
+        <!-- Pizza Deal -->
+
         <div class="deal-card">
 
           <span class="deal-icon">
@@ -146,6 +241,8 @@
         </div>
 
 
+        <!-- Delivery Deal -->
+
         <div class="deal-card">
 
           <span class="deal-icon">
@@ -161,6 +258,7 @@
           </p>
 
         </div>
+
 
       </div>
 
