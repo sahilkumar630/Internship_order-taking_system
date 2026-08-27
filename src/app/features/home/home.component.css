@@ -1,3 +1,7 @@
+/* =========================================
+   HOME PAGE
+========================================= */
+
 .home-page {
   min-height: 100vh;
 
@@ -9,6 +13,10 @@
 }
 
 
+/* =========================================
+   HOME CONTENT
+========================================= */
+
 .home-content {
   max-width: 1200px;
 
@@ -17,6 +25,130 @@
   padding: 25px;
 }
 
+
+/* =========================================
+   LOCATION BAR
+========================================= */
+
+.location-bar {
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 12px 25px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  box-sizing: border-box;
+
+  background: white;
+
+  border-bottom: 1px solid #eee8f3;
+}
+
+
+.location-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.location-icon {
+  width: 38px;
+
+  height: 38px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #f3e8ff;
+
+  font-size: 18px;
+}
+
+
+.location-text {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+
+.location-label {
+  color: #999;
+
+  font-size: 10px;
+
+  font-weight: 500;
+}
+
+
+.location-text strong {
+  max-width: 450px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: #33243d;
+
+  font-size: 13px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================
+   CHANGE LOCATION
+========================================= */
+
+.change-location-button {
+  padding: 8px 15px;
+
+  border: 1px solid #e1d4eb;
+
+  border-radius: 9px;
+
+  background: white;
+
+  color: #7b2cbf;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+
+.change-location-button:hover {
+  background: #faf5ff;
+
+  border-color: #9d4edd;
+}
+
+
+/* =========================================
+   WELCOME
+========================================= */
 
 .welcome-section {
   margin-bottom: 25px;
@@ -41,9 +173,9 @@
 }
 
 
-/* ===========================
+/* =========================================
    PROMOTION
-=========================== */
+========================================= */
 
 .promotion-banner {
   min-height: 190px;
@@ -127,6 +259,16 @@
   font-weight: 700;
 
   cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+
+.promotion-content button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.15);
 }
 
 
@@ -143,15 +285,15 @@
 
   border-radius: 50%;
 
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
 
   font-size: 90px;
 }
 
 
-/* ===========================
+/* =========================================
    SECTIONS
-=========================== */
+========================================= */
 
 .section {
   margin-bottom: 35px;
@@ -187,9 +329,133 @@
 }
 
 
-/* ===========================
+.section-header a:hover {
+  text-decoration: underline;
+}
+
+
+.section-location {
+  margin: 4px 0 0;
+
+  color: #999;
+
+  font-size: 11px;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+.loading-message {
+  min-height: 140px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  border-radius: 18px;
+
+  background: white;
+
+  color: #888;
+
+  font-size: 13px;
+
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.04);
+}
+
+
+.loading-spinner {
+  width: 18px;
+
+  height: 18px;
+
+  border: 2px solid #eadcf3;
+
+  border-top-color: #7b2cbf;
+
+  border-radius: 50%;
+
+  animation:
+    home-spin 0.7s linear infinite;
+}
+
+
+@keyframes home-spin {
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+.error-message {
+  padding: 18px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  border-radius: 16px;
+
+  background: #fff1f1;
+
+  color: #c62828;
+
+  text-align: center;
+
+  font-size: 13px;
+}
+
+
+.retry-button {
+  padding: 9px 17px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background: #7b2cbf;
+
+  color: white;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+
+.retry-button:hover {
+  background: #6a1b9a;
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================
    RESTAURANTS
-=========================== */
+========================================= */
 
 .restaurant-grid {
   display: grid;
@@ -201,9 +467,102 @@
 }
 
 
-/* ===========================
+/* =========================================
+   EMPTY RESTAURANT STATE
+========================================= */
+
+.empty-message {
+  min-height: 190px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 30px;
+
+  border-radius: 18px;
+
+  background: white;
+
+  text-align: center;
+
+  box-sizing: border-box;
+
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.04);
+}
+
+
+.empty-icon {
+  margin-bottom: 10px;
+
+  font-size: 35px;
+}
+
+
+.empty-message h3 {
+  margin: 0 0 7px;
+
+  color: #33243d;
+
+  font-size: 16px;
+}
+
+
+.empty-message p {
+  max-width: 400px;
+
+  margin: 0 0 15px;
+
+  color: #999;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+}
+
+
+.change-location-empty-button {
+  padding: 10px 18px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7b2cbf,
+      #9d4edd
+    );
+
+  color: white;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+
+.change-location-empty-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 20px rgba(123, 44, 191, 0.25);
+}
+
+
+/* =========================================
    DEALS
-=========================== */
+========================================= */
 
 .deals-placeholder {
   display: grid;
@@ -235,7 +594,7 @@
   text-align: center;
 
   box-shadow:
-    0 5px 20px rgba(0,0,0,0.05);
+    0 5px 20px rgba(0, 0, 0, 0.05);
 }
 
 
@@ -262,9 +621,9 @@
 }
 
 
-/* ===========================
+/* =========================================
    RESPONSIVE
-=========================== */
+========================================= */
 
 @media (max-width: 768px) {
 
@@ -272,13 +631,21 @@
     padding: 20px;
   }
 
+
+  .location-bar {
+    padding: 12px 20px;
+  }
+
+
   .promotion-banner {
     padding: 25px;
   }
 
+
   .restaurant-grid {
     grid-template-columns: 1fr 1fr;
   }
+
 
   .deals-placeholder {
     grid-template-columns: 1fr 1fr;
@@ -287,15 +654,36 @@
 }
 
 
+/* =========================================
+   MOBILE
+========================================= */
+
 @media (max-width: 500px) {
 
   .home-content {
     padding: 15px;
   }
 
+
+  .location-bar {
+    padding: 10px 15px;
+  }
+
+
+  .location-text strong {
+    max-width: 210px;
+  }
+
+
+  .change-location-button {
+    padding: 7px 12px;
+  }
+
+
   .welcome-section h1 {
     font-size: 23px;
   }
+
 
   .promotion-banner {
     min-height: 200px;
@@ -303,21 +691,26 @@
     padding: 22px;
   }
 
+
   .promotion-content {
     max-width: 65%;
   }
+
 
   .discount {
     font-size: 24px;
   }
 
+
   .promotion-content h2 {
     font-size: 17px;
   }
 
+
   .promotion-content p {
     font-size: 12px;
   }
+
 
   .promotion-image {
     width: 90px;
@@ -327,12 +720,24 @@
     font-size: 50px;
   }
 
+
   .restaurant-grid {
     grid-template-columns: 1fr;
   }
 
+
   .deals-placeholder {
     grid-template-columns: 1fr;
+  }
+
+
+  .section-header h2 {
+    font-size: 18px;
+  }
+
+
+  .section-location {
+    font-size: 10px;
   }
 
 }

@@ -1,232 +1,364 @@
-@if (restaurant) {
+<div class="menu-page">
 
-  <div class="menu-page">
+  <!-- =========================================
+       HEADER
+  ========================================== -->
 
+  <header class="menu-header">
 
-    <!-- ==========================
-         HEADER
-    =========================== -->
-
-    <header class="menu-header">
-
-      <a
-        [routerLink]="[
-          '/restaurant',
-          restaurant.id
-        ]"
-        class="back-button"
-      >
-        ←
-      </a>
+    <button
+      class="back-button"
+      routerLink="/home"
+      type="button"
+    >
+      ←
+    </button>
 
 
-      <div class="header-title">
+    <div class="restaurant-title">
 
-        <h1>
-          {{ restaurant.name }}
-        </h1>
+      <h1>
+        {{ restaurant?.name || 'Restaurant' }}
+      </h1>
 
-        <span>
-          Menu
-        </span>
-
-      </div>
-
-
-      <a
-        routerLink="/cart"
-        class="cart-button"
-      >
-        🛒
-
-        @if (cartItemCount > 0) {
-
-          <span class="cart-badge">
-            {{ cartItemCount }}
-          </span>
-
-        }
-
-      </a>
-
-    </header>
-
-
-    <!-- ==========================
-         CATEGORIES
-    =========================== -->
-
-    <div class="category-container">
-
-      @for (
-        category of categories;
-        track category
-      ) {
-
-        <button
-          type="button"
-          class="category-button"
-          [class.active]="
-            selectedCategory === category
-          "
-          (click)="selectCategory(category)"
-        >
-          {{ category }}
-        </button>
-
-      }
+      <span>
+        Menu
+      </span>
 
     </div>
 
 
-    <!-- ==========================
-         MENU
-    =========================== -->
-
-    <main class="menu-content">
-
-      <div class="menu-heading">
-
-        <h2>
-          {{ selectedCategory }}
-        </h2>
-
-        <span>
-          {{ filteredMenuItems.length }} items
-        </span>
-
-      </div>
-
-
-      <div class="menu-list">
-
-        @for (
-          item of filteredMenuItems;
-          track item.id
-        ) {
-
-          <article class="menu-item">
-
-
-            <!-- Food Image -->
-
-            <div class="food-image">
-
-              {{ item.image }}
-
-              @if (item.isPopular) {
-
-                <span class="popular-badge">
-                  Popular
-                </span>
-
-              }
-
-            </div>
-
-
-            <!-- Food Details -->
-
-            <div class="food-details">
-
-              <h3>
-                {{ item.name }}
-              </h3>
-
-              <p>
-                {{ item.description }}
-              </p>
-
-              <strong>
-                Rs. {{ item.price }}
-              </strong>
-
-            </div>
-
-
-            <!-- Add Button -->
-
-            <button
-              type="button"
-              class="add-button"
-              (click)="addToCart(item)"
-            >
-              +
-            </button>
-
-          </article>
-
-        }
-
-
-        @if (filteredMenuItems.length === 0) {
-
-          <div class="empty-menu">
-
-            <span>
-              🍽️
-            </span>
-
-            <h3>
-              No items found
-            </h3>
-
-            <p>
-              Try another category.
-            </p>
-
-          </div>
-
-        }
-
-      </div>
-
-    </main>
-
-
-    <!-- ==========================
-         CART BUTTON
-    =========================== -->
-
-    <a
-      routerLink="/cart"
-      class="floating-cart"
+    <button
+      class="cart-button"
+      type="button"
     >
-
-      <span>
-        🛒
-      </span>
-
-      <strong>
-        View Cart
-      </strong>
+      🛒
 
       @if (cartItemCount > 0) {
 
-        <span class="floating-cart-count">
+        <span class="cart-count">
           {{ cartItemCount }}
         </span>
 
       }
 
-    </a>
+    </button>
+
+  </header>
+
+
+
+  <!-- =========================================
+       CATEGORY FILTER
+  ========================================== -->
+
+  <div class="category-bar">
+
+    @for (
+      category of categories;
+      track category
+    ) {
+
+      <button
+        type="button"
+        class="category-button"
+        [class.active]="
+          selectedCategory === category
+        "
+        (click)="selectCategory(category)"
+      >
+
+        {{ category }}
+
+      </button>
+
+    }
 
   </div>
 
-}
 
-@else {
 
-  <div class="not-found">
+  <!-- =========================================
+       CONTENT
+  ========================================== -->
 
-    <h2>
-      Restaurant not found
-    </h2>
+  <main class="menu-content">
 
-    <a routerLink="/home">
-      Back to Home
-    </a>
 
-  </div>
+    <!-- =========================================
+         LOADING
+    ========================================== -->
 
-}
+    @if (isLoading) {
+
+      <div class="state-message">
+
+        <div class="loading-spinner"></div>
+
+        <h2>
+          Loading menu...
+        </h2>
+
+        <p>
+          Please wait while we load the food items.
+        </p>
+
+      </div>
+
+    }
+
+
+
+    <!-- =========================================
+         ERROR
+    ========================================== -->
+
+    @if (
+      !isLoading &&
+      errorMessage
+    ) {
+
+      <div class="state-message error">
+
+        <div class="state-icon">
+          ⚠️
+        </div>
+
+        <h2>
+          Unable to load menu
+        </h2>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+      </div>
+
+    }
+
+
+
+    <!-- =========================================
+         MENU
+    ========================================== -->
+
+    @if (
+      !isLoading &&
+      !errorMessage &&
+      filteredMenuItems.length > 0
+    ) {
+
+      <section class="menu-section">
+
+        <div class="section-heading">
+
+          <h2>
+            {{ selectedCategory }}
+          </h2>
+
+          <span>
+            {{ filteredMenuItems.length }}
+            items
+          </span>
+
+        </div>
+
+
+        <div class="menu-list">
+
+          @for (
+            item of filteredMenuItems;
+            track item.id
+          ) {
+
+            <article class="menu-item">
+
+
+              <!-- =================================
+                   IMAGE
+              ================================= -->
+
+              <div class="menu-item-image">
+
+                @if (item.image) {
+
+                  <img
+                    [src]="item.image"
+                    [alt]="item.name"
+                    loading="lazy"
+                  />
+
+                }
+                @else {
+
+                  <div class="image-placeholder">
+                    🍽️
+                  </div>
+
+                }
+
+              </div>
+
+
+
+              <!-- =================================
+                   INFORMATION
+              ================================= -->
+
+              <div class="menu-item-info">
+
+                <h3>
+                  {{ item.name }}
+                </h3>
+
+
+                @if (item.description) {
+
+                  <p class="description">
+                    {{ item.description }}
+                  </p>
+
+                }
+
+
+                <div class="item-meta">
+
+                  <span>
+                    {{ item.itemCategory }}
+                  </span>
+
+
+                  @if (
+                    item.preparationTimeMinutes
+                  ) {
+
+                    <span>
+                      ⏱
+                      {{ item.preparationTimeMinutes }}
+                      min
+                    </span>
+
+                  }
+
+                </div>
+
+
+
+                <!-- =================================
+                     PRICE
+                ================================= -->
+
+                <div class="price-row">
+
+                  @if (
+                    item.discountPrice > 0 &&
+                    item.discountPrice < item.price
+                  ) {
+
+                    <span class="discount-price">
+                      {{ item.discountPriceLabel }}
+                    </span>
+
+                    <span class="original-price">
+                      {{ item.priceLabel }}
+                    </span>
+
+                  }
+                  @else {
+
+                    <span class="discount-price">
+                      {{ item.priceLabel }}
+                    </span>
+
+                  }
+
+                </div>
+
+              </div>
+
+
+
+              <!-- =================================
+                   ADD BUTTON
+              ================================= -->
+
+              <button
+                type="button"
+                class="add-button"
+                (click)="addToCart(item)"
+              >
+
+                +
+
+              </button>
+
+            </article>
+
+          }
+
+        </div>
+
+      </section>
+
+    }
+
+
+
+    <!-- =========================================
+         EMPTY
+    ========================================== -->
+
+    @if (
+      !isLoading &&
+      !errorMessage &&
+      filteredMenuItems.length === 0
+    ) {
+
+      <div class="state-message">
+
+        <div class="state-icon">
+          🍽️
+        </div>
+
+        <h2>
+          No items found
+        </h2>
+
+        <p>
+          Try another category.
+        </p>
+
+      </div>
+
+    }
+
+  </main>
+
+
+
+  <!-- =========================================
+       VIEW CART
+  ========================================== -->
+
+  @if (cartItemCount > 0) {
+
+    <button
+      class="view-cart-button"
+      type="button"
+    >
+
+      🛒
+
+      <span>
+        View Cart
+      </span>
+
+      <strong>
+        {{ cartItemCount }}
+      </strong>
+
+    </button>
+
+  }
+
+</div>

@@ -1,205 +1,446 @@
 import { Injectable } from '@angular/core';
+import {
+  HttpClient,
+  HttpParams
+} from '@angular/common/http';
+
+import {
+  Observable,
+  map
+} from 'rxjs';
 
 import { MenuItem }
   from '../../shared/models/menu-item.model';
+
+import { ApiResponse }
+  from '../../shared/models/api-response.model';
+
+
+/*
+ * =========================================
+ * FOOD CATEGORY
+ * =========================================
+ */
+
+export interface FoodCategory {
+
+  id: number;
+
+  name: string;
+
+  description: string;
+
+  sortOrder: number;
+
+}
+
+
+/*
+ * =========================================
+ * FOOD ITEM API RESPONSE
+ * =========================================
+ */
+
+interface FoodItemApi {
+
+  id: number;
+
+  name: string;
+
+  description: string;
+
+  itemCategory: string;
+
+  itemCategoryId: number;
+
+  preparationTimeMinutes: number;
+
+  price: number;
+
+  priceLabel: string;
+
+  discountPrice: number;
+
+  discountPriceLabel: string;
+
+  rating: number;
+
+  raters: number;
+
+  isDeal: boolean;
+
+  images: {
+    id: number;
+    name: string;
+    addedOn: string | null;
+  }[];
+
+}
+
+
+/*
+ * =========================================
+ * SERVICE
+ * =========================================
+ */
 
 @Injectable({
   providedIn: 'root'
 })
 export class MenuService {
 
-  private menuItems: MenuItem[] = [
 
-    // ==========================
-    // HOT N SPICY
-    // ==========================
-
-    {
-      id: 1,
-      restaurantId: 1,
-      name: 'Classic Beef Burger',
-      description: 'Juicy beef patty with cheese, lettuce and special sauce.',
-      price: 650,
-      category: 'Burgers',
-      image: '🍔',
-      isPopular: true
-    },
-
-    {
-      id: 2,
-      restaurantId: 1,
-      name: 'Chicken BBQ Pizza',
-      description: 'Loaded pizza with BBQ chicken and mozzarella cheese.',
-      price: 950,
-      category: 'Pizza',
-      image: '🍕',
-      isPopular: true
-    },
-
-    {
-      id: 3,
-      restaurantId: 1,
-      name: 'BBQ Platter',
-      description: 'Grilled chicken, seekh kebab and delicious BBQ selection.',
-      price: 1250,
-      category: 'BBQ',
-      image: '🍗',
-      isPopular: true
-    },
-
-    {
-      id: 4,
-      restaurantId: 1,
-      name: 'Chicken Wings',
-      description: 'Crispy chicken wings with our signature sauce.',
-      price: 550,
-      category: 'BBQ',
-      image: '🍗',
-      isPopular: false
-    },
+  private readonly apiUrl =
+    'https://dev.makglobalps.com/TAJApi/api';
 
 
-    // ==========================
-    // PIZZA MAX
-    // ==========================
-
-    {
-      id: 5,
-      restaurantId: 2,
-      name: 'Pepperoni Pizza',
-      description: 'Classic pepperoni pizza with mozzarella cheese.',
-      price: 1100,
-      category: 'Pizza',
-      image: '🍕',
-      isPopular: true
-    },
-
-    {
-      id: 6,
-      restaurantId: 2,
-      name: 'Chicken Fajita Pizza',
-      description: 'Chicken fajita with fresh vegetables and cheese.',
-      price: 1050,
-      category: 'Pizza',
-      image: '🍕',
-      isPopular: true
-    },
-
-    {
-      id: 7,
-      restaurantId: 2,
-      name: 'Garlic Bread',
-      description: 'Freshly baked garlic bread with cheese.',
-      price: 350,
-      category: 'Sides',
-      image: '🥖',
-      isPopular: false
-    },
+  constructor(
+    private http: HttpClient
+  ) {}
 
 
-    // ==========================
-    // BURGER LAB
-    // ==========================
+  /*
+   * =========================================
+   * GET CATEGORIES
+   *
+   * /FoodCategory/menu
+   * =========================================
+   */
 
-    {
-      id: 8,
-      restaurantId: 3,
-      name: 'Lab Original Burger',
-      description: 'Signature beef burger with special Lab sauce.',
-      price: 750,
-      category: 'Burgers',
-      image: '🍔',
-      isPopular: true
-    },
+  getCategories(
+    businessLocationId: number
+  ): Observable<FoodCategory[]> {
 
-    {
-      id: 9,
-      restaurantId: 3,
-      name: 'Firehouse Burger',
-      description: 'Spicy beef burger with jalapenos and cheese.',
-      price: 850,
-      category: 'Burgers',
-      image: '🌶️',
-      isPopular: true
-    },
-
-    {
-      id: 10,
-      restaurantId: 3,
-      name: 'Loaded Fries',
-      description: 'Crispy fries loaded with cheese and special sauce.',
-      price: 450,
-      category: 'Sides',
-      image: '🍟',
-      isPopular: false
-    },
+    const params =
+      new HttpParams()
+        .set(
+          'BusinessLocationId',
+          businessLocationId
+        );
 
 
-    // ==========================
-    // BIRYANI OF KARACHI
-    // ==========================
+    return this.http
+      .get<ApiResponse<FoodCategory[]>>(
+        `${this.apiUrl}/FoodCategory/menu`,
+        {
+          params
+        }
+      )
+      .pipe(
 
-    {
-      id: 11,
-      restaurantId: 4,
-      name: 'Chicken Biryani',
-      description: 'Traditional Karachi-style chicken biryani.',
-      price: 450,
-      category: 'Biryani',
-      image: '🍛',
-      isPopular: true
-    },
+        map(response => {
 
-    {
-      id: 12,
-      restaurantId: 4,
-      name: 'Beef Biryani',
-      description: 'Spicy beef biryani with traditional Karachi flavors.',
-      price: 550,
-      category: 'Biryani',
-      image: '🍛',
-      isPopular: true
-    },
+          if (
+            response.responseStatus !== 1 ||
+            !response.data
+          ) {
 
-    {
-      id: 13,
-      restaurantId: 4,
-      name: 'Raita',
-      description: 'Fresh chilled yogurt raita.',
-      price: 100,
-      category: 'Sides',
-      image: '🥣',
-      isPopular: false
-    }
+            return [];
 
-  ];
+          }
 
 
-  getMenuItems(): MenuItem[] {
+          return response.data;
 
-    return this.menuItems;
+        })
+
+      );
 
   }
 
+
+  /*
+   * =========================================
+   * GET FOOD ITEMS
+   *
+   * /FoodItem/menu
+   *
+   * BusinessLocationId
+   * CategoryId
+   * =========================================
+   */
+
+  getMenuItems(
+    businessLocationId: number,
+    categoryId: number
+  ): Observable<MenuItem[]> {
+
+    const params =
+      new HttpParams()
+        .set(
+          'BusinessLocationId',
+          businessLocationId
+        )
+        .set(
+          'CategoryId',
+          categoryId
+        );
+
+
+    return this.http
+      .get<ApiResponse<FoodItemApi[]>>(
+        `${this.apiUrl}/FoodItem/menu`,
+        {
+          params
+        }
+      )
+      .pipe(
+
+        map(response => {
+
+          if (
+            response.responseStatus !== 1 ||
+            !response.data
+          ) {
+
+            return [];
+
+          }
+
+
+          return response.data.map(
+            item =>
+              this.mapFoodItem(
+                item,
+                businessLocationId
+              )
+          );
+
+        })
+
+      );
+
+  }
+
+
+  /*
+   * =========================================
+   * GET MENU BY RESTAURANT
+   *
+   * Loads:
+   *
+   * 1. Categories
+   * 2. Food items for each category
+   * =========================================
+   */
 
   getMenuByRestaurantId(
-    restaurantId: number
-  ): MenuItem[] {
+    businessLocationId: number
+  ): Observable<MenuItem[]> {
 
-    return this.menuItems.filter(
-      item => item.restaurantId === restaurantId
+    return new Observable<MenuItem[]>(
+      subscriber => {
+
+        this.getCategories(
+          businessLocationId
+        )
+        .subscribe({
+
+          next: categories => {
+
+            if (
+              categories.length === 0
+            ) {
+
+              subscriber.next([]);
+
+              subscriber.complete();
+
+              return;
+
+            }
+
+
+            const allItems: MenuItem[] = [];
+
+            let completedRequests = 0;
+
+
+            categories.forEach(
+              category => {
+
+                this.getMenuItems(
+                  businessLocationId,
+                  category.id
+                )
+                .subscribe({
+
+                  next: items => {
+
+                    allItems.push(
+                      ...items
+                    );
+
+                  },
+
+
+                  error: error => {
+
+                    console.error(
+                      `Food items error for category ${category.id}:`,
+                      error
+                    );
+
+                  },
+
+
+                  complete: () => {
+
+                    completedRequests++;
+
+
+                    if (
+                      completedRequests ===
+                      categories.length
+                    ) {
+
+                      subscriber.next(
+                        allItems
+                      );
+
+                      subscriber.complete();
+
+                    }
+
+                  }
+
+                });
+
+              }
+
+            );
+
+          },
+
+
+          error: error => {
+
+            subscriber.error(
+              error
+            );
+
+          }
+
+        });
+
+      }
     );
 
   }
 
 
-  getMenuItemById(
-    id: number
-  ): MenuItem | undefined {
+  /*
+   * =========================================
+   * MAP API ITEM
+   * =========================================
+   */
 
-    return this.menuItems.find(
-      item => item.id === id
-    );
+  private mapFoodItem(
+    item: FoodItemApi,
+    businessLocationId: number
+  ): MenuItem {
+
+
+    let image = '';
+
+
+    /*
+     * -----------------------------------------
+     * IMAGE
+     * -----------------------------------------
+     */
+
+    if (
+      item.images &&
+      item.images.length > 0
+    ) {
+
+      const imagePath =
+        item.images[0].name;
+
+
+      if (
+        imagePath.startsWith(
+          'http://'
+        ) ||
+        imagePath.startsWith(
+          'https://'
+        )
+      ) {
+
+        image =
+          imagePath;
+
+      }
+      else {
+
+        image =
+          `https://dev.makglobalps.com/TAJApi${imagePath}`;
+
+      }
+
+    }
+
+
+    /*
+     * -----------------------------------------
+     * RETURN MODEL
+     * -----------------------------------------
+     */
+
+    return {
+
+      id:
+        item.id,
+
+      name:
+        item.name,
+
+      description:
+        item.description || '',
+
+      itemCategory:
+        item.itemCategory,
+
+      itemCategoryId:
+        item.itemCategoryId,
+
+      preparationTimeMinutes:
+        item.preparationTimeMinutes,
+
+      price:
+        item.price,
+
+      priceLabel:
+        item.priceLabel,
+
+      discountPrice:
+        item.discountPrice,
+
+      discountPriceLabel:
+        item.discountPriceLabel,
+
+      rating:
+        item.rating,
+
+      raters:
+        item.raters,
+
+      isDeal:
+        item.isDeal,
+
+      image,
+
+      restaurantId:
+        businessLocationId,
+
+      category:
+        item.itemCategory,
+
+      isPopular:
+        item.rating > 0
+
+    };
 
   }
 

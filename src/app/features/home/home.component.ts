@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { HeaderComponent }
   from '../../shared/components/header/header.component';
@@ -18,6 +18,12 @@ import { Restaurant }
 
 import { RestaurantService }
   from '../../core/services/restaurant.service';
+
+import { LocationService }
+  from '../../core/services/location.service';
+
+import { UserLocation }
+  from '../../shared/models/location.model';
 
 
 @Component({
@@ -46,6 +52,15 @@ export class HomeComponent implements OnInit {
 
 
   // =========================================
+  // USER LOCATION
+  // =========================================
+
+  selectedLocation: UserLocation | null = null;
+
+  selectedLocationName = '';
+
+
+  // =========================================
   // UI STATE
   // =========================================
 
@@ -59,7 +74,11 @@ export class HomeComponent implements OnInit {
   // =========================================
 
   constructor(
-    private restaurantService: RestaurantService
+    private restaurantService: RestaurantService,
+
+    private locationService: LocationService,
+
+    private router: Router
   ) {}
 
 
@@ -69,29 +88,123 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.loadRestaurants();
+    this.loadLocationAndRestaurants();
 
   }
 
 
   // =========================================
-  // LOAD RESTAURANTS
+  // LOAD LOCATION
   // =========================================
 
-  private loadRestaurants(): void {
+  private loadLocationAndRestaurants(): void {
+
+    const location =
+      this.locationService.getLocation();
+
+
+    // =========================================
+    // LOCATION NOT AVAILABLE
+    // =========================================
+
+    if (!location) {
+
+      this.router.navigate([
+        '/location'
+      ]);
+
+      return;
+
+    }
+
+
+    // =========================================
+    // STORE LOCATION
+    // =========================================
+
+    this.selectedLocation =
+      location;
+
+
+    this.selectedLocationName =
+      location.address ||
+      'Your location';
+
+
+    // =========================================
+    // LOAD NEARBY RESTAURANTS
+    // =========================================
+
+    this.loadNearbyRestaurants();
+
+  }
+
+
+  // =========================================
+  // LOAD NEARBY RESTAURANTS
+  // =========================================
+
+  loadNearbyRestaurants(): void {
+
+    const location =
+      this.locationService.getLocation();
+
+
+    // =========================================
+    // LOCATION NOT FOUND
+    // =========================================
+
+    if (!location) {
+
+      this.router.navigate([
+        '/location'
+      ]);
+
+      return;
+
+    }
+
+
+    // =========================================
+    // UPDATE LOCATION DISPLAY
+    // =========================================
+
+    this.selectedLocation =
+      location;
+
+
+    this.selectedLocationName =
+      location.address ||
+      'Your location';
+
+
+    // =========================================
+    // LOADING STATE
+    // =========================================
 
     this.isLoading = true;
 
     this.errorMessage = '';
 
+    this.restaurants = [];
+
+
+    // =========================================
+    // CALL NEARBY RESTAURANT API
+    // =========================================
 
     this.restaurantService
-      .getRestaurants()
+
+      .getNearbyRestaurants(
+        location.latitude,
+        location.longitude
+      )
+
       .subscribe({
 
-        // -------------------------------------
+        // =====================================
         // SUCCESS
-        // -------------------------------------
+        // =====================================
 
         next: (
           restaurants: Restaurant[]
@@ -100,20 +213,21 @@ export class HomeComponent implements OnInit {
           this.restaurants =
             restaurants;
 
+
           this.isLoading = false;
 
 
           console.log(
-            'Restaurants loaded:',
+            'Nearby restaurants:',
             restaurants
           );
 
         },
 
 
-        // -------------------------------------
+        // =====================================
         // ERROR
-        // -------------------------------------
+        // =====================================
 
         error: error => {
 
@@ -121,18 +235,44 @@ export class HomeComponent implements OnInit {
 
 
           console.error(
-            'Restaurant API Error:',
+            'Nearby Restaurant API Error:',
             error
           );
 
 
           this.errorMessage =
             error?.error?.message ||
-            'Unable to load restaurants.';
+            'Unable to find restaurants near your location.';
 
         }
 
       });
+
+  }
+
+
+  // =========================================
+  // CHANGE LOCATION
+  // =========================================
+
+  changeLocation(): void {
+
+    this.router.navigate([
+      '/location'
+    ]);
+
+  }
+
+
+  // =========================================
+  // ORDER NOW
+  // =========================================
+
+  goToRestaurants(): void {
+
+    this.router.navigate([
+      '/restaurants'
+    ]);
 
   }
 

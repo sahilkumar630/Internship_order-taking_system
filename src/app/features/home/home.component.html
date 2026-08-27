@@ -8,6 +8,44 @@
 
 
   <!-- =========================================
+       LOCATION BAR
+  ========================================== -->
+
+  <section class="location-bar">
+
+    <div class="location-info">
+
+      <span class="location-icon">
+        📍
+      </span>
+
+      <div class="location-text">
+
+        <span class="location-label">
+          Delivering to
+        </span>
+
+        <strong>
+          {{ selectedLocationName || 'Your location' }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="change-location-button"
+      (click)="changeLocation()"
+    >
+      Change
+    </button>
+
+  </section>
+
+
+  <!-- =========================================
        SEARCH
   ========================================== -->
 
@@ -61,7 +99,10 @@
           Enjoy delicious food with an amazing discount.
         </p>
 
-        <button type="button">
+        <button
+          type="button"
+          (click)="goToRestaurants()"
+        >
           Order Now
         </button>
 
@@ -76,19 +117,29 @@
 
 
     <!-- =========================================
-         POPULAR RESTAURANTS
+         NEARBY RESTAURANTS
     ========================================== -->
 
     <section class="section">
 
 
-      <!-- Section Header -->
-
       <div class="section-header">
 
-        <h2>
-          Popular Restaurants
-        </h2>
+        <div>
+
+          <h2>
+            Restaurants Near You
+          </h2>
+
+          @if (selectedLocationName) {
+
+            <p class="section-location">
+              📍 {{ selectedLocationName }}
+            </p>
+
+          }
+
+        </div>
 
 
         <a routerLink="/restaurants">
@@ -99,7 +150,7 @@
 
 
       <!-- =========================================
-           LOADING STATE
+           LOADING
       ========================================== -->
 
       @if (isLoading) {
@@ -109,7 +160,7 @@
           <span class="loading-spinner"></span>
 
           <span>
-            Loading restaurants...
+            Finding restaurants near you...
           </span>
 
         </div>
@@ -118,7 +169,7 @@
 
 
       <!-- =========================================
-           ERROR STATE
+           ERROR
       ========================================== -->
 
       @else if (errorMessage) {
@@ -126,6 +177,14 @@
         <div class="error-message">
 
           {{ errorMessage }}
+
+          <button
+            type="button"
+            class="retry-button"
+            (click)="loadNearbyRestaurants()"
+          >
+            Try Again
+          </button>
 
         </div>
 
@@ -157,14 +216,33 @@
 
 
       <!-- =========================================
-           EMPTY STATE
+           EMPTY
       ========================================== -->
 
       @else {
 
         <div class="empty-message">
 
-          No restaurants available.
+          <div class="empty-icon">
+            📍
+          </div>
+
+          <h3>
+            No restaurants found nearby
+          </h3>
+
+          <p>
+            Try changing your delivery location
+            or increasing your search area.
+          </p>
+
+          <button
+            type="button"
+            class="change-location-empty-button"
+            (click)="changeLocation()"
+          >
+            Change Location
+          </button>
 
         </div>
 
@@ -180,14 +258,11 @@
     <section class="section">
 
 
-      <!-- Section Header -->
-
       <div class="section-header">
 
         <h2>
           Top Deals For You
         </h2>
-
 
         <a routerLink="/deals">
           See all
@@ -195,10 +270,6 @@
 
       </div>
 
-
-      <!-- =========================================
-           DEAL CARDS
-      ========================================== -->
 
       <div class="deals-placeholder">
 

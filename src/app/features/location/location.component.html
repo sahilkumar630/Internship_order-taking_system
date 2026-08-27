@@ -1,0 +1,175 @@
+<div class="location-page">
+
+  <div class="location-card">
+
+
+    <!-- =========================================
+         ICON
+    ========================================== -->
+
+    <div class="location-icon">
+
+      📍
+
+    </div>
+
+
+    <!-- =========================================
+         TITLE
+    ========================================== -->
+
+    <h1>
+
+      Where should we deliver?
+
+    </h1>
+
+
+    <p>
+
+      Allow Foodie to use your location
+      to find restaurants that deliver to you.
+
+    </p>
+
+
+    <!-- =========================================
+         CURRENT LOCATION
+    ========================================== -->
+
+    <button
+      type="button"
+      class="location-button"
+      [disabled]="isLoading"
+      (click)="useCurrentLocation()">
+
+      @if (isLoading) {
+
+        Getting your location...
+
+      }
+      @else {
+
+        📍 Use My Current Location
+
+      }
+
+    </button>
+
+
+    <!-- =========================================
+         MANUAL LOCATION BUTTON
+    ========================================== -->
+
+    <button
+      type="button"
+      class="manual-button"
+      (click)="showManual()">
+
+      Enter Location Manually
+
+    </button>
+
+
+    <!-- =========================================
+         ERROR
+    ========================================== -->
+
+    @if (errorMessage) {
+
+      <div class="error-message">
+
+        {{ errorMessage }}
+
+      </div>
+
+    }
+
+
+    <!-- =========================================
+         MANUAL LOCATION
+    ========================================== -->
+
+    @if (showManualLocation) {
+
+      <div class="manual-location">
+
+        <h3>
+
+          Select your delivery area
+
+        </h3>
+
+
+        <p>
+
+          Choose the area where you want
+          your food delivered.
+
+        </p>
+
+
+        <!-- =====================================
+             AREA
+        ====================================== -->
+
+        <label
+          for="area">
+
+          Delivery Area
+
+        </label>
+
+
+        <select
+          id="area"
+          [(ngModel)]="selectedArea">
+
+          <option
+            value=""
+            disabled>
+
+            Select your area
+
+          </option>
+
+
+          @for (
+            area of areas;
+            track area.name
+          ) {
+
+            <option
+              [value]="area.name">
+
+              {{ area.name }}
+
+            </option>
+
+          }
+
+        </select>
+
+
+        <!-- =====================================
+             CONTINUE
+        ====================================== -->
+
+        <button
+          type="button"
+          class="continue-button"
+          [disabled]="!selectedArea"
+          (click)="continueWithManualLocation()">
+
+          Continue
+
+        </button>
+
+      </div>
+
+    }
+
+
+  </div>
+
+</div>

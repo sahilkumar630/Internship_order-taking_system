@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
 
+  // ==========================
+  // DEFAULT
+  // ==========================
+
   {
     path: '',
     redirectTo: 'login',
@@ -25,6 +29,18 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/register/register.component')
         .then(m => m.RegisterComponent)
+  },
+
+
+  // ==========================
+  // LOCATION
+  // ==========================
+
+  {
+    path: 'location',
+    loadComponent: () =>
+      import('./features/location/location.component')
+        .then(m => m.LocationComponent)
   },
 
 

@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import {
+  ActivatedRoute,
+  RouterLink
+} from '@angular/router';
 
 import { Restaurant }
   from '../../../shared/models/restaurant.model';
@@ -30,7 +33,6 @@ import { CartService }
 })
 export class MenuComponent implements OnInit {
 
-
   // =========================================
   // RESTAURANT
   // =========================================
@@ -55,22 +57,21 @@ export class MenuComponent implements OnInit {
   // UI STATE
   // =========================================
 
-  isLoadingRestaurant = false;
+  isLoading = false;
 
-  restaurantError = '';
+  errorMessage = '';
 
 
+  // =========================================
+  // CONSTRUCTOR
+  // =========================================
 
   constructor(
     private route: ActivatedRoute,
-
     private restaurantService: RestaurantService,
-
     private menuService: MenuService,
-
     private cartService: CartService
   ) {}
-
 
 
   // =========================================
@@ -83,15 +84,32 @@ export class MenuComponent implements OnInit {
 
       const id = params.get('id');
 
-
       if (!id) {
+
+        this.errorMessage =
+          'Restaurant ID not found.';
 
         return;
 
       }
 
 
-      this.restaurantId = Number(id);
+      const restaurantId =
+        Number(id);
+
+
+      if (Number.isNaN(restaurantId)) {
+
+        this.errorMessage =
+          'Invalid restaurant ID.';
+
+        return;
+
+      }
+
+
+      this.restaurantId =
+        restaurantId;
 
 
       this.loadRestaurant();
@@ -103,50 +121,34 @@ export class MenuComponent implements OnInit {
   }
 
 
-
   // =========================================
   // LOAD RESTAURANT
   // =========================================
 
   private loadRestaurant(): void {
 
-    this.isLoadingRestaurant = true;
-
-    this.restaurantError = '';
-
-
     this.restaurantService
       .getRestaurantById(this.restaurantId)
       .subscribe({
 
-        next: (restaurant: Restaurant) => {
+        next: restaurant => {
 
-          this.restaurant = restaurant;
-
-          this.isLoadingRestaurant = false;
-
+          this.restaurant =
+            restaurant;
 
           console.log(
-            'Restaurant Details:',
+            'Restaurant loaded:',
             restaurant
           );
 
         },
 
-
-        error: (error) => {
-
-          this.isLoadingRestaurant = false;
+        error: error => {
 
           console.error(
             'Restaurant API Error:',
             error
           );
-
-
-          this.restaurantError =
-            error?.error?.message ||
-            'Unable to load restaurant.';
 
         }
 
@@ -155,36 +157,105 @@ export class MenuComponent implements OnInit {
   }
 
 
-
   // =========================================
   // LOAD MENU
   // =========================================
 
   private loadMenu(): void {
 
-    this.menuItems =
-      this.menuService.getMenuByRestaurantId(
-        this.restaurantId
-      );
+    this.isLoading = true;
+
+    this.errorMessage = '';
+
+    this.menuItems = [];
+
+    this.categories = [];
+
+    this.selectedCategory = 'All';
 
 
-    this.categories = [
-      'All',
+    this.menuService
+      .getMenuByRestaurantId(this.restaurantId)
+      .subscribe({
 
-      ...new Set(
-        this.menuItems.map(
-          item => item.category
-        )
-      )
+        next: (items: MenuItem[]) => {
 
-    ];
+          this.menuItems =
+            items || [];
+
+          this.isLoading = false;
+
+
+          console.log(
+            'Menu Items:',
+            this.menuItems
+          );
+
+
+          this.buildCategories();
+
+        },
+
+
+        error: error => {
+
+          this.isLoading = false;
+
+
+          console.error(
+            'Menu API Error:',
+            error
+          );
+
+
+          this.errorMessage =
+            error?.error?.message ||
+            'Unable to load menu items.';
+
+        }
+
+      });
 
   }
 
 
+  // =========================================
+  // BUILD CATEGORIES
+  // =========================================
+
+  private buildCategories(): void {
+
+    const categorySet =
+      new Set<string>();
+
+
+    for (const item of this.menuItems) {
+
+      if (item.category) {
+
+        categorySet.add(
+          item.category
+        );
+
+      }
+
+    }
+
+
+    this.categories = [
+      'All',
+      ...Array.from(categorySet)
+    ];
+
+
+    this.selectedCategory =
+      'All';
+
+  }
+
 
   // =========================================
-  // FILTER MENU
+  // FILTER MENU ITEMS
   // =========================================
 
   get filteredMenuItems(): MenuItem[] {
@@ -207,7 +278,6 @@ export class MenuComponent implements OnInit {
   }
 
 
-
   // =========================================
   // SELECT CATEGORY
   // =========================================
@@ -216,10 +286,10 @@ export class MenuComponent implements OnInit {
     category: string
   ): void {
 
-    this.selectedCategory = category;
+    this.selectedCategory =
+      category;
 
   }
-
 
 
   // =========================================
@@ -232,8 +302,13 @@ export class MenuComponent implements OnInit {
 
     this.cartService.addItem(item);
 
-  }
 
+    console.log(
+      'Added to cart:',
+      item
+    );
+
+  }
 
 
   // =========================================
@@ -242,7 +317,8 @@ export class MenuComponent implements OnInit {
 
   get cartItemCount(): number {
 
-    return this.cartService.getItemCount();
+    return this.cartService
+      .getItemCount();
 
   }
 

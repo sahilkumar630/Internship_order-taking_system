@@ -1,0 +1,449 @@
+/* =========================================
+   LOCATION PAGE
+========================================= */
+
+.location-page {
+
+  min-height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 25px;
+
+  box-sizing: border-box;
+
+  background:
+    linear-gradient(
+      135deg,
+      #5a189a 0%,
+      #7b2cbf 45%,
+      #9d4edd 100%
+    );
+
+}
+
+
+/* =========================================
+   LOCATION CARD
+========================================= */
+
+.location-card {
+
+  width: 100%;
+
+  max-width: 480px;
+
+  padding: 45px 40px;
+
+  box-sizing: border-box;
+
+  border-radius: 28px;
+
+  background: white;
+
+  text-align: center;
+
+  box-shadow:
+    0 25px 70px rgba(35, 10, 60, 0.3);
+
+}
+
+
+/* =========================================
+   ICON
+========================================= */
+
+.location-icon {
+
+  width: 75px;
+
+  height: 75px;
+
+  margin: 0 auto 25px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  border-radius: 22px;
+
+  background: #f3e8ff;
+
+  font-size: 38px;
+
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+.location-card h1 {
+
+  margin: 0 0 12px;
+
+  color: #241b2f;
+
+  font-size: 28px;
+
+  font-weight: 800;
+
+}
+
+
+.location-card > p {
+
+  margin: 0 auto 30px;
+
+  max-width: 380px;
+
+  color: #777;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+
+}
+
+
+/* =========================================
+   CURRENT LOCATION BUTTON
+========================================= */
+
+.location-button {
+
+  width: 100%;
+
+  height: 52px;
+
+  border: none;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7b2cbf,
+      #9d4edd
+    );
+
+  color: white;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+
+}
+
+
+.location-button:hover:not(:disabled) {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 25px rgba(123, 44, 191, 0.3);
+
+}
+
+
+.location-button:disabled {
+
+  opacity: 0.65;
+
+  cursor: not-allowed;
+
+}
+
+
+/* =========================================
+   MANUAL BUTTON
+========================================= */
+
+.manual-button {
+
+  width: 100%;
+
+  height: 50px;
+
+  margin-top: 12px;
+
+  border: 1px solid #e3d8eb;
+
+  border-radius: 13px;
+
+  background: white;
+
+  color: #7b2cbf;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+
+}
+
+
+.manual-button:hover:not(:disabled) {
+
+  background: #faf6ff;
+
+  border-color: #7b2cbf;
+
+}
+
+
+.manual-button:disabled {
+
+  opacity: 0.65;
+
+  cursor: not-allowed;
+
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+.error-message {
+
+  margin-top: 20px;
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+  background: #fff1f1;
+
+  color: #c62828;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+}
+
+
+/* =========================================
+   MANUAL LOCATION
+========================================= */
+
+.manual-location {
+
+  margin-top: 25px;
+
+  padding: 22px;
+
+  border-radius: 16px;
+
+  background: #faf9fc;
+
+  text-align: left;
+
+}
+
+
+.manual-location h3 {
+
+  margin: 0 0 8px;
+
+  color: #33243d;
+
+  font-size: 17px;
+
+}
+
+
+.manual-location p {
+
+  margin: 0 0 20px;
+
+  color: #888;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+}
+
+
+/* =========================================
+   LABEL
+========================================= */
+
+.manual-location label {
+
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #33243d;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+}
+
+
+/* =========================================
+   SELECT
+========================================= */
+
+.manual-location select {
+
+  width: 100%;
+
+  height: 50px;
+
+  padding: 0 14px;
+
+  border: 1px solid #e3d8eb;
+
+  border-radius: 12px;
+
+  outline: none;
+
+  background: white;
+
+  color: #33243d;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+}
+
+
+.manual-location select:focus {
+
+  border-color: #9d4edd;
+
+  box-shadow:
+    0 0 0 4px rgba(157, 78, 221, 0.1);
+
+}
+
+
+.manual-location select:disabled {
+
+  opacity: 0.65;
+
+  cursor: not-allowed;
+
+}
+
+
+/* =========================================
+   CONTINUE BUTTON
+========================================= */
+
+.continue-button {
+
+  width: 100%;
+
+  height: 50px;
+
+  margin-top: 14px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7b2cbf,
+      #9d4edd
+    );
+
+  color: white;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+
+}
+
+
+.continue-button:hover:not(:disabled) {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 22px rgba(123, 44, 191, 0.25);
+
+}
+
+
+.continue-button:disabled {
+
+  opacity: 0.6;
+
+  cursor: not-allowed;
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 500px) {
+
+  .location-page {
+
+    padding: 18px;
+
+  }
+
+
+  .location-card {
+
+    padding: 35px 24px;
+
+    border-radius: 22px;
+
+  }
+
+
+  .location-card h1 {
+
+    font-size: 24px;
+
+  }
+
+
+  .location-card > p {
+
+    font-size: 13px;
+
+  }
+
+
+  .manual-location {
+
+    padding: 18px;
+
+  }
+
+}

@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map, throwError } from 'rxjs';
+
+import {
+  HttpClient,
+  HttpParams
+} from '@angular/common/http';
+
+import {
+  Observable,
+  map,
+  switchMap
+} from 'rxjs';
 
 import { Restaurant }
   from '../../shared/models/restaurant.model';
@@ -14,12 +23,17 @@ import { ApiResponse }
 })
 export class RestaurantService {
 
+
   // =========================================
   // API
   // =========================================
 
   private readonly apiUrl =
     'https://dev.makglobalps.com/TAJApi/api/BusinessLocation';
+
+
+  private readonly foodItemApiUrl =
+    'https://dev.makglobalps.com/TAJApi/api/FoodItem';
 
 
   // =========================================
@@ -29,6 +43,15 @@ export class RestaurantService {
   // =========================================
 
   private readonly restaurantBusinessId = 2;
+
+
+  // =========================================
+  // NEARBY RADIUS
+  //
+  // For now = 100 KM
+  // =========================================
+
+  private readonly nearbyRadiusInKm = 100;
 
 
   constructor(
@@ -41,14 +64,18 @@ export class RestaurantService {
   //
   // GET:
   // /api/BusinessLocation?BusinessId=2
+  //
+  // Returns all restaurant branches.
   // =========================================
 
   getRestaurants(): Observable<Restaurant[]> {
 
     return this.http
+
       .get<ApiResponse<Restaurant[]>>(
         `${this.apiUrl}?BusinessId=${this.restaurantBusinessId}`
       )
+
       .pipe(
 
         map(response => {
@@ -65,10 +92,238 @@ export class RestaurantService {
 
           return response.data.map(
             restaurant =>
-              this.mapRestaurant(restaurant)
+              this.mapRestaurant(
+                restaurant
+              )
           );
 
         })
+
+      );
+
+  }
+
+
+  // =========================================
+  // GET NEARBY RESTAURANTS
+  //
+  // STEP 1
+  // Send user's coordinates to:
+  //
+  // /api/FoodItem/near-by
+  //
+  // STEP 2
+  // Extract:
+  //
+  // businessLocations[].id
+  //
+  // STEP 3
+  // Get all restaurant branches from:
+  //
+  // /api/BusinessLocation?BusinessId=2
+  //
+  // STEP 4
+  // Match the nearby location IDs.
+  // =========================================
+
+  getNearbyRestaurants(
+    latitude: number,
+    longitude: number
+  ): Observable<Restaurant[]> {
+
+
+    // =========================================
+    // VALIDATE COORDINATES
+    // =========================================
+
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude)
+    ) {
+
+      throw new Error(
+        'Invalid latitude or longitude.'
+      );
+
+    }
+
+
+    // =========================================
+    // NEARBY API PARAMETERS
+    // =========================================
+
+    const params =
+      new HttpParams()
+
+        .set(
+          'Latitude',
+          latitude
+        )
+
+        .set(
+          'Longitude',
+          longitude
+        )
+
+        .set(
+          'RadiusInKm',
+          this.nearbyRadiusInKm
+        );
+
+
+    console.log(
+      'Nearby API coordinates:',
+      {
+        latitude,
+        longitude,
+        radiusInKm:
+          this.nearbyRadiusInKm
+      }
+    );
+
+
+    // =========================================
+    // CALL FOOD ITEM NEARBY API
+    // =========================================
+
+    return this.http
+
+      .get<ApiResponse<any[]>>(
+        `${this.foodItemApiUrl}/near-by`,
+        {
+          params
+        }
+      )
+
+      .pipe(
+
+
+        // =====================================
+        // EXTRACT BRANCH IDs
+        // =====================================
+
+        map(response => {
+
+          const locationIds =
+            new Set<number>();
+
+
+          if (
+            response.responseStatus !== 1 ||
+            !response.data ||
+            !Array.isArray(response.data)
+          ) {
+
+            return locationIds;
+
+          }
+
+
+          // ===================================
+          // LOOP THROUGH FOOD ITEMS
+          // ===================================
+
+          response.data.forEach(
+            item => {
+
+
+              if (
+                !item.businessLocations ||
+                !Array.isArray(
+                  item.businessLocations
+                )
+              ) {
+
+                return;
+
+              }
+
+
+              // ===============================
+              // LOOP THROUGH BRANCHES
+              // ===============================
+
+              item.businessLocations.forEach(
+                (location: any) => {
+
+
+                  if (
+                    location.id !== undefined &&
+                    location.id !== null
+                  ) {
+
+                    locationIds.add(
+                      Number(
+                        location.id
+                      )
+                    );
+
+                  }
+
+                }
+              );
+
+            }
+          );
+
+
+          console.log(
+            'Nearby branch IDs:',
+            Array.from(
+              locationIds
+            )
+          );
+
+
+          return locationIds;
+
+        }),
+
+
+        // =====================================
+        // GET ALL RESTAURANT BRANCHES
+        // =====================================
+
+        switchMap(
+          nearbyLocationIds => {
+
+            return this.getRestaurants()
+
+              .pipe(
+
+                map(restaurants => {
+
+
+                  // ===========================
+                  // FILTER RESTAURANTS
+                  // ===========================
+
+                  const nearbyRestaurants =
+                    restaurants.filter(
+                      restaurant =>
+                        nearbyLocationIds.has(
+                          Number(
+                            restaurant.id
+                          )
+                        )
+                    );
+
+
+                  console.log(
+                    'Nearby restaurants:',
+                    nearbyRestaurants
+                  );
+
+
+                  return nearbyRestaurants;
+
+                })
+
+              );
+
+          }
+
+        )
 
       );
 
@@ -81,11 +336,7 @@ export class RestaurantService {
   // Example:
   // /restaurant/228
   //
-  // 228 is the location ID.
-  //
-  // We retrieve all restaurants from
-  // Business ID 2 and find the matching
-  // location locally.
+  // 228 = Business Location ID
   // =========================================
 
   getRestaurantById(
@@ -93,6 +344,7 @@ export class RestaurantService {
   ): Observable<Restaurant> {
 
     return this.getRestaurants()
+
       .pipe(
 
         map(restaurants => {
@@ -100,7 +352,8 @@ export class RestaurantService {
           const restaurant =
             restaurants.find(
               item =>
-                item.id === id
+                Number(item.id) ===
+                Number(id)
             );
 
 
@@ -131,9 +384,11 @@ export class RestaurantService {
   ): Observable<Restaurant[]> {
 
     return this.http
+
       .get<ApiResponse<Restaurant[]>>(
         `${this.apiUrl}?BusinessId=${businessId}`
       )
+
       .pipe(
 
         map(response => {
@@ -150,7 +405,9 @@ export class RestaurantService {
 
           return response.data.map(
             restaurant =>
-              this.mapRestaurant(restaurant)
+              this.mapRestaurant(
+                restaurant
+              )
           );
 
         })
@@ -161,13 +418,14 @@ export class RestaurantService {
 
 
   // =========================================
-  // MAP API RESPONSE
-  // TO FRONTEND RESTAURANT MODEL
+  // MAP API RESTAURANT
+  // TO FRONTEND MODEL
   // =========================================
 
   private mapRestaurant(
     data: Restaurant
   ): Restaurant {
+
 
     // =========================================
     // IMAGE
@@ -186,13 +444,19 @@ export class RestaurantService {
 
 
       if (
-        imagePath.startsWith('http://') ||
-        imagePath.startsWith('https://')
+        imagePath.startsWith(
+          'http://'
+        ) ||
+        imagePath.startsWith(
+          'https://'
+        )
       ) {
 
-        image = imagePath;
+        image =
+          imagePath;
 
       }
+
       else {
 
         image =
@@ -201,6 +465,7 @@ export class RestaurantService {
       }
 
     }
+
     else if (
       data.logoUrl
     ) {
@@ -242,22 +507,34 @@ export class RestaurantService {
 
       ...data,
 
+
+      // Restaurant/branch name
       name:
         data.locationName ||
         data.businessName ||
         data.name,
 
+
+      // Image
       image,
 
+
+      // Category
       cuisine:
         data.businessCategoryName ||
         'Restaurant',
 
+
+      // Opening hours
       deliveryTime,
 
+
+      // Delivery fee
       deliveryFee:
         'Available',
 
+
+      // Current status
       discount:
         data.isOpen
           ? 'OPEN NOW'
