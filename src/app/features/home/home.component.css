@@ -23,126 +23,8 @@
   margin: 0 auto;
 
   padding: 25px;
-}
-
-
-/* =========================================
-   LOCATION BAR
-========================================= */
-
-.location-bar {
-  max-width: 1200px;
-
-  margin: 0 auto;
-
-  padding: 12px 25px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
 
   box-sizing: border-box;
-
-  background: white;
-
-  border-bottom: 1px solid #eee8f3;
-}
-
-
-.location-info {
-  display: flex;
-
-  align-items: center;
-
-  gap: 10px;
-}
-
-
-.location-icon {
-  width: 38px;
-
-  height: 38px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 11px;
-
-  background: #f3e8ff;
-
-  font-size: 18px;
-}
-
-
-.location-text {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-
-.location-label {
-  color: #999;
-
-  font-size: 10px;
-
-  font-weight: 500;
-}
-
-
-.location-text strong {
-  max-width: 450px;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-
-  color: #33243d;
-
-  font-size: 13px;
-
-  font-weight: 700;
-}
-
-
-/* =========================================
-   CHANGE LOCATION
-========================================= */
-
-.change-location-button {
-  padding: 8px 15px;
-
-  border: 1px solid #e1d4eb;
-
-  border-radius: 9px;
-
-  background: white;
-
-  color: #7b2cbf;
-
-  font-size: 11px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: 0.2s ease;
-}
-
-
-.change-location-button:hover {
-  background: #faf5ff;
-
-  border-color: #9d4edd;
 }
 
 
@@ -158,9 +40,11 @@
 .welcome-section h1 {
   margin: 0;
 
+  color: #241b2f;
+
   font-size: 28px;
 
-  color: #241b2f;
+  font-weight: 700;
 }
 
 
@@ -174,7 +58,7 @@
 
 
 /* =========================================
-   PROMOTION
+   PROMOTION BANNER
 ========================================= */
 
 .promotion-banner {
@@ -192,6 +76,8 @@
 
   padding: 30px 40px;
 
+  box-sizing: border-box;
+
   border-radius: 22px;
 
   background:
@@ -204,12 +90,14 @@
 
   color: white;
 
-  box-sizing: border-box;
-
   box-shadow:
     0 12px 30px rgba(123, 44, 191, 0.22);
 }
 
+
+/* =========================================
+   PROMOTION CONTENT
+========================================= */
 
 .promotion-content {
   max-width: 500px;
@@ -232,6 +120,8 @@
 
   font-size: 22px;
 
+  font-weight: 700;
+
   text-transform: uppercase;
 }
 
@@ -242,8 +132,14 @@
   color: #eee;
 
   font-size: 14px;
+
+  line-height: 1.5;
 }
 
+
+/* =========================================
+   ORDER NOW BUTTON
+========================================= */
 
 .promotion-content button {
   padding: 12px 22px;
@@ -256,11 +152,15 @@
 
   color: #6a1b9a;
 
+  font-size: 13px;
+
   font-weight: 700;
 
   cursor: pointer;
 
-  transition: 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 
@@ -272,6 +172,15 @@
 }
 
 
+.promotion-content button:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================
+   PROMOTION IMAGE
+========================================= */
+
 .promotion-image {
   width: 150px;
 
@@ -279,9 +188,11 @@
 
   display: flex;
 
+  align-items: center;
+
   justify-content: center;
 
-  align-items: center;
+  flex-shrink: 0;
 
   border-radius: 50%;
 
@@ -300,12 +211,16 @@
 }
 
 
+/* =========================================
+   SECTION HEADER
+========================================= */
+
 .section-header {
   display: flex;
 
-  justify-content: space-between;
-
   align-items: center;
+
+  justify-content: space-between;
 
   margin-bottom: 15px;
 }
@@ -314,7 +229,11 @@
 .section-header h2 {
   margin: 0;
 
+  color: #241b2f;
+
   font-size: 20px;
+
+  font-weight: 700;
 }
 
 
@@ -326,20 +245,15 @@
   font-weight: 700;
 
   text-decoration: none;
+
+  transition: color 0.2s ease;
 }
 
 
 .section-header a:hover {
+  color: #5a189a;
+
   text-decoration: underline;
-}
-
-
-.section-location {
-  margin: 4px 0 0;
-
-  color: #999;
-
-  font-size: 11px;
 }
 
 
@@ -352,9 +266,9 @@
 
   display: flex;
 
-  justify-content: center;
-
   align-items: center;
+
+  justify-content: center;
 
   gap: 10px;
 
@@ -388,6 +302,10 @@
 
 
 @keyframes home-spin {
+
+  from {
+    transform: rotate(0deg);
+  }
 
   to {
     transform: rotate(360deg);
@@ -425,6 +343,15 @@
 }
 
 
+.error-message p {
+  margin: 0;
+}
+
+
+/* =========================================
+   RETRY BUTTON
+========================================= */
+
 .retry-button {
   padding: 9px 17px;
 
@@ -442,7 +369,9 @@
 
   cursor: pointer;
 
-  transition: 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 
@@ -453,8 +382,13 @@
 }
 
 
+.retry-button:active {
+  transform: translateY(0);
+}
+
+
 /* =========================================
-   RESTAURANTS
+   RESTAURANT GRID
 ========================================= */
 
 .restaurant-grid {
@@ -464,99 +398,6 @@
     repeat(2, minmax(0, 1fr));
 
   gap: 18px;
-}
-
-
-/* =========================================
-   EMPTY RESTAURANT STATE
-========================================= */
-
-.empty-message {
-  min-height: 190px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 30px;
-
-  border-radius: 18px;
-
-  background: white;
-
-  text-align: center;
-
-  box-sizing: border-box;
-
-  box-shadow:
-    0 5px 20px rgba(0, 0, 0, 0.04);
-}
-
-
-.empty-icon {
-  margin-bottom: 10px;
-
-  font-size: 35px;
-}
-
-
-.empty-message h3 {
-  margin: 0 0 7px;
-
-  color: #33243d;
-
-  font-size: 16px;
-}
-
-
-.empty-message p {
-  max-width: 400px;
-
-  margin: 0 0 15px;
-
-  color: #999;
-
-  font-size: 12px;
-
-  line-height: 1.5;
-}
-
-
-.change-location-empty-button {
-  padding: 10px 18px;
-
-  border: none;
-
-  border-radius: 10px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #7b2cbf,
-      #9d4edd
-    );
-
-  color: white;
-
-  font-size: 12px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: 0.2s ease;
-}
-
-
-.change-location-empty-button:hover {
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 8px 20px rgba(123, 44, 191, 0.25);
 }
 
 
@@ -574,6 +415,10 @@
 }
 
 
+/* =========================================
+   DEAL CARD
+========================================= */
+
 .deal-card {
   min-height: 150px;
 
@@ -581,11 +426,13 @@
 
   flex-direction: column;
 
-  justify-content: center;
-
   align-items: center;
 
+  justify-content: center;
+
   padding: 20px;
+
+  box-sizing: border-box;
 
   border-radius: 18px;
 
@@ -595,22 +442,52 @@
 
   box-shadow:
     0 5px 20px rgba(0, 0, 0, 0.05);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 
+.deal-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =========================================
+   DEAL ICON
+========================================= */
+
 .deal-icon {
+  display: block;
+
   margin-bottom: 10px;
 
   font-size: 40px;
+
+  line-height: 1;
 }
 
+
+/* =========================================
+   DEAL TITLE
+========================================= */
 
 .deal-card strong {
   color: #7b2cbf;
 
   font-size: 15px;
+
+  font-weight: 700;
 }
 
+
+/* =========================================
+   DEAL DESCRIPTION
+========================================= */
 
 .deal-card p {
   margin: 7px 0 0;
@@ -618,22 +495,19 @@
   color: #888;
 
   font-size: 12px;
+
+  line-height: 1.4;
 }
 
 
 /* =========================================
-   RESPONSIVE
+   TABLET
 ========================================= */
 
 @media (max-width: 768px) {
 
   .home-content {
     padding: 20px;
-  }
-
-
-  .location-bar {
-    padding: 12px 20px;
   }
 
 
@@ -665,18 +539,8 @@
   }
 
 
-  .location-bar {
-    padding: 10px 15px;
-  }
-
-
-  .location-text strong {
-    max-width: 210px;
-  }
-
-
-  .change-location-button {
-    padding: 7px 12px;
+  .welcome-section {
+    margin-bottom: 20px;
   }
 
 
@@ -685,10 +549,21 @@
   }
 
 
+  .welcome-section p {
+    font-size: 13px;
+  }
+
+
+  /* -----------------------------------------
+     PROMOTION
+  ----------------------------------------- */
+
   .promotion-banner {
     min-height: 200px;
 
     padding: 22px;
+
+    border-radius: 18px;
   }
 
 
@@ -708,7 +583,16 @@
 
 
   .promotion-content p {
+    margin-bottom: 15px;
+
     font-size: 12px;
+  }
+
+
+  .promotion-content button {
+    padding: 10px 17px;
+
+    font-size: 11px;
   }
 
 
@@ -721,23 +605,35 @@
   }
 
 
+  /* -----------------------------------------
+     RESTAURANTS
+  ----------------------------------------- */
+
   .restaurant-grid {
     grid-template-columns: 1fr;
   }
 
+
+  /* -----------------------------------------
+     DEALS
+  ----------------------------------------- */
 
   .deals-placeholder {
     grid-template-columns: 1fr;
   }
 
 
+  /* -----------------------------------------
+     SECTION HEADER
+  ----------------------------------------- */
+
   .section-header h2 {
     font-size: 18px;
   }
 
 
-  .section-location {
-    font-size: 10px;
+  .section-header a {
+    font-size: 12px;
   }
 
 }

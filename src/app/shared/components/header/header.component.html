@@ -1,37 +1,72 @@
 <header class="header">
 
-  <div class="location">
 
-    <div class="location-icon">
+  <!-- =========================================
+       CLICKABLE LOCATION
+  ========================================== -->
+
+  <button
+    type="button"
+    class="location"
+    (click)="openLocation()"
+    aria-label="Change delivery location"
+  >
+
+    <!-- LOCATION ICON -->
+
+    <span class="location-icon">
       📍
-    </div>
+    </span>
 
-    <div class="location-info">
+
+    <!-- LOCATION INFORMATION -->
+
+    <span class="location-info">
 
       <span class="deliver-label">
         Deliver to
       </span>
 
+
       <strong>
-        Block 7, Gulshan-e-Iqbal
+        {{ locationDisplayName }}
       </strong>
 
-    </div>
+    </span>
+
+
+    <!-- DROPDOWN ARROW -->
 
     <span class="arrow">
       ▾
     </span>
 
-  </div>
+  </button>
 
 
-  <button class="notification-button">
+  <!-- =========================================
+       NOTIFICATIONS
+  ========================================== -->
+
+  <button
+    type="button"
+    class="notification-button"
+    (click)="openNotifications()"
+    aria-label="Notifications"
+  >
+
     🔔
 
-    <span class="notification-badge">
-      3
-    </span>
+
+    @if (notificationCount > 0) {
+
+      <span class="notification-badge">
+        {{ notificationCount }}
+      </span>
+
+    }
 
   </button>
+
 
 </header>

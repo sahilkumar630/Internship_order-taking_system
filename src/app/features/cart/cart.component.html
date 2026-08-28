@@ -1,1 +1,360 @@
-<p>cart works!</p>
+<div class="cart-page">
+
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <header class="cart-header">
+
+    <button
+      type="button"
+      class="back-button"
+      routerLink="/home"
+    >
+
+      ←
+
+    </button>
+
+
+    <div class="cart-title">
+
+      <h1>
+        Your Cart
+      </h1>
+
+      <span>
+        {{ itemCount }} items
+      </span>
+
+    </div>
+
+
+    @if (cartItems.length > 0) {
+
+      <button
+        type="button"
+        class="clear-button"
+        (click)="clearCart()"
+      >
+
+        Clear
+
+      </button>
+
+    }
+
+  </header>
+
+
+
+
+  <!-- =========================================
+       CART CONTENT
+  ========================================== -->
+
+  <main class="cart-content">
+
+
+    <!-- =========================================
+         EMPTY CART
+    ========================================== -->
+
+    @if (cartItems.length === 0) {
+
+      <section class="empty-cart">
+
+        <div class="empty-cart-icon">
+          🛒
+        </div>
+
+
+        <h2>
+          Your cart is empty
+        </h2>
+
+
+        <p>
+          Add some delicious food to your cart
+          and it will appear here.
+        </p>
+
+
+        <button
+          type="button"
+          class="continue-button"
+          (click)="continueShopping()"
+        >
+
+          Browse Restaurants
+
+        </button>
+
+      </section>
+
+    }
+
+
+    <!-- =========================================
+         CART ITEMS
+    ========================================== -->
+
+    @else {
+
+      <section class="cart-items">
+
+
+        @for (
+          item of cartItems;
+          track item.menuItem.id
+        ) {
+
+          <article class="cart-item">
+
+
+            <!-- =================================
+                 IMAGE
+            ================================= -->
+
+            <div class="cart-item-image">
+
+              @if (item.menuItem.image) {
+
+                <img
+                  [src]="item.menuItem.image"
+                  [alt]="item.menuItem.name"
+                />
+
+              }
+
+              @else {
+
+                <div class="image-placeholder">
+                  🍽️
+                </div>
+
+              }
+
+            </div>
+
+
+
+
+            <!-- =================================
+                 INFORMATION
+            ================================= -->
+
+            <div class="cart-item-info">
+
+              <h3>
+
+                {{ item.menuItem.name }}
+
+              </h3>
+
+
+              @if (item.menuItem.description) {
+
+                <p>
+
+                  {{ item.menuItem.description }}
+
+                </p>
+
+              }
+
+
+              <strong class="item-price">
+
+                Rs.
+                {{ getItemPrice(item).toFixed(2) }}
+
+              </strong>
+
+
+              <!-- =================================
+                   QUANTITY
+              ================================= -->
+
+              <div class="quantity-control">
+
+
+                <button
+                  type="button"
+                  (click)="
+                    decreaseQuantity(
+                      item.menuItem.id
+                    )
+                  "
+                >
+
+                  −
+
+                </button>
+
+
+                <span>
+
+                  {{ item.quantity }}
+
+                </span>
+
+
+                <button
+                  type="button"
+                  (click)="
+                    increaseQuantity(
+                      item.menuItem.id
+                    )
+                  "
+                >
+
+                  +
+
+                </button>
+
+
+              </div>
+
+            </div>
+
+
+
+
+            <!-- =================================
+                 ITEM TOTAL / REMOVE
+            ================================= -->
+
+            <div class="cart-item-right">
+
+              <strong>
+
+                Rs.
+                {{ getItemTotal(item).toFixed(2) }}
+
+              </strong>
+
+
+              <button
+                type="button"
+                class="remove-button"
+
+                (click)="
+                  removeItem(
+                    item.menuItem.id
+                  )
+                "
+              >
+
+                Remove
+
+              </button>
+
+            </div>
+
+
+          </article>
+
+        }
+
+      </section>
+
+
+
+
+      <!-- =========================================
+           ORDER SUMMARY
+      ========================================== -->
+
+      <aside class="order-summary">
+
+
+        <h2>
+          Order Summary
+        </h2>
+
+
+        <div class="summary-row">
+
+          <span>
+            Items
+          </span>
+
+          <span>
+            {{ itemCount }}
+          </span>
+
+        </div>
+
+
+        <div class="summary-row">
+
+          <span>
+            Subtotal
+          </span>
+
+          <strong>
+            Rs. {{ subtotal.toFixed(2) }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-row">
+
+          <span>
+            Delivery Fee
+          </span>
+
+          <span>
+            Calculated at checkout
+          </span>
+
+        </div>
+
+
+        <div class="summary-divider"></div>
+
+
+        <div class="summary-total">
+
+          <span>
+            Total
+          </span>
+
+          <strong>
+            Rs. {{ subtotal.toFixed(2) }}
+          </strong>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="checkout-button"
+          (click)="checkout()"
+        >
+
+          Proceed to Checkout
+
+        </button>
+
+
+        <button
+          type="button"
+          class="continue-shopping-button"
+          (click)="continueShopping()"
+        >
+
+          ← Continue Shopping
+
+        </button>
+
+      </aside>
+
+    }
+
+  </main>
+
+</div>

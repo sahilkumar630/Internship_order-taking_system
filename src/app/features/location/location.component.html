@@ -2,15 +2,12 @@
 
   <div class="location-card">
 
-
     <!-- =========================================
          ICON
     ========================================== -->
 
     <div class="location-icon">
-
       📍
-
     </div>
 
 
@@ -19,17 +16,12 @@
     ========================================== -->
 
     <h1>
-
       Where should we deliver?
-
     </h1>
 
-
     <p>
-
       Allow Foodie to use your location
       to find restaurants that deliver to you.
-
     </p>
 
 
@@ -47,8 +39,7 @@
 
         Getting your location...
 
-      }
-      @else {
+      } @else {
 
         📍 Use My Current Location
 
@@ -58,13 +49,13 @@
 
 
     <!-- =========================================
-         MANUAL LOCATION BUTTON
+         MANUAL LOCATION
     ========================================== -->
 
     <button
       type="button"
       class="manual-button"
-      (click)="showManual()">
+      (click)="openManualLocation()">
 
       Enter Location Manually
 
@@ -87,7 +78,7 @@
 
 
     <!-- =========================================
-         MANUAL LOCATION
+         MANUAL LOCATION FORM
     ========================================== -->
 
     @if (showManualLocation) {
@@ -95,18 +86,52 @@
       <div class="manual-location">
 
         <h3>
-
-          Select your delivery area
-
+          Select your delivery location
         </h3>
 
-
         <p>
-
-          Choose the area where you want
-          your food delivered.
-
+          Choose your city and area so we can
+          find restaurants that deliver to you.
         </p>
+
+
+        <!-- =====================================
+             CITY
+        ====================================== -->
+
+        <label for="city">
+          City
+        </label>
+
+        <select
+          id="city"
+          [(ngModel)]="selectedCity"
+          (change)="selectedArea = ''">
+
+          <option
+            value=""
+            disabled>
+
+            Select your city
+
+          </option>
+
+
+          @for (
+            city of cities;
+            track city
+          ) {
+
+            <option
+              [value]="city">
+
+              {{ city }}
+
+            </option>
+
+          }
+
+        </select>
 
 
         <!-- =====================================
@@ -114,12 +139,12 @@
         ====================================== -->
 
         <label
-          for="area">
+          for="area"
+          class="area-label">
 
           Delivery Area
 
         </label>
-
 
         <select
           id="area"
@@ -136,13 +161,13 @@
 
           @for (
             area of areas;
-            track area.name
+            track area
           ) {
 
             <option
-              [value]="area.name">
+              [value]="area">
 
-              {{ area.name }}
+              {{ area }}
 
             </option>
 
@@ -158,17 +183,33 @@
         <button
           type="button"
           class="continue-button"
-          [disabled]="!selectedArea"
-          (click)="continueWithManualLocation()">
+          [disabled]="
+            !selectedCity ||
+            !selectedArea
+          "
+          (click)="saveManualLocation()">
 
           Continue
+
+        </button>
+
+
+        <!-- =====================================
+             CANCEL
+        ====================================== -->
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="closeManualLocation()">
+
+          Cancel
 
         </button>
 
       </div>
 
     }
-
 
   </div>
 

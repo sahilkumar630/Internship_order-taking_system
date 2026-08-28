@@ -1,58 +1,212 @@
 import { Injectable } from '@angular/core';
 
-export interface UserLocation {
-  latitude: number;
-  longitude: number;
-  address: string;
-}
+import { UserLocation }
+  from '../../shared/models/location.model';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocationService {
 
-  private readonly locationKey = 'foodie_user_location';
+  // =========================================
+  // STORAGE
+  // =========================================
+
+  private readonly locationKey =
+    'foodie_user_location';
 
 
   // =========================================
-  // SAVE LOCATION
+  // GET CURRENT BROWSER LOCATION
   // =========================================
 
-  saveLocation(location: UserLocation): void {
+  getCurrentLocation(): Promise<UserLocation> {
 
-    localStorage.setItem(
-      this.locationKey,
-      JSON.stringify(location)
+    return new Promise(
+      (resolve, reject) => {
+
+        // -----------------------------------------
+        // CHECK BROWSER SUPPORT
+        // -----------------------------------------
+
+        if (!navigator.geolocation) {
+
+          reject(
+            new Error(
+              'Geolocation is not supported by this browser.'
+            )
+          );
+
+          return;
+
+        }
+
+
+        // -----------------------------------------
+        // GET GPS LOCATION
+        // -----------------------------------------
+
+        navigator.geolocation.getCurrentPosition(
+
+          // =======================================
+          // SUCCESS
+          // =======================================
+
+          position => {
+
+            const location: UserLocation = {
+
+              latitude:
+                position.coords.latitude,
+
+              longitude:
+                position.coords.longitude,
+
+              address:
+                'Current Location',
+
+              source:
+                'current'
+
+            };
+
+
+            // -------------------------------------
+            // SAVE LOCATION
+            // -------------------------------------
+
+            this.saveLocation(
+              location
+            );
+
+
+            resolve(
+              location
+            );
+
+          },
+
+
+          // =======================================
+          // ERROR
+          // =======================================
+
+          error => {
+
+            let message =
+              'Unable to get your location.';
+
+
+            switch (error.code) {
+
+              case error.PERMISSION_DENIED:
+
+                message =
+                  'Location permission was denied.';
+
+                break;
+
+
+              case error.POSITION_UNAVAILABLE:
+
+                message =
+                  'Your location is currently unavailable.';
+
+                break;
+
+
+              case error.TIMEOUT:
+
+                message =
+                  'Location request timed out.';
+
+                break;
+
+            }
+
+
+            reject(
+              new Error(message)
+            );
+
+          },
+
+
+          // =======================================
+          // OPTIONS
+          // =======================================
+
+          {
+
+            enableHighAccuracy: true,
+
+            timeout: 15000,
+
+            maximumAge: 300000
+
+          }
+
+        );
+
+      }
     );
 
   }
 
 
   // =========================================
-  // GET LOCATION
+  // SAVE LOCATION
+  // =========================================
+
+  saveLocation(
+    location: UserLocation
+  ): void {
+
+    localStorage.setItem(
+
+      this.locationKey,
+
+      JSON.stringify(
+        location
+      )
+
+    );
+
+  }
+
+
+  // =========================================
+  // GET SAVED LOCATION
   // =========================================
 
   getLocation(): UserLocation | null {
 
-    const location =
+    const storedLocation =
       localStorage.getItem(
         this.locationKey
       );
 
-    if (!location) {
+
+    if (!storedLocation) {
 
       return null;
 
     }
 
+
     try {
 
       return JSON.parse(
-        location
+        storedLocation
       ) as UserLocation;
 
     }
     catch {
+
+      console.error(
+        'Invalid saved location.'
+      );
 
       return null;
 
@@ -67,7 +221,9 @@ export class LocationService {
 
   hasLocation(): boolean {
 
-    return this.getLocation() !== null;
+    return (
+      this.getLocation() !== null
+    );
 
   }
 

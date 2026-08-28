@@ -1,1 +1,294 @@
-<p>restaurant-list works!</p>
+<div class="restaurant-list-page">
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <header class="restaurant-header">
+
+    <button
+      type="button"
+      class="back-button"
+      routerLink="/home"
+    >
+      ←
+    </button>
+
+    <div class="header-title">
+
+      <h1>
+        Restaurants
+      </h1>
+
+      <p>
+        Find delicious food near you
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="cart-button"
+      routerLink="/cart"
+    >
+      🛒
+    </button>
+
+  </header>
+
+
+  <!-- =========================================
+       LOCATION
+  ========================================== -->
+
+  <button
+    type="button"
+    class="location-section"
+    (click)="changeLocation()"
+  >
+
+    <div class="location-icon">
+      📍
+    </div>
+
+    <div class="location-info">
+
+      <span>
+        Deliver to
+      </span>
+
+      <strong>
+        {{ selectedLocationName || 'Your location' }}
+      </strong>
+
+    </div>
+
+    <span class="location-arrow">
+      ▾
+    </span>
+
+  </button>
+
+
+  <!-- =========================================
+       SEARCH
+  ========================================== -->
+
+  <div class="search-box">
+
+    <span class="search-icon">
+      🔍
+    </span>
+
+    <input
+      type="text"
+      placeholder="Search restaurants..."
+      [(ngModel)]="searchTerm"
+      (input)="filterRestaurants()"
+    />
+
+  </div>
+
+
+  <!-- =========================================
+       MAIN CONTENT
+  ========================================== -->
+
+  <main class="restaurant-content">
+
+
+    <!-- =========================================
+         PAGE TITLE
+    ========================================== -->
+
+    <div class="section-heading">
+
+      <div>
+
+        <h2>
+          Restaurants Near You
+        </h2>
+
+        @if (selectedLocationName) {
+
+          <p>
+            📍 {{ selectedLocationName }}
+          </p>
+
+        }
+
+      </div>
+
+      <span>
+        {{ filteredRestaurants.length }}
+        restaurants
+      </span>
+
+    </div>
+
+
+    <!-- =========================================
+         LOADING
+    ========================================== -->
+
+    @if (isLoading) {
+
+      <div class="state-message">
+
+        <div class="loading-spinner"></div>
+
+        <h2>
+          Finding restaurants...
+        </h2>
+
+        <p>
+          Please wait while we find restaurants
+          near your location.
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- =========================================
+         ERROR
+    ========================================== -->
+
+    @else if (errorMessage) {
+
+      <div class="state-message error">
+
+        <div class="state-icon">
+          ⚠️
+        </div>
+
+        <h2>
+          Unable to load restaurants
+        </h2>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <button
+          type="button"
+          class="retry-button"
+          (click)="loadRestaurants()"
+        >
+          Try Again
+        </button>
+
+      </div>
+
+    }
+
+
+    <!-- =========================================
+         RESTAURANTS
+    ========================================== -->
+
+    @else if (filteredRestaurants.length > 0) {
+
+      <div class="restaurant-grid">
+
+        @for (
+          restaurant of filteredRestaurants;
+          track restaurant.id
+        ) {
+
+          <app-restaurant-card
+            [restaurant]="restaurant"
+          />
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- =========================================
+         EMPTY
+    ========================================== -->
+
+    @else {
+
+      <div class="state-message empty">
+
+        <div class="state-icon">
+          🍽️
+        </div>
+
+        <h2>
+          No restaurants found
+        </h2>
+
+        @if (searchTerm) {
+
+          <p>
+            We couldn't find any restaurant
+            matching "{{ searchTerm }}".
+          </p>
+
+          <button
+            type="button"
+            class="retry-button"
+            (click)="clearSearch()"
+          >
+            Clear Search
+          </button>
+
+        }
+
+        @else {
+
+          <p>
+            We couldn't find restaurants
+            delivering to your selected location.
+          </p>
+
+          <button
+            type="button"
+            class="retry-button"
+            (click)="changeLocation()"
+          >
+            Change Location
+          </button>
+
+        }
+
+      </div>
+
+    }
+
+  </main>
+
+
+  <!-- =========================================
+       FLOATING CART
+  ========================================== -->
+
+  @if (cartItemCount > 0) {
+
+    <button
+      type="button"
+      class="view-cart-button"
+      routerLink="/cart"
+    >
+
+      🛒
+
+      <span>
+        View Cart
+      </span>
+
+      <strong>
+        {{ cartItemCount }}
+      </strong>
+
+    </button>
+
+  }
+
+</div>

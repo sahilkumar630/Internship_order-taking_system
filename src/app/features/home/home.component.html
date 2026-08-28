@@ -1,48 +1,14 @@
 <div class="home-page">
 
+
   <!-- =========================================
        HEADER
+       Location is handled by app-header.
+       Clicking the location in the header
+       opens the /location page.
   ========================================== -->
 
   <app-header />
-
-
-  <!-- =========================================
-       LOCATION BAR
-  ========================================== -->
-
-  <section class="location-bar">
-
-    <div class="location-info">
-
-      <span class="location-icon">
-        📍
-      </span>
-
-      <div class="location-text">
-
-        <span class="location-label">
-          Delivering to
-        </span>
-
-        <strong>
-          {{ selectedLocationName || 'Your location' }}
-        </strong>
-
-      </div>
-
-    </div>
-
-
-    <button
-      type="button"
-      class="change-location-button"
-      (click)="changeLocation()"
-    >
-      Change
-    </button>
-
-  </section>
 
 
   <!-- =========================================
@@ -58,6 +24,10 @@
 
   <app-category-list />
 
+
+  <!-- =========================================
+       HOME CONTENT
+  ========================================== -->
 
   <main class="home-content">
 
@@ -85,19 +55,27 @@
 
     <section class="promotion-banner">
 
+
+      <!-- =======================================
+           PROMOTION CONTENT
+      ======================================== -->
+
       <div class="promotion-content">
 
         <span class="discount">
           30% OFF
         </span>
 
+
         <h2>
           Your First Order
         </h2>
 
+
         <p>
           Enjoy delicious food with an amazing discount.
         </p>
+
 
         <button
           type="button"
@@ -109,9 +87,16 @@
       </div>
 
 
+      <!-- =======================================
+           PROMOTION IMAGE
+      ======================================== -->
+
       <div class="promotion-image">
+
         🍔
+
       </div>
+
 
     </section>
 
@@ -123,60 +108,66 @@
     <section class="section">
 
 
+      <!-- =======================================
+           SECTION HEADER
+      ======================================== -->
+
       <div class="section-header">
 
-        <div>
 
-          <h2>
-            Restaurants Near You
-          </h2>
-
-          @if (selectedLocationName) {
-
-            <p class="section-location">
-              📍 {{ selectedLocationName }}
-            </p>
-
-          }
-
-        </div>
+        <h2>
+          Restaurants Near You
+        </h2>
 
 
-        <a routerLink="/restaurants">
+        <a
+          routerLink="/restaurants"
+        >
           See all
         </a>
+
 
       </div>
 
 
-      <!-- =========================================
-           LOADING
-      ========================================== -->
+      <!-- =======================================
+           LOADING STATE
+      ======================================== -->
 
       @if (isLoading) {
 
+
         <div class="loading-message">
 
+
           <span class="loading-spinner"></span>
+
 
           <span>
             Finding restaurants near you...
           </span>
 
+
         </div>
+
 
       }
 
 
-      <!-- =========================================
-           ERROR
-      ========================================== -->
+      <!-- =======================================
+           ERROR STATE
+      ======================================== -->
 
       @else if (errorMessage) {
 
+
         <div class="error-message">
 
-          {{ errorMessage }}
+
+          <p>
+            {{ errorMessage }}
+          </p>
+
 
           <button
             type="button"
@@ -186,67 +177,53 @@
             Try Again
           </button>
 
+
         </div>
+
 
       }
 
 
-      <!-- =========================================
-           RESTAURANTS
-      ========================================== -->
+      <!-- =======================================
+           RESTAURANTS FOUND
+      ======================================== -->
 
       @else if (restaurants.length > 0) {
 
+
         <div class="restaurant-grid">
+
 
           @for (
             restaurant of restaurants;
             track restaurant.id
           ) {
 
+
             <app-restaurant-card
               [restaurant]="restaurant"
             />
 
+
           }
 
+
         </div>
+
 
       }
 
 
-      <!-- =========================================
-           EMPTY
-      ========================================== -->
+      <!-- =======================================
+           NO RESTAURANTS
+           
+           Nothing is displayed intentionally.
+           
+           This prevents the large empty box
+           from appearing when no restaurants
+           are returned by the API.
+      ======================================== -->
 
-      @else {
-
-        <div class="empty-message">
-
-          <div class="empty-icon">
-            📍
-          </div>
-
-          <h3>
-            No restaurants found nearby
-          </h3>
-
-          <p>
-            Try changing your delivery location
-            or increasing your search area.
-          </p>
-
-          <button
-            type="button"
-            class="change-location-empty-button"
-            (click)="changeLocation()"
-          >
-            Change Location
-          </button>
-
-        </div>
-
-      }
 
     </section>
 
@@ -258,84 +235,117 @@
     <section class="section">
 
 
+      <!-- =======================================
+           SECTION HEADER
+      ======================================== -->
+
       <div class="section-header">
+
 
         <h2>
           Top Deals For You
         </h2>
 
-        <a routerLink="/deals">
+
+        <a
+          routerLink="/deals"
+        >
           See all
         </a>
+
 
       </div>
 
 
+      <!-- =======================================
+           DEAL CARDS
+      ======================================== -->
+
       <div class="deals-placeholder">
 
 
-        <!-- Burger Deal -->
+        <!-- =====================================
+             BURGER DEAL
+        ====================================== -->
 
         <div class="deal-card">
+
 
           <span class="deal-icon">
             🍔
           </span>
 
+
           <strong>
             40% OFF
           </strong>
+
 
           <p>
             On selected burgers
           </p>
 
+
         </div>
 
 
-        <!-- Pizza Deal -->
+        <!-- =====================================
+             PIZZA DEAL
+        ====================================== -->
 
         <div class="deal-card">
+
 
           <span class="deal-icon">
             🍕
           </span>
 
+
           <strong>
             Buy 1 Get 1
           </strong>
+
 
           <p>
             On selected pizzas
           </p>
 
+
         </div>
 
 
-        <!-- Delivery Deal -->
+        <!-- =====================================
+             DELIVERY DEAL
+        ====================================== -->
 
         <div class="deal-card">
+
 
           <span class="deal-icon">
             🛵
           </span>
 
+
           <strong>
             Free Delivery
           </strong>
 
+
           <p>
             On orders above Rs. 999
           </p>
+
 
         </div>
 
 
       </div>
 
+
     </section>
 
 
   </main>
+
 
 </div>

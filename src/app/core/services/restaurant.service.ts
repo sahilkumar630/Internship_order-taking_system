@@ -25,12 +25,16 @@ export class RestaurantService {
 
 
   // =========================================
-  // API
+  // BUSINESS LOCATION API
   // =========================================
 
   private readonly apiUrl =
     'https://dev.makglobalps.com/TAJApi/api/BusinessLocation';
 
+
+  // =========================================
+  // FOOD ITEM API
+  // =========================================
 
   private readonly foodItemApiUrl =
     'https://dev.makglobalps.com/TAJApi/api/FoodItem';
@@ -42,17 +46,23 @@ export class RestaurantService {
   // Business ID 2 = Restaurant
   // =========================================
 
-  private readonly restaurantBusinessId = 2;
+  private readonly restaurantBusinessId =
+    2;
 
 
   // =========================================
   // NEARBY RADIUS
   //
-  // For now = 100 KM
+  // Currently 100 KM
   // =========================================
 
-  private readonly nearbyRadiusInKm = 100;
+  private readonly nearbyRadiusInKm =
+    100;
 
+
+  // =========================================
+  // CONSTRUCTOR
+  // =========================================
 
   constructor(
     private http: HttpClient
@@ -64,8 +74,6 @@ export class RestaurantService {
   //
   // GET:
   // /api/BusinessLocation?BusinessId=2
-  //
-  // Returns all restaurant branches.
   // =========================================
 
   getRestaurants(): Observable<Restaurant[]> {
@@ -80,15 +88,25 @@ export class RestaurantService {
 
         map(response => {
 
+          // ===================================
+          // INVALID RESPONSE
+          // ===================================
+
           if (
             !response.data ||
-            !Array.isArray(response.data)
+            !Array.isArray(
+              response.data
+            )
           ) {
 
             return [];
 
           }
 
+
+          // ===================================
+          // MAP RESTAURANTS
+          // ===================================
 
           return response.data.map(
             restaurant =>
@@ -107,23 +125,17 @@ export class RestaurantService {
   // =========================================
   // GET NEARBY RESTAURANTS
   //
-  // STEP 1
-  // Send user's coordinates to:
+  // API:
   //
-  // /api/FoodItem/near-by
+  // GET /api/FoodItem/near-by
   //
-  // STEP 2
-  // Extract:
+  // Parameters:
   //
-  // businessLocations[].id
+  // Latitude
+  // Longitude
+  // RadiusInKm
   //
-  // STEP 3
-  // Get all restaurant branches from:
-  //
-  // /api/BusinessLocation?BusinessId=2
-  //
-  // STEP 4
-  // Match the nearby location IDs.
+  // Radius = 100 KM
   // =========================================
 
   getNearbyRestaurants(
@@ -133,23 +145,7 @@ export class RestaurantService {
 
 
     // =========================================
-    // VALIDATE COORDINATES
-    // =========================================
-
-    if (
-      !Number.isFinite(latitude) ||
-      !Number.isFinite(longitude)
-    ) {
-
-      throw new Error(
-        'Invalid latitude or longitude.'
-      );
-
-    }
-
-
-    // =========================================
-    // NEARBY API PARAMETERS
+    // QUERY PARAMETERS
     // =========================================
 
     const params =
@@ -172,18 +168,18 @@ export class RestaurantService {
 
 
     console.log(
-      'Nearby API coordinates:',
+      'Nearby API Parameters:',
       {
-        latitude,
-        longitude,
-        radiusInKm:
+        Latitude: latitude,
+        Longitude: longitude,
+        RadiusInKm:
           this.nearbyRadiusInKm
       }
     );
 
 
     // =========================================
-    // CALL FOOD ITEM NEARBY API
+    // CALL NEARBY API
     // =========================================
 
     return this.http
@@ -197,30 +193,30 @@ export class RestaurantService {
 
       .pipe(
 
-
         // =====================================
-        // EXTRACT BRANCH IDs
+        // EXTRACT LOCATION IDs
         // =====================================
 
         map(response => {
 
-          const locationIds =
-            new Set<number>();
-
-
           if (
-            response.responseStatus !== 1 ||
             !response.data ||
-            !Array.isArray(response.data)
+            !Array.isArray(
+              response.data
+            )
           ) {
 
-            return locationIds;
+            return new Set<number>();
 
           }
 
 
+          const nearbyLocationIds =
+            new Set<number>();
+
+
           // ===================================
-          // LOOP THROUGH FOOD ITEMS
+          // LOOP FOOD ITEMS
           // ===================================
 
           response.data.forEach(
@@ -240,19 +236,18 @@ export class RestaurantService {
 
 
               // ===============================
-              // LOOP THROUGH BRANCHES
+              // GET BUSINESS LOCATION IDs
               // ===============================
 
               item.businessLocations.forEach(
                 (location: any) => {
-
 
                   if (
                     location.id !== undefined &&
                     location.id !== null
                   ) {
 
-                    locationIds.add(
+                    nearbyLocationIds.add(
                       Number(
                         location.id
                       )
@@ -268,20 +263,20 @@ export class RestaurantService {
 
 
           console.log(
-            'Nearby branch IDs:',
+            'Nearby Business Location IDs:',
             Array.from(
-              locationIds
+              nearbyLocationIds
             )
           );
 
 
-          return locationIds;
+          return nearbyLocationIds;
 
         }),
 
 
         // =====================================
-        // GET ALL RESTAURANT BRANCHES
+        // GET RESTAURANT LIST
         // =====================================
 
         switchMap(
@@ -294,9 +289,9 @@ export class RestaurantService {
                 map(restaurants => {
 
 
-                  // ===========================
-                  // FILTER RESTAURANTS
-                  // ===========================
+                  // =========================
+                  // MATCH LOCATION IDs
+                  // =========================
 
                   const nearbyRestaurants =
                     restaurants.filter(
@@ -310,7 +305,7 @@ export class RestaurantService {
 
 
                   console.log(
-                    'Nearby restaurants:',
+                    'Nearby Restaurants:',
                     nearbyRestaurants
                   );
 
@@ -322,7 +317,6 @@ export class RestaurantService {
               );
 
           }
-
         )
 
       );
@@ -332,11 +326,6 @@ export class RestaurantService {
 
   // =========================================
   // GET RESTAURANT BY LOCATION ID
-  //
-  // Example:
-  // /restaurant/228
-  //
-  // 228 = Business Location ID
   // =========================================
 
   getRestaurantById(
@@ -395,7 +384,9 @@ export class RestaurantService {
 
           if (
             !response.data ||
-            !Array.isArray(response.data)
+            !Array.isArray(
+              response.data
+            )
           ) {
 
             return [];
@@ -419,7 +410,6 @@ export class RestaurantService {
 
   // =========================================
   // MAP API RESTAURANT
-  // TO FRONTEND MODEL
   // =========================================
 
   private mapRestaurant(
@@ -456,7 +446,6 @@ export class RestaurantService {
           imagePath;
 
       }
-
       else {
 
         image =
@@ -465,7 +454,6 @@ export class RestaurantService {
       }
 
     }
-
     else if (
       data.logoUrl
     ) {
@@ -477,7 +465,7 @@ export class RestaurantService {
 
 
     // =========================================
-    // WORKING HOURS
+    // DELIVERY / WORKING TIME
     // =========================================
 
     let deliveryTime =
@@ -500,41 +488,29 @@ export class RestaurantService {
 
 
     // =========================================
-    // FRONTEND MODEL
+    // RETURN FRONTEND MODEL
     // =========================================
 
     return {
 
       ...data,
 
-
-      // Restaurant/branch name
       name:
         data.locationName ||
         data.businessName ||
         data.name,
 
-
-      // Image
       image,
 
-
-      // Category
       cuisine:
         data.businessCategoryName ||
         'Restaurant',
 
-
-      // Opening hours
       deliveryTime,
 
-
-      // Delivery fee
       deliveryFee:
         'Available',
 
-
-      // Current status
       discount:
         data.isOpen
           ? 'OPEN NOW'

@@ -1,5 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
+
+import {
+  Router,
+  RouterLink
+} from '@angular/router';
 
 import { HeaderComponent }
   from '../../shared/components/header/header.component';
@@ -41,7 +48,8 @@ import { UserLocation }
 
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent
+  implements OnInit {
 
 
   // =========================================
@@ -55,18 +63,24 @@ export class HomeComponent implements OnInit {
   // USER LOCATION
   // =========================================
 
-  selectedLocation: UserLocation | null = null;
+  selectedLocation:
+    UserLocation | null = null;
 
-  selectedLocationName = '';
+
+  selectedLocationName =
+    '';
 
 
   // =========================================
   // UI STATE
   // =========================================
 
-  isLoading = false;
+  isLoading =
+    false;
 
-  errorMessage = '';
+
+  errorMessage =
+    '';
 
 
   // =========================================
@@ -74,11 +88,16 @@ export class HomeComponent implements OnInit {
   // =========================================
 
   constructor(
-    private restaurantService: RestaurantService,
 
-    private locationService: LocationService,
+    private restaurantService:
+      RestaurantService,
 
-    private router: Router
+    private locationService:
+      LocationService,
+
+    private router:
+      Router
+
   ) {}
 
 
@@ -99,15 +118,22 @@ export class HomeComponent implements OnInit {
 
   private loadLocationAndRestaurants(): void {
 
+
     const location =
-      this.locationService.getLocation();
+      this.locationService
+        .getLocation();
 
 
     // =========================================
-    // LOCATION NOT AVAILABLE
+    // LOCATION DOES NOT EXIST
     // =========================================
 
     if (!location) {
+
+      console.log(
+        'No saved location found.'
+      );
+
 
       this.router.navigate([
         '/location'
@@ -119,7 +145,7 @@ export class HomeComponent implements OnInit {
 
 
     // =========================================
-    // STORE LOCATION
+    // SAVE LOCATION
     // =========================================
 
     this.selectedLocation =
@@ -129,6 +155,12 @@ export class HomeComponent implements OnInit {
     this.selectedLocationName =
       location.address ||
       'Your location';
+
+
+    console.log(
+      'Saved User Location:',
+      location
+    );
 
 
     // =========================================
@@ -146,8 +178,10 @@ export class HomeComponent implements OnInit {
 
   loadNearbyRestaurants(): void {
 
+
     const location =
-      this.locationService.getLocation();
+      this.locationService
+        .getLocation();
 
 
     // =========================================
@@ -166,7 +200,7 @@ export class HomeComponent implements OnInit {
 
 
     // =========================================
-    // UPDATE LOCATION DISPLAY
+    // UPDATE LOCATION
     // =========================================
 
     this.selectedLocation =
@@ -179,25 +213,52 @@ export class HomeComponent implements OnInit {
 
 
     // =========================================
-    // LOADING STATE
+    // RESET UI
     // =========================================
 
-    this.isLoading = true;
+    this.isLoading =
+      true;
 
-    this.errorMessage = '';
 
-    this.restaurants = [];
+    this.errorMessage =
+      '';
+
+
+    this.restaurants =
+      [];
 
 
     // =========================================
-    // CALL NEARBY RESTAURANT API
+    // LOG API REQUEST
+    // =========================================
+
+    console.log(
+      'Calling Nearby Restaurant API:',
+      {
+        latitude:
+          location.latitude,
+
+        longitude:
+          location.longitude,
+
+        radiusInKm:
+          100
+      }
+    );
+
+
+    // =========================================
+    // CALL RESTAURANT SERVICE
     // =========================================
 
     this.restaurantService
 
       .getNearbyRestaurants(
+
         location.latitude,
+
         location.longitude
+
       )
 
       .subscribe({
@@ -210,15 +271,17 @@ export class HomeComponent implements OnInit {
           restaurants: Restaurant[]
         ) => {
 
+
           this.restaurants =
             restaurants;
 
 
-          this.isLoading = false;
+          this.isLoading =
+            false;
 
 
           console.log(
-            'Nearby restaurants:',
+            'Nearby Restaurants Loaded:',
             restaurants
           );
 
@@ -231,7 +294,9 @@ export class HomeComponent implements OnInit {
 
         error: error => {
 
-          this.isLoading = false;
+
+          this.isLoading =
+            false;
 
 
           console.error(
@@ -257,6 +322,7 @@ export class HomeComponent implements OnInit {
 
   changeLocation(): void {
 
+
     this.router.navigate([
       '/location'
     ]);
@@ -269,6 +335,7 @@ export class HomeComponent implements OnInit {
   // =========================================
 
   goToRestaurants(): void {
+
 
     this.router.navigate([
       '/restaurants'
