@@ -1,6 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
+
 import {
   ActivatedRoute,
+  Router,
   RouterLink
 } from '@angular/router';
 
@@ -19,6 +24,9 @@ import { MenuService }
 import { CartService }
   from '../../../core/services/cart.service';
 
+import { LocationService }
+  from '../../../core/services/location.service';
+
 
 @Component({
   selector: 'app-menu',
@@ -27,11 +35,15 @@ import { CartService }
     RouterLink
   ],
 
-  templateUrl: './menu.component.html',
+  templateUrl:
+    './menu.component.html',
 
-  styleUrl: './menu.component.css'
+  styleUrl:
+    './menu.component.css'
 })
-export class MenuComponent implements OnInit {
+export class MenuComponent
+  implements OnInit {
+
 
   // =========================================
   // RESTAURANT
@@ -63,14 +75,37 @@ export class MenuComponent implements OnInit {
 
 
   // =========================================
+  // PENDING ADD-TO-CART ITEM
+  // =========================================
+
+  private pendingAddItemId:
+    number | null = null;
+
+
+  // =========================================
   // CONSTRUCTOR
   // =========================================
 
   constructor(
-    private route: ActivatedRoute,
-    private restaurantService: RestaurantService,
-    private menuService: MenuService,
-    private cartService: CartService
+
+    private route:
+      ActivatedRoute,
+
+    private router:
+      Router,
+
+    private restaurantService:
+      RestaurantService,
+
+    private menuService:
+      MenuService,
+
+    private cartService:
+      CartService,
+
+    private locationService:
+      LocationService
+
   ) {}
 
 
@@ -80,43 +115,132 @@ export class MenuComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe(
+      params => {
 
-      const id = params.get('id');
+        const id =
+          params.get('id');
 
-      if (!id) {
 
-        this.errorMessage =
-          'Restaurant ID not found.';
+        if (!id) {
 
-        return;
+          this.errorMessage =
+            'Restaurant ID not found.';
+
+          return;
+
+        }
+
+
+        const restaurantId =
+          Number(id);
+
+
+        if (
+          Number.isNaN(
+            restaurantId
+          )
+        ) {
+
+          this.errorMessage =
+            'Invalid restaurant ID.';
+
+          return;
+
+        }
+
+
+        this.restaurantId =
+          restaurantId;
+
+
+        // ===================================
+        // CHECK PENDING ITEM
+        // ===================================
+
+        this.getPendingAddItem();
+
+
+        // ===================================
+        // LOAD RESTAURANT
+        // ===================================
+
+        this.loadRestaurant();
+
+
+        // ===================================
+        // LOAD MENU
+        // ===================================
+
+        this.loadMenu();
 
       }
+    );
+
+  }
 
 
-      const restaurantId =
-        Number(id);
+  // =========================================
+  // GET PENDING ADD ITEM
+  // =========================================
+
+  private getPendingAddItem(): void {
+
+    const addItem =
+      this.route.snapshot.queryParamMap
+        .get('addItem');
 
 
-      if (Number.isNaN(restaurantId)) {
+    // =========================================
+    // NO PENDING ITEM
+    // =========================================
 
-        this.errorMessage =
-          'Invalid restaurant ID.';
+    if (!addItem) {
 
-        return;
+      this.pendingAddItemId =
+        null;
 
-      }
+      return;
 
-
-      this.restaurantId =
-        restaurantId;
+    }
 
 
-      this.loadRestaurant();
+    // =========================================
+    // CONVERT ITEM ID
+    // =========================================
 
-      this.loadMenu();
+    const itemId =
+      Number(addItem);
 
-    });
+
+    // =========================================
+    // INVALID ITEM ID
+    // =========================================
+
+    if (
+      Number.isNaN(itemId)
+    ) {
+
+      this.pendingAddItemId =
+        null;
+
+      return;
+
+    }
+
+
+    // =========================================
+    // SAVE PENDING ITEM
+    // =========================================
+
+    this.pendingAddItemId =
+      itemId;
+
+
+    console.log(
+      'Pending item detected:',
+      this.pendingAddItemId
+    );
 
   }
 
@@ -128,29 +252,45 @@ export class MenuComponent implements OnInit {
   private loadRestaurant(): void {
 
     this.restaurantService
-      .getRestaurantById(this.restaurantId)
+
+      .getRestaurantById(
+        this.restaurantId
+      )
+
       .subscribe({
 
-        next: restaurant => {
+        // =====================================
+        // SUCCESS
+        // =====================================
 
-          this.restaurant =
-            restaurant;
+        next:
+          restaurant => {
 
-          console.log(
-            'Restaurant loaded:',
-            restaurant
-          );
+            this.restaurant =
+              restaurant;
 
-        },
 
-        error: error => {
+            console.log(
+              'Restaurant loaded:',
+              restaurant
+            );
 
-          console.error(
-            'Restaurant API Error:',
-            error
-          );
+          },
 
-        }
+
+        // =====================================
+        // ERROR
+        // =====================================
+
+        error:
+          error => {
+
+            console.error(
+              'Restaurant API Error:',
+              error
+            );
+
+          }
 
       });
 
@@ -163,58 +303,187 @@ export class MenuComponent implements OnInit {
 
   private loadMenu(): void {
 
-    this.isLoading = true;
+    this.isLoading =
+      true;
 
-    this.errorMessage = '';
 
-    this.menuItems = [];
+    this.errorMessage =
+      '';
 
-    this.categories = [];
 
-    this.selectedCategory = 'All';
+    this.menuItems =
+      [];
+
+
+    this.categories =
+      [];
+
+
+    this.selectedCategory =
+      'All';
 
 
     this.menuService
-      .getMenuByRestaurantId(this.restaurantId)
+
+      .getMenuByRestaurantId(
+        this.restaurantId
+      )
+
       .subscribe({
 
-        next: (items: MenuItem[]) => {
+        // =====================================
+        // SUCCESS
+        // =====================================
 
-          this.menuItems =
-            items || [];
+        next:
+          (items: MenuItem[]) => {
 
-          this.isLoading = false;
-
-
-          console.log(
-            'Menu Items:',
-            this.menuItems
-          );
+            this.menuItems =
+              items || [];
 
 
-          this.buildCategories();
-
-        },
-
-
-        error: error => {
-
-          this.isLoading = false;
+            this.isLoading =
+              false;
 
 
-          console.error(
-            'Menu API Error:',
-            error
-          );
+            console.log(
+              'Menu Items:',
+              this.menuItems
+            );
 
 
-          this.errorMessage =
-            error?.error?.message ||
-            'Unable to load menu items.';
+            // =================================
+            // BUILD CATEGORIES
+            // =================================
 
-        }
+            this.buildCategories();
+
+
+            // =================================
+            // PROCESS PENDING ITEM
+            // =================================
+
+            this.processPendingAddItem();
+
+          },
+
+
+        // =====================================
+        // ERROR
+        // =====================================
+
+        error:
+          error => {
+
+            this.isLoading =
+              false;
+
+
+            console.error(
+              'Menu API Error:',
+              error
+            );
+
+
+            this.errorMessage =
+              error?.error?.message ||
+              'Unable to load menu items.';
+
+          }
 
       });
+
+  }
+
+
+  // =========================================
+  // PROCESS PENDING ITEM
+  // =========================================
+
+  private processPendingAddItem(): void {
+
+    // =========================================
+    // NO PENDING ITEM
+    // =========================================
+
+    if (
+      this.pendingAddItemId === null
+    ) {
+
+      return;
+
+    }
+
+
+    // =========================================
+    // FIND ITEM
+    // =========================================
+
+    const item =
+      this.menuItems.find(
+        menuItem =>
+          Number(menuItem.id) ===
+          Number(this.pendingAddItemId)
+      );
+
+
+    // =========================================
+    // ITEM NOT FOUND
+    // =========================================
+
+    if (!item) {
+
+      console.warn(
+        'Pending item was not found in the menu:',
+        this.pendingAddItemId
+      );
+
+
+      this.pendingAddItemId =
+        null;
+
+      return;
+
+    }
+
+
+    console.log(
+      'Processing pending item:',
+      item
+    );
+
+
+    // =========================================
+    // ADD ITEM
+    // =========================================
+
+    this.addToCart(item);
+
+
+    // =========================================
+    // CLEAR PENDING ITEM
+    // =========================================
+
+    this.pendingAddItemId =
+      null;
+
+
+    // =========================================
+    // REMOVE QUERY PARAMETER
+    // =========================================
+
+    this.router.navigate(
+      [],
+      {
+        relativeTo:
+          this.route,
+
+        queryParams: {},
+
+        replaceUrl:
+          true
+      }
+    );
 
   }
 
@@ -229,7 +498,10 @@ export class MenuComponent implements OnInit {
       new Set<string>();
 
 
-    for (const item of this.menuItems) {
+    for (
+      const item
+      of this.menuItems
+    ) {
 
       if (item.category) {
 
@@ -244,7 +516,9 @@ export class MenuComponent implements OnInit {
 
     this.categories = [
       'All',
-      ...Array.from(categorySet)
+      ...Array.from(
+        categorySet
+      )
     ];
 
 
@@ -258,16 +532,26 @@ export class MenuComponent implements OnInit {
   // FILTER MENU ITEMS
   // =========================================
 
-  get filteredMenuItems(): MenuItem[] {
+  get filteredMenuItems():
+    MenuItem[] {
+
+    // =========================================
+    // ALL
+    // =========================================
 
     if (
-      this.selectedCategory === 'All'
+      this.selectedCategory ===
+      'All'
     ) {
 
       return this.menuItems;
 
     }
 
+
+    // =========================================
+    // SELECTED CATEGORY
+    // =========================================
 
     return this.menuItems.filter(
       item =>
@@ -300,13 +584,157 @@ export class MenuComponent implements OnInit {
     item: MenuItem
   ): void {
 
-    this.cartService.addItem(item);
+    // =========================================
+    // GET SAVED LOCATION
+    // =========================================
 
+    const location =
+      this.locationService
+        .getLocation();
+
+
+    // =========================================
+    // LOCATION NOT AVAILABLE
+    // =========================================
+
+    if (!location) {
+
+      console.log(
+        'Location required before adding item.'
+      );
+
+
+      this.router.navigate(
+        ['/location'],
+        {
+          queryParams: {
+
+            returnUrl:
+              `/restaurant/${this.restaurantId}/menu`,
+
+            addItem:
+              item.id
+
+          }
+        }
+      );
+
+
+      return;
+
+    }
+
+
+    // =========================================
+    // CHECK NEARBY RESTAURANT
+    // =========================================
 
     console.log(
-      'Added to cart:',
-      item
+      'Checking restaurant availability:',
+      {
+        restaurantId:
+          this.restaurantId,
+
+        latitude:
+          location.latitude,
+
+        longitude:
+          location.longitude
+      }
     );
+
+
+    this.restaurantService
+
+      .getNearbyRestaurants(
+
+        location.latitude,
+
+        location.longitude
+
+      )
+
+      .subscribe({
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        next:
+          (restaurants: Restaurant[]) => {
+
+            const restaurantAvailable =
+              restaurants.some(
+                restaurant =>
+                  Number(restaurant.id) ===
+                  Number(this.restaurantId)
+              );
+
+
+            // =================================
+            // RESTAURANT AVAILABLE
+            // =================================
+
+            if (restaurantAvailable) {
+
+              this.cartService.addItem(
+                item
+              );
+
+
+              console.log(
+                'Restaurant available. Item added to cart:',
+                item
+              );
+
+
+              return;
+
+            }
+
+
+            // =================================
+            // RESTAURANT NOT AVAILABLE
+            // =================================
+
+            console.warn(
+              'Restaurant is not available at the selected location.',
+              {
+                restaurantId:
+                  this.restaurantId,
+
+                selectedLocation:
+                  location
+              }
+            );
+
+
+            // =================================
+            // GO TO NEARBY RESTAURANTS
+            // =================================
+
+            this.router.navigate([
+              '/restaurants'
+            ]);
+
+          },
+
+
+        // =====================================
+        // ERROR
+        // =====================================
+
+        error:
+          error => {
+
+            console.error(
+              'Restaurant availability check failed:',
+              error
+            );
+
+          }
+
+      });
 
   }
 

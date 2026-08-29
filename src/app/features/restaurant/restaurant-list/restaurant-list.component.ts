@@ -1,6 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
+
+import {
+  FormsModule
+} from '@angular/forms';
+
+import {
+  Router,
+  RouterLink
+} from '@angular/router';
 
 import { RestaurantCardComponent }
   from '../../../shared/components/restaurant-card/restaurant-card.component';
@@ -27,11 +37,14 @@ import { CartService }
     RestaurantCardComponent
   ],
 
-  templateUrl: './restaurant-list.component.html',
+  templateUrl:
+    './restaurant-list.component.html',
 
-  styleUrl: './restaurant-list.component.css'
+  styleUrl:
+    './restaurant-list.component.css'
 })
-export class RestaurantListComponent implements OnInit {
+export class RestaurantListComponent
+  implements OnInit {
 
 
   // =========================================
@@ -79,13 +92,17 @@ export class RestaurantListComponent implements OnInit {
 
   constructor(
 
-    private restaurantService: RestaurantService,
+    private restaurantService:
+      RestaurantService,
 
-    private locationService: LocationService,
+    private locationService:
+      LocationService,
 
-    private cartService: CartService,
+    private cartService:
+      CartService,
 
-    private router: Router
+    private router:
+      Router
 
   ) {}
 
@@ -112,14 +129,20 @@ export class RestaurantListComponent implements OnInit {
   private loadLocation(): void {
 
     const location =
-      this.locationService.getLocation();
+      this.locationService
+        .getLocation();
 
 
-    // -----------------------------------------
+    // =========================================
     // LOCATION NOT AVAILABLE
-    // -----------------------------------------
+    // =========================================
 
     if (!location) {
+
+      console.log(
+        'No saved location found.'
+      );
+
 
       this.router.navigate([
         '/location'
@@ -130,32 +153,44 @@ export class RestaurantListComponent implements OnInit {
     }
 
 
-    // -----------------------------------------
-    // LOCATION NAME
-    // -----------------------------------------
+    // =========================================
+    // UPDATE LOCATION NAME
+    // =========================================
 
     this.selectedLocationName =
       location.address ||
       'Your location';
+
+
+    console.log(
+      'Selected Location:',
+      location
+    );
 
   }
 
 
   // =========================================
-  // LOAD RESTAURANTS
+  // LOAD NEARBY RESTAURANTS
   // =========================================
 
   loadRestaurants(): void {
 
     const location =
-      this.locationService.getLocation();
+      this.locationService
+        .getLocation();
 
 
-    // -----------------------------------------
+    // =========================================
     // LOCATION NOT AVAILABLE
-    // -----------------------------------------
+    // =========================================
 
     if (!location) {
+
+      console.log(
+        'Location required before loading restaurants.'
+      );
+
 
       this.router.navigate([
         '/location'
@@ -166,37 +201,66 @@ export class RestaurantListComponent implements OnInit {
     }
 
 
-    // -----------------------------------------
+    // =========================================
     // UPDATE LOCATION
-    // -----------------------------------------
+    // =========================================
 
     this.selectedLocationName =
       location.address ||
       'Your location';
 
 
-    // -----------------------------------------
+    // =========================================
     // RESET STATE
-    // -----------------------------------------
+    // =========================================
 
-    this.isLoading = true;
-
-    this.errorMessage = '';
-
-    this.restaurants = [];
-
-    this.filteredRestaurants = [];
+    this.isLoading =
+      true;
 
 
-    // -----------------------------------------
-    // API REQUEST
-    // -----------------------------------------
+    this.errorMessage =
+      '';
+
+
+    this.restaurants =
+      [];
+
+
+    this.filteredRestaurants =
+      [];
+
+
+    // =========================================
+    // LOG API REQUEST
+    // =========================================
+
+    console.log(
+      'Loading nearby restaurants:',
+      {
+        latitude:
+          location.latitude,
+
+        longitude:
+          location.longitude,
+
+        radiusInKm:
+          100
+      }
+    );
+
+
+    // =========================================
+    // CALL NEARBY RESTAURANT API
+    // =========================================
 
     this.restaurantService
 
       .getNearbyRestaurants(
+
         location.latitude,
+
         location.longitude
+
       )
 
       .subscribe({
@@ -205,49 +269,67 @@ export class RestaurantListComponent implements OnInit {
         // SUCCESS
         // =====================================
 
-        next: (
-          restaurants: Restaurant[]
-        ) => {
+        next:
+          (restaurants: Restaurant[]) => {
 
-          this.restaurants =
-            restaurants || [];
-
-
-          this.filteredRestaurants =
-            [...this.restaurants];
+            this.restaurants =
+              restaurants || [];
 
 
-          this.isLoading = false;
+            this.filteredRestaurants =
+              [
+                ...this.restaurants
+              ];
 
 
-          console.log(
-            'Restaurants loaded:',
-            this.restaurants
-          );
+            this.isLoading =
+              false;
 
-        },
+
+            console.log(
+              'Nearby Restaurants Loaded:',
+              this.restaurants
+            );
+
+
+            // =================================
+            // NO RESTAURANTS
+            // =================================
+
+            if (
+              this.restaurants.length === 0
+            ) {
+
+              this.errorMessage =
+                'No restaurants found near your location.';
+
+            }
+
+          },
 
 
         // =====================================
         // ERROR
         // =====================================
 
-        error: error => {
+        error:
+          error => {
 
-          this.isLoading = false;
-
-
-          console.error(
-            'Restaurant List API Error:',
-            error
-          );
+            this.isLoading =
+              false;
 
 
-          this.errorMessage =
-            error?.error?.message ||
-            'Unable to load restaurants near your location.';
+            console.error(
+              'Restaurant List API Error:',
+              error
+            );
 
-        }
+
+            this.errorMessage =
+              error?.error?.message ||
+              'Unable to load restaurants near your location.';
+
+          }
 
       });
 
@@ -266,23 +348,25 @@ export class RestaurantListComponent implements OnInit {
         .toLowerCase();
 
 
-    // -----------------------------------------
+    // =========================================
     // EMPTY SEARCH
-    // -----------------------------------------
+    // =========================================
 
     if (!search) {
 
       this.filteredRestaurants =
-        [...this.restaurants];
+        [
+          ...this.restaurants
+        ];
 
       return;
 
     }
 
 
-    // -----------------------------------------
-    // SEARCH
-    // -----------------------------------------
+    // =========================================
+    // SEARCH RESTAURANTS
+    // =========================================
 
     this.filteredRestaurants =
       this.restaurants.filter(
@@ -290,10 +374,31 @@ export class RestaurantListComponent implements OnInit {
 
           const name =
             restaurant.name
-              ?.toLowerCase() || '';
+              ?.toLowerCase() ||
+            '';
 
 
-          return name.includes(search);
+          const businessName =
+            restaurant.businessName
+              ?.toLowerCase() ||
+            '';
+
+
+          const locationName =
+            restaurant.locationName
+              ?.toLowerCase() ||
+            '';
+
+
+          return (
+
+            name.includes(search) ||
+
+            businessName.includes(search) ||
+
+            locationName.includes(search)
+
+          );
 
         }
       );
@@ -307,10 +412,14 @@ export class RestaurantListComponent implements OnInit {
 
   clearSearch(): void {
 
-    this.searchTerm = '';
+    this.searchTerm =
+      '';
+
 
     this.filteredRestaurants =
-      [...this.restaurants];
+      [
+        ...this.restaurants
+      ];
 
   }
 
@@ -335,7 +444,8 @@ export class RestaurantListComponent implements OnInit {
   updateCartCount(): void {
 
     this.cartItemCount =
-      this.cartService.getItemCount();
+      this.cartService
+        .getItemCount();
 
   }
 

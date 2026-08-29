@@ -14,6 +14,37 @@
 
 
 /* =========================================
+   CUISINES FOR YOU
+========================================= */
+
+.cuisines-section {
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 0 25px 10px;
+
+  box-sizing: border-box;
+}
+
+
+.cuisines-section .section-header {
+  margin-bottom: 15px;
+}
+
+
+.cuisines-section .section-header h2 {
+  margin: 0;
+
+  color: #241b2f;
+
+  font-size: 20px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================
    HOME CONTENT
 ========================================= */
 
@@ -207,7 +238,7 @@
 ========================================= */
 
 .section {
-  margin-bottom: 35px;
+  margin-bottom: 40px;
 }
 
 
@@ -222,7 +253,7 @@
 
   justify-content: space-between;
 
-  margin-bottom: 15px;
+  margin-bottom: 18px;
 }
 
 
@@ -246,7 +277,8 @@
 
   text-decoration: none;
 
-  transition: color 0.2s ease;
+  transition:
+    color 0.2s ease;
 }
 
 
@@ -349,6 +381,33 @@
 
 
 /* =========================================
+   EMPTY MESSAGE
+========================================= */
+
+.empty-message {
+  padding: 30px 20px;
+
+  border-radius: 16px;
+
+  background: white;
+
+  color: #888;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.04);
+}
+
+
+.empty-message p {
+  margin: 0;
+}
+
+
+/* =========================================
    RETRY BUTTON
 ========================================= */
 
@@ -383,6 +442,234 @@
 
 
 .retry-button:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================
+   POPULAR FOOD GRID
+========================================= */
+
+.food-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+
+/* =========================================
+   FOOD CARD
+========================================= */
+
+.food-card {
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background: white;
+
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.06);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.food-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.10);
+}
+
+
+/* =========================================
+   FOOD IMAGE
+========================================= */
+
+.food-image {
+  width: 100%;
+
+  height: 180px;
+
+  overflow: hidden;
+
+  background: #f1edf5;
+}
+
+
+.food-image img {
+  width: 100%;
+
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition:
+    transform 0.3s ease;
+}
+
+
+.food-card:hover .food-image img {
+  transform: scale(1.05);
+}
+
+
+/* =========================================
+   FOOD IMAGE PLACEHOLDER
+========================================= */
+
+.food-image-placeholder {
+  width: 100%;
+
+  height: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 55px;
+}
+
+
+/* =========================================
+   FOOD CONTENT
+========================================= */
+
+.food-content {
+  padding: 15px;
+}
+
+
+.food-content h3 {
+  margin: 0;
+
+  color: #241b2f;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =========================================
+   FOOD CATEGORY
+========================================= */
+
+.food-category {
+  margin: 5px 0 8px;
+
+  color: #888;
+
+  font-size: 12px;
+}
+
+
+/* =========================================
+   FOOD RATING
+========================================= */
+
+.food-rating {
+  margin-bottom: 8px;
+
+  color: #6d5a78;
+
+  font-size: 12px;
+}
+
+
+.food-rating span {
+  color: #999;
+}
+
+
+/* =========================================
+   FOOD PRICE
+========================================= */
+
+.food-price {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 12px;
+}
+
+
+.food-price strong {
+  color: #7b2cbf;
+
+  font-size: 15px;
+
+  font-weight: 800;
+}
+
+
+.original-price {
+  color: #aaa;
+
+  font-size: 11px;
+
+  text-decoration: line-through;
+}
+
+
+/* =========================================
+   ADD FOOD BUTTON
+========================================= */
+
+.add-food-button {
+  width: 100%;
+
+  padding: 10px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background: #7b2cbf;
+
+  color: white;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  text-decoration: none;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.add-food-button:hover {
+  background: #6a1b9a;
+
+  transform: translateY(-1px);
+}
+
+
+.add-food-button:active {
   transform: translateY(0);
 }
 
@@ -504,10 +791,30 @@
    TABLET
 ========================================= */
 
+@media (max-width: 1000px) {
+
+  .food-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
 @media (max-width: 768px) {
 
   .home-content {
     padding: 20px;
+  }
+
+
+  .cuisines-section {
+    padding:
+      0 20px 5px;
   }
 
 
@@ -516,13 +823,21 @@
   }
 
 
+  .food-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
   .restaurant-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
   }
 
 
   .deals-placeholder {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
   }
 
 }
@@ -538,6 +853,25 @@
     padding: 15px;
   }
 
+
+  /* -----------------------------------------
+     CUISINES
+  ----------------------------------------- */
+
+  .cuisines-section {
+    padding:
+      0 15px 5px;
+  }
+
+
+  .cuisines-section .section-header h2 {
+    font-size: 18px;
+  }
+
+
+  /* -----------------------------------------
+     WELCOME
+  ----------------------------------------- */
 
   .welcome-section {
     margin-bottom: 20px;
@@ -606,11 +940,61 @@
 
 
   /* -----------------------------------------
+     FOOD
+  ----------------------------------------- */
+
+  .food-grid {
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 12px;
+  }
+
+
+  .food-image {
+    height: 140px;
+  }
+
+
+  .food-content {
+    padding: 12px;
+  }
+
+
+  .food-content h3 {
+    font-size: 14px;
+  }
+
+
+  .food-category {
+    font-size: 11px;
+  }
+
+
+  .food-rating {
+    font-size: 11px;
+  }
+
+
+  .food-price strong {
+    font-size: 13px;
+  }
+
+
+  .add-food-button {
+    padding: 9px 6px;
+
+    font-size: 11px;
+  }
+
+
+  /* -----------------------------------------
      RESTAURANTS
   ----------------------------------------- */
 
   .restaurant-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
 
@@ -619,7 +1003,8 @@
   ----------------------------------------- */
 
   .deals-placeholder {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
 

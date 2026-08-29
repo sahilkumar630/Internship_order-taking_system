@@ -23,6 +23,9 @@ import { RestaurantCardComponent }
 import { Restaurant }
   from '../../shared/models/restaurant.model';
 
+import { MenuItem }
+  from '../../shared/models/menu-item.model';
+
 import { RestaurantService }
   from '../../core/services/restaurant.service';
 
@@ -44,12 +47,21 @@ import { UserLocation }
     RestaurantCardComponent
   ],
 
-  templateUrl: './home.component.html',
+  templateUrl:
+    './home.component.html',
 
-  styleUrl: './home.component.css'
+  styleUrl:
+    './home.component.css'
 })
 export class HomeComponent
   implements OnInit {
+
+
+  // =========================================
+  // FOOD ITEMS
+  // =========================================
+
+  foodItems: MenuItem[] = [];
 
 
   // =========================================
@@ -66,20 +78,29 @@ export class HomeComponent
   selectedLocation:
     UserLocation | null = null;
 
-
   selectedLocationName =
     '';
 
 
   // =========================================
-  // UI STATE
+  // FOOD UI STATE
   // =========================================
 
-  isLoading =
+  isLoadingFood =
     false;
 
+  foodErrorMessage =
+    '';
 
-  errorMessage =
+
+  // =========================================
+  // RESTAURANT UI STATE
+  // =========================================
+
+  isLoadingRestaurants =
+    false;
+
+  restaurantErrorMessage =
     '';
 
 
@@ -107,37 +128,44 @@ export class HomeComponent
 
   ngOnInit(): void {
 
-    this.loadLocationAndRestaurants();
+    this.loadSavedLocation();
 
   }
 
 
   // =========================================
-  // LOAD LOCATION
+  // LOAD SAVED LOCATION
   // =========================================
 
-  private loadLocationAndRestaurants(): void {
-
+  private loadSavedLocation(): void {
 
     const location =
-      this.locationService
-        .getLocation();
+      this.locationService.getLocation();
 
 
     // =========================================
-    // LOCATION DOES NOT EXIST
+    // NO LOCATION
+    //
+    // New user can browse Home normally.
     // =========================================
 
     if (!location) {
 
+      this.selectedLocation =
+        null;
+
+      this.selectedLocationName =
+        '';
+
+      this.foodItems =
+        [];
+
+      this.restaurants =
+        [];
+
       console.log(
-        'No saved location found.'
+        'No saved location found. Showing location-independent Home content.'
       );
-
-
-      this.router.navigate([
-        '/location'
-      ]);
 
       return;
 
@@ -145,12 +173,11 @@ export class HomeComponent
 
 
     // =========================================
-    // SAVE LOCATION
+    // LOCATION EXISTS
     // =========================================
 
     this.selectedLocation =
       location;
-
 
     this.selectedLocationName =
       location.address ||
@@ -164,35 +191,41 @@ export class HomeComponent
 
 
     // =========================================
-    // LOAD NEARBY RESTAURANTS
+    // LOAD LOCATION BASED CONTENT
     // =========================================
 
-    this.loadNearbyRestaurants();
+    this.loadLocationBasedContent();
 
   }
 
 
   // =========================================
-  // LOAD NEARBY RESTAURANTS
+  // LOAD LOCATION BASED CONTENT
   // =========================================
 
-  loadNearbyRestaurants(): void {
-
+  private loadLocationBasedContent(): void {
 
     const location =
-      this.locationService
-        .getLocation();
+      this.locationService.getLocation();
 
 
     // =========================================
-    // LOCATION NOT FOUND
+    // LOCATION NOT AVAILABLE
     // =========================================
 
     if (!location) {
 
-      this.router.navigate([
-        '/location'
-      ]);
+      this.selectedLocation =
+        null;
+
+      this.selectedLocationName =
+        '';
+
+      this.foodItems =
+        [];
+
+      this.restaurants =
+        [];
 
       return;
 
@@ -206,6 +239,64 @@ export class HomeComponent
     this.selectedLocation =
       location;
 
+    this.selectedLocationName =
+      location.address ||
+      'Your location';
+
+
+    // =========================================
+    // LOAD POPULAR FOOD
+    // =========================================
+
+    this.loadNearbyFood();
+
+
+    // =========================================
+    // LOAD NEARBY RESTAURANTS
+    // =========================================
+
+    this.loadNearbyRestaurants();
+
+  }
+
+
+  // =========================================
+  // LOAD NEARBY FOOD
+  //
+  // Uses:
+  //
+  // GET /api/FoodItem/near-by
+  // =========================================
+
+  loadNearbyFood(): void {
+
+    const location =
+      this.locationService.getLocation();
+
+
+    // =========================================
+    // LOCATION NOT AVAILABLE
+    // =========================================
+
+    if (!location) {
+
+      this.foodItems =
+        [];
+
+      this.isLoadingFood =
+        false;
+
+      return;
+
+    }
+
+
+    // =========================================
+    // UPDATE LOCATION
+    // =========================================
+
+    this.selectedLocation =
+      location;
 
     this.selectedLocationName =
       location.address ||
@@ -213,43 +304,168 @@ export class HomeComponent
 
 
     // =========================================
-    // RESET UI
+    // RESET STATE
     // =========================================
 
-    this.isLoading =
+    this.isLoadingFood =
       true;
 
-
-    this.errorMessage =
+    this.foodErrorMessage =
       '';
 
+    this.foodItems =
+      [];
+
+
+    // =========================================
+    // API REQUEST
+    // =========================================
+
+    console.log(
+      'Loading nearby food:',
+      {
+        latitude:
+          location.latitude,
+
+        longitude:
+          location.longitude
+      }
+    );
+
+
+    this.restaurantService
+
+      .getNearbyFoodItems(
+
+        location.latitude,
+
+        location.longitude
+
+      )
+
+      .subscribe({
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        next:
+          (items: MenuItem[]) => {
+
+            this.foodItems =
+              items || [];
+
+            this.isLoadingFood =
+              false;
+
+
+            console.log(
+              'Nearby Food Items Loaded:',
+              this.foodItems
+            );
+
+          },
+
+
+        // =====================================
+        // ERROR
+        // =====================================
+
+        error:
+          error => {
+
+            this.isLoadingFood =
+              false;
+
+
+            console.error(
+              'Nearby Food API Error:',
+              error
+            );
+
+
+            this.foodErrorMessage =
+              error?.error?.message ||
+              'Unable to load food items near your location.';
+
+          }
+
+      });
+
+  }
+
+
+  // =========================================
+  // LOAD NEARBY RESTAURANTS
+  //
+  // Only restaurants available around
+  // the selected location are displayed.
+  // =========================================
+
+  loadNearbyRestaurants(): void {
+
+    const location =
+      this.locationService.getLocation();
+
+
+    // =========================================
+    // LOCATION NOT AVAILABLE
+    // =========================================
+
+    if (!location) {
+
+      this.restaurants =
+        [];
+
+      this.isLoadingRestaurants =
+        false;
+
+      return;
+
+    }
+
+
+    // =========================================
+    // UPDATE LOCATION
+    // =========================================
+
+    this.selectedLocation =
+      location;
+
+    this.selectedLocationName =
+      location.address ||
+      'Your location';
+
+
+    // =========================================
+    // RESET STATE
+    // =========================================
+
+    this.isLoadingRestaurants =
+      true;
+
+    this.restaurantErrorMessage =
+      '';
 
     this.restaurants =
       [];
 
 
     // =========================================
-    // LOG API REQUEST
+    // API REQUEST
     // =========================================
 
     console.log(
-      'Calling Nearby Restaurant API:',
+      'Loading nearby restaurants:',
       {
         latitude:
           location.latitude,
 
         longitude:
-          location.longitude,
-
-        radiusInKm:
-          100
+          location.longitude
       }
     );
 
-
-    // =========================================
-    // CALL RESTAURANT SERVICE
-    // =========================================
 
     this.restaurantService
 
@@ -267,49 +483,46 @@ export class HomeComponent
         // SUCCESS
         // =====================================
 
-        next: (
-          restaurants: Restaurant[]
-        ) => {
+        next:
+          (restaurants: Restaurant[]) => {
+
+            this.restaurants =
+              restaurants || [];
+
+            this.isLoadingRestaurants =
+              false;
 
 
-          this.restaurants =
-            restaurants;
+            console.log(
+              'Nearby Restaurants Loaded:',
+              this.restaurants
+            );
 
-
-          this.isLoading =
-            false;
-
-
-          console.log(
-            'Nearby Restaurants Loaded:',
-            restaurants
-          );
-
-        },
+          },
 
 
         // =====================================
         // ERROR
         // =====================================
 
-        error: error => {
+        error:
+          error => {
+
+            this.isLoadingRestaurants =
+              false;
 
 
-          this.isLoading =
-            false;
+            console.error(
+              'Nearby Restaurant API Error:',
+              error
+            );
 
 
-          console.error(
-            'Nearby Restaurant API Error:',
-            error
-          );
+            this.restaurantErrorMessage =
+              error?.error?.message ||
+              'Unable to load restaurants near your location.';
 
-
-          this.errorMessage =
-            error?.error?.message ||
-            'Unable to find restaurants near your location.';
-
-        }
+          }
 
       });
 
@@ -321,7 +534,6 @@ export class HomeComponent
   // =========================================
 
   changeLocation(): void {
-
 
     this.router.navigate([
       '/location'
@@ -335,7 +547,6 @@ export class HomeComponent
   // =========================================
 
   goToRestaurants(): void {
-
 
     this.router.navigate([
       '/restaurants'

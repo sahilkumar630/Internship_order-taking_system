@@ -1,10 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
 
 import {
   FormsModule
 } from '@angular/forms';
 
 import {
+  ActivatedRoute,
   Router
 } from '@angular/router';
 
@@ -18,7 +22,6 @@ import {
 
 
 @Component({
-
   selector: 'app-location',
 
   imports: [
@@ -30,7 +33,6 @@ import {
 
   styleUrl:
     './location.component.css'
-
 })
 export class LocationComponent
   implements OnInit {
@@ -70,6 +72,17 @@ export class LocationComponent
 
 
   // =========================================
+  // RETURN FLOW
+  // =========================================
+
+  private returnUrl:
+    string | null = null;
+
+  private addItemId:
+    number | null = null;
+
+
+  // =========================================
   // CITIES
   // =========================================
 
@@ -94,12 +107,6 @@ export class LocationComponent
 
   // =========================================
   // AREAS
-  // =========================================
-  //
-  // Currently these are Karachi areas.
-  //
-  // We can later make areas dynamic
-  // according to selected city.
   // =========================================
 
   areas: string[] = [
@@ -137,7 +144,10 @@ export class LocationComponent
       LocationService,
 
     private router:
-      Router
+      Router,
+
+    private route:
+      ActivatedRoute
 
   ) {}
 
@@ -152,9 +162,51 @@ export class LocationComponent
       this.locationService.getLocation();
 
 
-    // -----------------------------------------
-    // If location already exists
-    // -----------------------------------------
+    // =========================================
+    // READ RETURN PARAMETERS
+    // =========================================
+
+    this.returnUrl =
+      this.route.snapshot.queryParamMap
+        .get('returnUrl');
+
+
+    const addItem =
+      this.route.snapshot.queryParamMap
+        .get('addItem');
+
+
+    if (addItem) {
+
+      const itemId =
+        Number(addItem);
+
+
+      if (!Number.isNaN(itemId)) {
+
+        this.addItemId =
+          itemId;
+
+      }
+
+    }
+
+
+    console.log(
+      'Location return flow:',
+      {
+        returnUrl:
+          this.returnUrl,
+
+        addItemId:
+          this.addItemId
+      }
+    );
+
+
+    // =========================================
+    // IF LOCATION ALREADY EXISTS
+    // =========================================
 
     if (this.selectedLocation) {
 
@@ -183,6 +235,7 @@ export class LocationComponent
 
 
     this.locationService
+
       .getCurrentLocation()
 
       .then(
@@ -202,10 +255,11 @@ export class LocationComponent
 
 
           // -----------------------------------
-          // GO HOME
+          // CONTINUE ORIGINAL FLOW
+          // OR RETURN TO MENU
           // -----------------------------------
 
-          this.goToHome();
+          this.continueAfterLocation();
 
         }
       )
@@ -229,7 +283,7 @@ export class LocationComponent
 
 
           // -----------------------------------
-          // Show manual option
+          // SHOW MANUAL OPTION
           // -----------------------------------
 
           this.showManualLocation =
@@ -292,9 +346,9 @@ export class LocationComponent
       '';
 
 
-    // -----------------------------------------
+    // =========================================
     // VALIDATE CITY
-    // -----------------------------------------
+    // =========================================
 
     if (!this.selectedCity) {
 
@@ -306,9 +360,9 @@ export class LocationComponent
     }
 
 
-    // -----------------------------------------
+    // =========================================
     // VALIDATE AREA
-    // -----------------------------------------
+    // =========================================
 
     if (!this.selectedArea) {
 
@@ -320,9 +374,9 @@ export class LocationComponent
     }
 
 
-    // -----------------------------------------
+    // =========================================
     // GET COORDINATES
-    // -----------------------------------------
+    // =========================================
 
     const coordinates =
       this.getAreaCoordinates(
@@ -344,31 +398,31 @@ export class LocationComponent
     }
 
 
-    // -----------------------------------------
+    // =========================================
     // CREATE LOCATION
-    // -----------------------------------------
+    // =========================================
 
     const location:
       UserLocation = {
 
-        latitude:
-          coordinates.latitude,
+      latitude:
+        coordinates.latitude,
 
-        longitude:
-          coordinates.longitude,
+      longitude:
+        coordinates.longitude,
 
-        address:
-          `${this.selectedArea}, ${this.selectedCity}`,
+      address:
+        `${this.selectedArea}, ${this.selectedCity}`,
 
-        source:
-          'manual'
+      source:
+        'manual'
 
-      };
+    };
 
 
-    // -----------------------------------------
+    // =========================================
     // SAVE
-    // -----------------------------------------
+    // =========================================
 
     this.locationService
       .saveLocation(
@@ -386,11 +440,12 @@ export class LocationComponent
     );
 
 
-    // -----------------------------------------
-    // GO HOME
-    // -----------------------------------------
+    // =========================================
+    // CONTINUE ORIGINAL FLOW
+    // OR RETURN TO MENU
+    // =========================================
 
-    this.goToHome();
+    this.continueAfterLocation();
 
   }
 
@@ -398,14 +453,57 @@ export class LocationComponent
   // =========================================
   // CONTINUE WITH MANUAL LOCATION
   // =========================================
-  //
-  // Kept because your existing HTML
-  // was calling this method.
-  // =========================================
 
   continueWithManualLocation(): void {
 
     this.saveManualLocation();
+
+  }
+
+
+  // =========================================
+  // CONTINUE AFTER LOCATION
+  // =========================================
+
+  private continueAfterLocation(): void {
+
+    // =========================================
+    // ADD-TO-CART FLOW
+    // =========================================
+
+    if (
+      this.returnUrl &&
+      this.addItemId !== null
+    ) {
+
+      console.log(
+        'Returning to menu after location selection.',
+        {
+          returnUrl:
+            this.returnUrl,
+
+          addItemId:
+            this.addItemId
+        }
+      );
+
+
+      this.router.navigateByUrl(
+
+        `${this.returnUrl}?addItem=${this.addItemId}`
+
+      );
+
+      return;
+
+    }
+
+
+    // =========================================
+    // NORMAL LOCATION FLOW
+    // =========================================
+
+    this.goToHome();
 
   }
 
@@ -421,8 +519,11 @@ export class LocationComponent
     area: string
 
   ): {
+
     latitude: number;
+
     longitude: number;
+
   } | null {
 
 
@@ -443,7 +544,6 @@ export class LocationComponent
         };
 
       } = {
-
 
         'DHA': {
 
@@ -580,7 +680,6 @@ export class LocationComponent
       };
 
     } = {
-
 
       'Lahore': {
 

@@ -1,23 +1,134 @@
-<div class="category-section">
+<section class="category-section">
 
-  <div class="category-list">
 
-    @for (category of categories; track category.name) {
+  <!-- =========================================
+       HEADER
+  ========================================== -->
 
-      <button class="category-item">
+  <div class="category-header">
 
-        <div class="category-icon">
-          {{ category.icon }}
-        </div>
+    <h2>
+      🍽️ Cuisines for you
+    </h2>
 
-        <span>
-          {{ category.name }}
-        </span>
 
-      </button>
-
-    }
+    <button
+      type="button"
+      class="see-all-button"
+    >
+      See all
+    </button>
 
   </div>
 
-</div>
+
+  <!-- =========================================
+       CAROUSEL
+  ========================================== -->
+
+  <div class="category-carousel">
+
+
+    <!-- =======================================
+         LEFT BUTTON
+    ======================================== -->
+
+    <button
+      type="button"
+
+      class="carousel-arrow left-arrow"
+
+      (click)="scrollLeft()"
+
+      aria-label="Scroll cuisines left"
+    >
+      ‹
+    </button>
+
+
+    <!-- =======================================
+         SCROLLABLE LIST
+    ======================================== -->
+
+    <div
+      #categoryList
+      class="category-list"
+    >
+
+
+      @for (
+        category of categories;
+        track category.name
+      ) {
+
+
+        <button
+          type="button"
+
+          class="category-item"
+
+          (click)="selectCategory(category.name)"
+        >
+
+
+          <div class="category-image">
+
+
+            @if (category.image) {
+
+              <img
+                [src]="category.image"
+                [alt]="category.name"
+              />
+
+            }
+
+            @else {
+
+              <div
+                class="category-image-placeholder"
+              >
+                {{ category.icon }}
+              </div>
+
+            }
+
+
+          </div>
+
+
+          <span class="category-name">
+            {{ category.name }}
+          </span>
+
+
+        </button>
+
+
+      }
+
+
+    </div>
+
+
+    <!-- =======================================
+         RIGHT BUTTON
+    ======================================== -->
+
+    <button
+      type="button"
+
+      class="carousel-arrow right-arrow"
+
+      (click)="scrollRight()"
+
+      aria-label="Scroll cuisines right"
+    >
+      ›
+    </button>
+
+
+  </div>
+
+
+</section>

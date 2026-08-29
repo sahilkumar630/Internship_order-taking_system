@@ -14,10 +14,14 @@ import {
 import { Restaurant }
   from '../../shared/models/restaurant.model';
 
+import { MenuItem }
+  from '../../shared/models/menu-item.model';
+
 import { ApiResponse }
   from '../../shared/models/api-response.model';
 
-import { environment } from '../../../environments/environment';
+import { environment }
+  from '../../../environments/environment';
 
 
 @Injectable({
@@ -125,6 +129,115 @@ export class RestaurantService {
 
 
   // =========================================
+  // GET NEARBY FOOD ITEMS
+  //
+  // API:
+  //
+  // GET /api/FoodItem/near-by
+  //
+  // Parameters:
+  //
+  // Latitude
+  // Longitude
+  // RadiusInKm
+  // =========================================
+
+  getNearbyFoodItems(
+    latitude: number,
+    longitude: number
+  ): Observable<MenuItem[]> {
+
+
+    // =========================================
+    // QUERY PARAMETERS
+    // =========================================
+
+    const params =
+      new HttpParams()
+
+        .set(
+          'Latitude',
+          latitude
+        )
+
+        .set(
+          'Longitude',
+          longitude
+        )
+
+        .set(
+          'RadiusInKm',
+          this.nearbyRadiusInKm
+        );
+
+
+    console.log(
+      'Nearby Food API Parameters:',
+      {
+        Latitude:
+          latitude,
+
+        Longitude:
+          longitude,
+
+        RadiusInKm:
+          this.nearbyRadiusInKm
+      }
+    );
+
+
+    // =========================================
+    // CALL FOOD ITEM API
+    // =========================================
+
+    return this.http
+
+      .get<ApiResponse<any[]>>(
+        `${this.foodItemApiUrl}/near-by`,
+        {
+          params
+        }
+      )
+
+      .pipe(
+
+        map(response => {
+
+          // ===================================
+          // INVALID RESPONSE
+          // ===================================
+
+          if (
+            !response.data ||
+            !Array.isArray(
+              response.data
+            )
+          ) {
+
+            return [];
+
+          }
+
+
+          // ===================================
+          // MAP FOOD ITEMS
+          // ===================================
+
+          return response.data.map(
+            item =>
+              this.mapFoodItem(
+                item
+              )
+          );
+
+        })
+
+      );
+
+  }
+
+
+  // =========================================
   // GET NEARBY RESTAURANTS
   //
   // API:
@@ -172,8 +285,12 @@ export class RestaurantService {
     console.log(
       'Nearby API Parameters:',
       {
-        Latitude: latitude,
-        Longitude: longitude,
+        Latitude:
+          latitude,
+
+        Longitude:
+          longitude,
+
         RadiusInKm:
           this.nearbyRadiusInKm
       }
@@ -223,7 +340,6 @@ export class RestaurantService {
 
           response.data.forEach(
             item => {
-
 
               if (
                 !item.businessLocations ||
@@ -411,6 +527,178 @@ export class RestaurantService {
 
 
   // =========================================
+  // MAP API FOOD ITEM
+  // =========================================
+
+  private mapFoodItem(
+    data: any
+  ): MenuItem {
+
+
+    // =========================================
+    // IMAGE
+    // =========================================
+
+    let image =
+      '';
+
+
+    if (
+      data.images &&
+      Array.isArray(
+        data.images
+      ) &&
+      data.images.length > 0
+    ) {
+
+      const imagePath =
+        data.images[0].imageUrl;
+
+
+      if (
+        imagePath?.startsWith(
+          'http://'
+        ) ||
+        imagePath?.startsWith(
+          'https://'
+        )
+      ) {
+
+        image =
+          imagePath;
+
+      }
+      else if (
+        imagePath
+      ) {
+
+        image =
+          `${environment.tajImageApiUrl}${imagePath}`;
+
+      }
+
+    }
+
+
+    // =========================================
+    // RESTAURANT / BUSINESS LOCATION ID
+    // =========================================
+
+    let restaurantId =
+      0;
+
+
+    if (
+      data.businessLocations &&
+      Array.isArray(
+        data.businessLocations
+      ) &&
+      data.businessLocations.length > 0
+    ) {
+
+      restaurantId =
+        Number(
+          data.businessLocations[0].id
+        );
+
+    }
+
+
+    // =========================================
+    // RETURN FRONTEND MODEL
+    // =========================================
+
+    return {
+
+      id:
+        Number(
+          data.id
+        ),
+
+      name:
+        data.name ||
+        '',
+
+      description:
+        data.description ||
+        '',
+
+      itemCategory:
+        data.itemCategory ||
+        '',
+
+      itemCategoryId:
+        Number(
+          data.itemCategoryId ||
+          0
+        ),
+
+      preparationTimeMinutes:
+        Number(
+          data.preparationTimeMinutes ||
+          0
+        ),
+
+      price:
+        Number(
+          data.price ||
+          0
+        ),
+
+      priceLabel:
+        data.priceLabel ||
+        `${Number(
+          data.price || 0
+        ).toFixed(2)} RS`,
+
+      discountPrice:
+        Number(
+          data.discountPrice ||
+          0
+        ),
+
+      discountPriceLabel:
+        data.discountPriceLabel ||
+        `${Number(
+          data.discountPrice || 0
+        ).toFixed(2)} RS`,
+
+      rating:
+        Number(
+          data.rating ||
+          0
+        ),
+
+      raters:
+        Number(
+          data.raters ||
+          0
+        ),
+
+      isDeal:
+        Boolean(
+          data.isDeal
+        ),
+
+      image,
+
+      restaurantId,
+
+      category:
+        data.itemCategory ||
+        '',
+
+      isPopular:
+        Boolean(
+          data.isPopular
+        )
+
+    };
+
+  }
+
+
+  // =========================================
   // MAP API RESTAURANT
   // =========================================
 
@@ -423,7 +711,8 @@ export class RestaurantService {
     // IMAGE
     // =========================================
 
-    let image = '';
+    let image =
+      '';
 
 
     if (

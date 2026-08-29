@@ -3,9 +3,6 @@
 
   <!-- =========================================
        HEADER
-       Location is handled by app-header.
-       Clicking the location in the header
-       opens the /location page.
   ========================================== -->
 
   <app-header />
@@ -16,13 +13,6 @@
   ========================================== -->
 
   <app-search-bar />
-
-
-  <!-- =========================================
-       CATEGORIES
-  ========================================== -->
-
-  <app-category-list />
 
 
   <!-- =========================================
@@ -102,134 +92,30 @@
 
 
     <!-- =========================================
-         NEARBY RESTAURANTS
+         CUISINES FOR YOU
+         
+         Always visible.
+         Does NOT require location.
+         
+         CategoryListComponent contains:
+         - Cuisines heading
+         - Food images
+         - Horizontal scrolling
+         - Navigation arrows
     ========================================== -->
 
-    <section class="section">
+    <section class="section cuisines-section">
 
-
-      <!-- =======================================
-           SECTION HEADER
-      ======================================== -->
-
-      <div class="section-header">
-
-
-        <h2>
-          Restaurants Near You
-        </h2>
-
-
-        <a
-          routerLink="/restaurants"
-        >
-          See all
-        </a>
-
-
-      </div>
-
-
-      <!-- =======================================
-           LOADING STATE
-      ======================================== -->
-
-      @if (isLoading) {
-
-
-        <div class="loading-message">
-
-
-          <span class="loading-spinner"></span>
-
-
-          <span>
-            Finding restaurants near you...
-          </span>
-
-
-        </div>
-
-
-      }
-
-
-      <!-- =======================================
-           ERROR STATE
-      ======================================== -->
-
-      @else if (errorMessage) {
-
-
-        <div class="error-message">
-
-
-          <p>
-            {{ errorMessage }}
-          </p>
-
-
-          <button
-            type="button"
-            class="retry-button"
-            (click)="loadNearbyRestaurants()"
-          >
-            Try Again
-          </button>
-
-
-        </div>
-
-
-      }
-
-
-      <!-- =======================================
-           RESTAURANTS FOUND
-      ======================================== -->
-
-      @else if (restaurants.length > 0) {
-
-
-        <div class="restaurant-grid">
-
-
-          @for (
-            restaurant of restaurants;
-            track restaurant.id
-          ) {
-
-
-            <app-restaurant-card
-              [restaurant]="restaurant"
-            />
-
-
-          }
-
-
-        </div>
-
-
-      }
-
-
-      <!-- =======================================
-           NO RESTAURANTS
-           
-           Nothing is displayed intentionally.
-           
-           This prevents the large empty box
-           from appearing when no restaurants
-           are returned by the API.
-      ======================================== -->
-
+      <app-category-list />
 
     </section>
 
 
     <!-- =========================================
          TOP DEALS
+         
+         Always visible.
+         Does NOT require location.
     ========================================== -->
 
     <section class="section">
@@ -241,9 +127,8 @@
 
       <div class="section-header">
 
-
         <h2>
-          Top Deals For You
+          🔥 Top Deals For You
         </h2>
 
 
@@ -252,7 +137,6 @@
         >
           See all
         </a>
-
 
       </div>
 
@@ -270,7 +154,6 @@
 
         <div class="deal-card">
 
-
           <span class="deal-icon">
             🍔
           </span>
@@ -285,7 +168,6 @@
             On selected burgers
           </p>
 
-
         </div>
 
 
@@ -294,7 +176,6 @@
         ====================================== -->
 
         <div class="deal-card">
-
 
           <span class="deal-icon">
             🍕
@@ -310,7 +191,6 @@
             On selected pizzas
           </p>
 
-
         </div>
 
 
@@ -319,7 +199,6 @@
         ====================================== -->
 
         <div class="deal-card">
-
 
           <span class="deal-icon">
             🛵
@@ -335,7 +214,6 @@
             On orders above Rs. 999
           </p>
 
-
         </div>
 
 
@@ -343,6 +221,412 @@
 
 
     </section>
+
+
+    <!-- =========================================
+         LOCATION BASED CONTENT
+         
+         Only appears when the user has
+         selected a location.
+    ========================================== -->
+
+    @if (selectedLocation) {
+
+
+      <!-- =======================================
+           POPULAR FOOD NEAR YOU
+      ======================================== -->
+
+      <section class="section">
+
+
+        <div class="section-header">
+
+          <h2>
+            🍔 Popular Food Near You
+          </h2>
+
+        </div>
+
+
+        <!-- =====================================
+             LOADING
+        ====================================== -->
+
+        @if (isLoadingFood) {
+
+
+          <div class="loading-message">
+
+            <span class="loading-spinner"></span>
+
+            <span>
+              Finding delicious food near you...
+            </span>
+
+          </div>
+
+
+        }
+
+
+        <!-- =====================================
+             ERROR
+        ====================================== -->
+
+        @else if (foodErrorMessage) {
+
+
+          <div class="error-message">
+
+            <p>
+              {{ foodErrorMessage }}
+            </p>
+
+
+            <button
+              type="button"
+              class="retry-button"
+              (click)="loadNearbyFood()"
+            >
+              Try Again
+            </button>
+
+          </div>
+
+
+        }
+
+
+        <!-- =====================================
+             FOOD ITEMS
+        ====================================== -->
+
+        @else if (foodItems.length > 0) {
+
+
+          <div class="food-grid">
+
+
+            @for (
+              item of foodItems;
+              track item.id
+            ) {
+
+
+              <div class="food-card">
+
+
+                <!-- =============================
+                     FOOD IMAGE
+                ============================== -->
+
+                <div class="food-image">
+
+
+                  @if (item.image) {
+
+
+                    <img
+                      [src]="item.image"
+                      [alt]="item.name"
+                    />
+
+
+                  }
+
+
+                  @else {
+
+
+                    <div
+                      class="food-image-placeholder"
+                    >
+                      🍔
+                    </div>
+
+
+                  }
+
+
+                </div>
+
+
+                <!-- =============================
+                     FOOD CONTENT
+                ============================== -->
+
+                <div class="food-content">
+
+
+                  <h3>
+                    {{ item.name }}
+                  </h3>
+
+
+                  @if (item.itemCategory) {
+
+
+                    <p class="food-category">
+                      {{ item.itemCategory }}
+                    </p>
+
+
+                  }
+
+
+                  <!-- ===========================
+                       RATING
+                  ============================ -->
+
+                  <div class="food-rating">
+
+                    ⭐ {{ item.rating || 0 }}
+
+
+                    @if (item.raters) {
+
+                      <span>
+                        ({{ item.raters }})
+                      </span>
+
+                    }
+
+                  </div>
+
+
+                  <!-- ===========================
+                       PRICE
+                  ============================ -->
+
+                  <div class="food-price">
+
+
+                    @if (
+                      item.discountPrice > 0 &&
+                      item.discountPrice < item.price
+                    ) {
+
+
+                      <strong>
+                        {{ item.discountPriceLabel }}
+                      </strong>
+
+
+                      <span
+                        class="original-price"
+                      >
+                        {{ item.priceLabel }}
+                      </span>
+
+
+                    }
+
+
+                    @else {
+
+
+                      <strong>
+                        {{ item.priceLabel }}
+                      </strong>
+
+
+                    }
+
+
+                  </div>
+
+
+                  <!-- ===========================
+                       VIEW & ADD
+                  ============================ -->
+
+                  <button
+                    type="button"
+                    class="add-food-button"
+
+                    [routerLink]="[
+                      '/restaurant',
+                      item.restaurantId,
+                      'menu'
+                    ]"
+
+                    [queryParams]="{
+                      addItem: item.id
+                    }"
+                  >
+                    View & Add
+                  </button>
+
+
+                </div>
+
+
+              </div>
+
+
+            }
+
+
+          </div>
+
+
+        }
+
+
+        <!-- =====================================
+             NO FOOD
+        ====================================== -->
+
+        @else {
+
+
+          <div class="empty-message">
+
+            <p>
+              No food items found near your location.
+            </p>
+
+          </div>
+
+
+        }
+
+
+      </section>
+
+
+      <!-- =======================================
+           ALL RESTAURANTS
+           
+           Only shown when location exists.
+      ======================================== -->
+
+      <section class="section">
+
+
+        <!-- =====================================
+             SECTION HEADER
+        ====================================== -->
+
+        <div class="section-header">
+
+          <h2>
+            🍴 All Restaurants
+          </h2>
+
+
+          <a
+            routerLink="/restaurants"
+          >
+            See all
+          </a>
+
+        </div>
+
+
+        <!-- =====================================
+             LOADING
+        ====================================== -->
+
+        @if (isLoadingRestaurants) {
+
+
+          <div class="loading-message">
+
+            <span class="loading-spinner"></span>
+
+            <span>
+              Finding restaurants near you...
+            </span>
+
+          </div>
+
+
+        }
+
+
+        <!-- =====================================
+             ERROR
+        ====================================== -->
+
+        @else if (restaurantErrorMessage) {
+
+
+          <div class="error-message">
+
+            <p>
+              {{ restaurantErrorMessage }}
+            </p>
+
+
+            <button
+              type="button"
+              class="retry-button"
+              (click)="loadNearbyRestaurants()"
+            >
+              Try Again
+            </button>
+
+          </div>
+
+
+        }
+
+
+        <!-- =====================================
+             RESTAURANTS
+        ====================================== -->
+
+        @else if (restaurants.length > 0) {
+
+
+          <div class="restaurant-grid">
+
+
+            @for (
+              restaurant of restaurants;
+              track restaurant.id
+            ) {
+
+
+              <app-restaurant-card
+                [restaurant]="restaurant"
+              />
+
+
+            }
+
+
+          </div>
+
+
+        }
+
+
+        <!-- =====================================
+             NO RESTAURANTS
+        ====================================== -->
+
+        @else {
+
+
+          <div class="empty-message">
+
+            <p>
+              No restaurants found near your location.
+            </p>
+
+          </div>
+
+
+        }
+
+
+      </section>
+
+
+    }
 
 
   </main>
