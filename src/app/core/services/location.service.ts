@@ -1,4 +1,12 @@
-import { Injectable } from '@angular/core';
+import {
+  Injectable,
+  Inject,
+  PLATFORM_ID
+} from '@angular/core';
+
+import {
+  isPlatformBrowser
+} from '@angular/common';
 
 import { UserLocation }
   from '../../shared/models/location.model';
@@ -18,6 +26,29 @@ export class LocationService {
 
 
   // =========================================
+  // CONSTRUCTOR
+  // =========================================
+
+  constructor(
+    @Inject(PLATFORM_ID)
+    private platformId: object
+  ) {}
+
+
+  // =========================================
+  // CHECK BROWSER
+  // =========================================
+
+  private isBrowser(): boolean {
+
+    return isPlatformBrowser(
+      this.platformId
+    );
+
+  }
+
+
+  // =========================================
   // GET CURRENT BROWSER LOCATION
   // =========================================
 
@@ -27,7 +58,24 @@ export class LocationService {
       (resolve, reject) => {
 
         // -----------------------------------------
-        // CHECK BROWSER SUPPORT
+        // CHECK BROWSER
+        // -----------------------------------------
+
+        if (!this.isBrowser()) {
+
+          reject(
+            new Error(
+              'Location can only be accessed from a browser.'
+            )
+          );
+
+          return;
+
+        }
+
+
+        // -----------------------------------------
+        // CHECK GEOLOCATION SUPPORT
         // -----------------------------------------
 
         if (!navigator.geolocation) {
@@ -139,11 +187,14 @@ export class LocationService {
 
           {
 
-            enableHighAccuracy: true,
+            enableHighAccuracy:
+              true,
 
-            timeout: 15000,
+            timeout:
+              15000,
 
-            maximumAge: 300000
+            maximumAge:
+              300000
 
           }
 
@@ -163,6 +214,17 @@ export class LocationService {
     location: UserLocation
   ): void {
 
+    // -----------------------------------------
+    // SSR PROTECTION
+    // -----------------------------------------
+
+    if (!this.isBrowser()) {
+
+      return;
+
+    }
+
+
     localStorage.setItem(
 
       this.locationKey,
@@ -181,6 +243,17 @@ export class LocationService {
   // =========================================
 
   getLocation(): UserLocation | null {
+
+    // -----------------------------------------
+    // SSR PROTECTION
+    // -----------------------------------------
+
+    if (!this.isBrowser()) {
+
+      return null;
+
+    }
+
 
     const storedLocation =
       localStorage.getItem(
@@ -202,6 +275,7 @@ export class LocationService {
       ) as UserLocation;
 
     }
+
     catch {
 
       console.error(
@@ -233,6 +307,17 @@ export class LocationService {
   // =========================================
 
   clearLocation(): void {
+
+    // -----------------------------------------
+    // SSR PROTECTION
+    // -----------------------------------------
+
+    if (!this.isBrowser()) {
+
+      return;
+
+    }
+
 
     localStorage.removeItem(
       this.locationKey

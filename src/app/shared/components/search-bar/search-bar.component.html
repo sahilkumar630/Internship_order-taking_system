@@ -9,8 +9,56 @@
     <input
       type="text"
       placeholder="Search for restaurants, dishes..."
-    >
+      [(ngModel)]="searchQuery"
+      (input)="onSearchInput()"
+      (keyup.enter)="search()"
+    />
+
+    @if (isSearching) {
+
+      <span class="search-loading">
+        ⏳
+      </span>
+
+    }
 
   </div>
+
+
+  <!-- =========================================
+       SUGGESTIONS
+  ========================================== -->
+
+  @if (
+    showSuggestions &&
+    suggestions.length > 0
+  ) {
+
+    <div class="suggestions-list">
+
+      @for (
+        suggestion of suggestions;
+        track $index
+      ) {
+
+        <button
+          type="button"
+          class="suggestion-item"
+          (click)="selectSuggestion(suggestion)"
+        >
+
+          🔍
+
+          <span>
+            {{ suggestion }}
+          </span>
+
+        </button>
+
+      }
+
+    </div>
+
+  }
 
 </div>

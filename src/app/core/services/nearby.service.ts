@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment.production';
 
 
 @Injectable({
@@ -19,7 +20,7 @@ export class NearbyService {
   // =========================================
 
   private readonly apiUrl =
-    'https://dev.makglobalps.com/tajapi/api/FoodItem';
+    `${environment.apiUrl}/FoodItem`;
 
 
   // =========================================

@@ -15,6 +15,9 @@ import { MenuItem }
 import { ApiResponse }
   from '../../shared/models/api-response.model';
 
+import { environment }
+  from '../../../environments/environment';
+
 
 /*
  * =========================================
@@ -91,7 +94,7 @@ export class MenuService {
 
 
   private readonly apiUrl =
-    'https://dev.makglobalps.com/TAJApi/api';
+    environment.apiUrl;
 
 
   constructor(
@@ -375,7 +378,7 @@ export class MenuService {
       else {
 
         image =
-          `https://dev.makglobalps.com/TAJApi${imagePath}`;
+          `${environment.tajImageApiUrl}${imagePath}`;
 
       }
 

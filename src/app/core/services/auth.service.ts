@@ -11,6 +11,8 @@ import { LoginResponse }
 import { User }
   from '../../shared/models/user.model';
 
+import { environment } from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +20,7 @@ import { User }
 export class AuthService {
 
   private readonly apiUrl =
-    'https://dev.makglobalps.com/TAJApi/api/User';
+    `${environment.apiUrl}/User`;
 
 
   private readonly tokenKey =

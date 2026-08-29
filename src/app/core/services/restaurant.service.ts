@@ -17,6 +17,8 @@ import { Restaurant }
 import { ApiResponse }
   from '../../shared/models/api-response.model';
 
+import { environment } from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +31,7 @@ export class RestaurantService {
   // =========================================
 
   private readonly apiUrl =
-    'https://dev.makglobalps.com/TAJApi/api/BusinessLocation';
+    `${environment.apiUrl}/BusinessLocation`;
 
 
   // =========================================
@@ -37,7 +39,7 @@ export class RestaurantService {
   // =========================================
 
   private readonly foodItemApiUrl =
-    'https://dev.makglobalps.com/TAJApi/api/FoodItem';
+    `${environment.apiUrl}/FoodItem`;
 
 
   // =========================================
@@ -449,7 +451,7 @@ export class RestaurantService {
       else {
 
         image =
-          `https://dev.makglobalps.com/TAJApi${imagePath}`;
+          `${environment.tajImageApiUrl}${imagePath}`;
 
       }
 
