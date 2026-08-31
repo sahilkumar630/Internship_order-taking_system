@@ -616,60 +616,71 @@ export class CartService {
   }
 
 
-  // =========================================
-  // CLEAR CART
-  // =========================================
 
-  clearCart(): Observable<Cart | null> {
+// =========================================
+// CLEAR CART
+// =========================================
+
+clearCart(
+  businessLocationId: number
+): Observable<Cart | null> {
+
+  const body = {
+
+    businessLocationId:
+      businessLocationId
+
+  };
 
 
-    console.log(
-      'Clearing cart...'
+  console.log(
+    'Clearing cart:',
+    body
+  );
+
+
+  return this.http
+
+    .delete<ApiResponse<Cart>>(
+      `${this.apiUrl}/clear`,
+      {
+        body: body
+      }
+    )
+
+    .pipe(
+
+      map(response => {
+
+        console.log(
+          'Clear Cart Response:',
+          response
+        );
+
+
+        this.cart = null;
+
+
+        return null;
+
+      }),
+
+
+      catchError(error => {
+
+        console.error(
+          'Clear Cart API Error:',
+          error
+        );
+
+
+        throw error;
+
+      })
+
     );
 
-
-    return this.http
-
-      .delete<ApiResponse<Cart>>(
-        `${this.apiUrl}/clear`
-      )
-
-      .pipe(
-
-        map(response => {
-
-          console.log(
-            'Clear Cart Response:',
-            response
-          );
-
-
-          this.cart =
-            null;
-
-
-          return null;
-
-        }),
-
-
-        catchError(error => {
-
-          console.error(
-            'Clear Cart API Error:',
-            error
-          );
-
-
-          throw error;
-
-        })
-
-      );
-
-  }
-
-
+}
   // =========================================
   // GET SUBTOTAL
   // =========================================

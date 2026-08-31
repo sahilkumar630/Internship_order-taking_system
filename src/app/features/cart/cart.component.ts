@@ -38,33 +38,25 @@ export class CartComponent
   // CART ITEMS
   // =========================================
 
-  cartItems:
-    CartItem[] = [];
+  cartItems: CartItem[] = [];
 
 
   // =========================================
   // CART STATE
   // =========================================
 
-  isLoading =
-    false;
+  isLoading = false;
 
-  isUpdating =
-    false;
-
-  errorMessage =
-    '';
+  errorMessage = '';
 
 
   // =========================================
   // TOTALS
   // =========================================
 
-  subtotal =
-    0;
+  subtotal = 0;
 
-  itemCount =
-    0;
+  itemCount = 0;
 
 
   // =========================================
@@ -73,11 +65,9 @@ export class CartComponent
 
   constructor(
 
-    private cartService:
-      CartService,
+    private cartService: CartService,
 
-    private router:
-      Router
+    private router: Router
 
   ) {}
 
@@ -99,59 +89,51 @@ export class CartComponent
 
   loadCart(): void {
 
-    this.isLoading =
-      true;
+    this.isLoading = true;
 
-    this.errorMessage =
-      '';
+    this.errorMessage = '';
 
 
     this.cartService
-
       .getCart()
-
       .subscribe({
 
-        next:
-          cart => {
+        next: (cart) => {
 
-            this.cartItems =
-              cart?.cartItems || [];
-
-
-            this.updateTotals();
+          this.cartItems =
+            cart?.cartItems ?? [];
 
 
-            this.isLoading =
-              false;
+          this.updateTotals();
 
 
-            console.log(
-              'Cart loaded:',
-              cart
-            );
-
-          },
+          this.isLoading = false;
 
 
-        error:
-          error => {
+          console.log(
+            'Cart loaded:',
+            cart
+          );
 
-            this.isLoading =
-              false;
-
-
-            console.error(
-              'Cart Load Error:',
-              error
-            );
+        },
 
 
-            this.errorMessage =
-              error?.error?.message ||
-              'Unable to load cart.';
+        error: (error) => {
 
-          }
+          this.isLoading = false;
+
+
+          console.error(
+            'Cart Load Error:',
+            error
+          );
+
+
+          this.errorMessage =
+            error?.error?.message ||
+            'Unable to load cart.';
+
+        }
 
       });
 
@@ -165,13 +147,11 @@ export class CartComponent
   private updateTotals(): void {
 
     this.subtotal =
-      this.cartService
-        .getSubtotal();
+      this.cartService.getSubtotal();
 
 
     this.itemCount =
-      this.cartService
-        .getItemCount();
+      this.cartService.getItemCount();
 
   }
 
@@ -184,56 +164,36 @@ export class CartComponent
     itemId: number
   ): void {
 
-    if (
-      this.isUpdating
-    ) {
+    if (this.isLoading) {
 
       return;
 
     }
 
 
-    this.isUpdating =
-      true;
-
-
     this.cartService
-
-      .increaseQuantity(
-        itemId
-      )
-
+      .increaseQuantity(itemId)
       .subscribe({
 
-        next:
-          cart => {
+        next: (cart) => {
 
-            this.cartItems =
-              cart?.cartItems || [];
-
-
-            this.updateTotals();
+          this.cartItems =
+            cart?.cartItems ?? [];
 
 
-            this.isUpdating =
-              false;
+          this.updateTotals();
 
-          },
-
-
-        error:
-          error => {
-
-            console.error(
-              'Increase Quantity Error:',
-              error
-            );
+        },
 
 
-            this.isUpdating =
-              false;
+        error: (error) => {
 
-          }
+          console.error(
+            'Increase Quantity Error:',
+            error
+          );
+
+        }
 
       });
 
@@ -248,56 +208,36 @@ export class CartComponent
     itemId: number
   ): void {
 
-    if (
-      this.isUpdating
-    ) {
+    if (this.isLoading) {
 
       return;
 
     }
 
 
-    this.isUpdating =
-      true;
-
-
     this.cartService
-
-      .decreaseQuantity(
-        itemId
-      )
-
+      .decreaseQuantity(itemId)
       .subscribe({
 
-        next:
-          cart => {
+        next: (cart) => {
 
-            this.cartItems =
-              cart?.cartItems || [];
-
-
-            this.updateTotals();
+          this.cartItems =
+            cart?.cartItems ?? [];
 
 
-            this.isUpdating =
-              false;
+          this.updateTotals();
 
-          },
-
-
-        error:
-          error => {
-
-            console.error(
-              'Decrease Quantity Error:',
-              error
-            );
+        },
 
 
-            this.isUpdating =
-              false;
+        error: (error) => {
 
-          }
+          console.error(
+            'Decrease Quantity Error:',
+            error
+          );
+
+        }
 
       });
 
@@ -312,68 +252,42 @@ export class CartComponent
     itemId: number
   ): void {
 
-    if (
-      this.isUpdating
-    ) {
+    if (this.isLoading) {
 
       return;
 
     }
 
 
-    this.isUpdating =
-      true;
-
-
-    console.log(
-      'Removing item from cart:',
-      itemId
-    );
-
-
     this.cartService
-
-      .removeItem(
-        itemId
-      )
-
+      .removeItem(itemId)
       .subscribe({
 
-        next:
-          cart => {
+        next: (cart) => {
 
-            this.cartItems =
-              cart?.cartItems || [];
-
-
-            this.updateTotals();
+          this.cartItems =
+            cart?.cartItems ?? [];
 
 
-            this.isUpdating =
-              false;
+          this.updateTotals();
 
 
-            console.log(
-              'Item removed successfully:',
-              cart
-            );
+          console.log(
+            'Item removed successfully:',
+            itemId
+          );
 
-          },
-
-
-        error:
-          error => {
-
-            console.error(
-              'Remove Item Error:',
-              error
-            );
+        },
 
 
-            this.isUpdating =
-              false;
+        error: (error) => {
 
-          }
+          console.error(
+            'Remove Item Error:',
+            error
+          );
+
+        }
 
       });
 
@@ -387,8 +301,8 @@ export class CartComponent
   clearCart(): void {
 
     if (
-      this.cartItems.length === 0 ||
-      this.isUpdating
+      this.isLoading ||
+      this.cartItems.length === 0
     ) {
 
       return;
@@ -396,53 +310,82 @@ export class CartComponent
     }
 
 
-    this.isUpdating =
-      true;
+    const businessLocationId =
+      this.cartService.getBusinessLocationId();
 
+
+    // =========================================
+    // CHECK BUSINESS LOCATION
+    // =========================================
+
+    if (!businessLocationId) {
+
+      console.error(
+        'Cannot clear cart: businessLocationId is missing.'
+      );
+
+      this.errorMessage =
+        'Unable to identify the restaurant cart.';
+
+      return;
+
+    }
+
+
+    console.log(
+      'Clearing cart for businessLocationId:',
+      businessLocationId
+    );
+
+
+    this.isLoading = true;
+
+
+    // =========================================
+    // CALL CLEAR CART API
+    // =========================================
 
     this.cartService
-
-      .clearCart()
-
+      .clearCart(businessLocationId)
       .subscribe({
 
-        next:
-          () => {
+        next: (response) => {
 
-            this.cartItems =
-              [];
-
-            this.subtotal =
-              0;
-
-            this.itemCount =
-              0;
+          console.log(
+            'Cart cleared successfully:',
+            response
+          );
 
 
-            this.isUpdating =
-              false;
+          this.cartItems = [];
+
+          this.subtotal = 0;
+
+          this.itemCount = 0;
+
+          this.errorMessage = '';
+
+          this.isLoading = false;
+
+        },
 
 
-            console.log(
-              'Cart cleared successfully.'
-            );
+        error: (error) => {
 
-          },
-
-
-        error:
-          error => {
-
-            console.error(
-              'Clear Cart Error:',
-              error
-            );
+          console.error(
+            'Clear Cart Error:',
+            error
+          );
 
 
-            this.isUpdating =
-              false;
+          this.isLoading = false;
 
-          }
+
+          this.errorMessage =
+            error?.error?.message ||
+            'Unable to clear cart.';
+
+        }
 
       });
 
@@ -493,7 +436,7 @@ export class CartComponent
   ): number {
 
     return Number(
-      item.price || 0
+      item.price ?? 0
     );
 
   }
@@ -508,10 +451,10 @@ export class CartComponent
   ): number {
 
     return Number(
-      item.totalPrice ||
+      item.totalPrice ??
       (
-        item.price *
-        item.quantity
+        Number(item.price ?? 0) *
+        Number(item.quantity ?? 0)
       )
     );
 

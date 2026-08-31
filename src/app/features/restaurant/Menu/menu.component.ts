@@ -84,6 +84,21 @@ export class MenuComponent
 
 
   // =========================================
+  // RESTAURANT SWITCH STATE
+  // =========================================
+
+  showRestaurantSwitchDialog = false;
+
+  currentCartRestaurantName =
+    'another restaurant';
+
+  pendingSwitchItem:
+    MenuItem | null = null;
+
+  isSwitchingRestaurant = false;
+
+
+  // =========================================
   // PENDING ADD-TO-CART ITEM
   // =========================================
 
@@ -337,18 +352,14 @@ export class MenuComponent
     this.isLoading =
       true;
 
-
     this.errorMessage =
       '';
-
 
     this.menuItems =
       [];
 
-
     this.categories =
       [];
-
 
     this.selectedCategory =
       'All';
@@ -546,10 +557,13 @@ export class MenuComponent
 
 
     this.categories = [
+
       'All',
+
       ...Array.from(
         categorySet
       )
+
     ];
 
 
@@ -610,26 +624,6 @@ export class MenuComponent
   // =========================================
   // ADD TO CART
   // =========================================
-  //
-  // IMPORTANT:
-  //
-  // We DO NOT call getNearbyRestaurants()
-  // here anymore.
-  //
-  // The current restaurant ID is directly
-  // used as businessLocationId.
-  //
-  // API:
-  //
-  // POST /api/Cart/add
-  //
-  // {
-  //   businessLocationId: 228,
-  //   itemId: 2,
-  //   quantity: 1
-  // }
-  //
-  // =========================================
 
   addToCart(
     item: MenuItem
@@ -640,7 +634,8 @@ export class MenuComponent
     // =========================================
 
     if (
-      this.isAddingToCart
+      this.isAddingToCart ||
+      this.isSwitchingRestaurant
     ) {
 
       return;
@@ -649,7 +644,7 @@ export class MenuComponent
 
 
     // =========================================
-    // CLEAR PREVIOUS MESSAGE
+    // CLEAR MESSAGE
     // =========================================
 
     this.cartMessage =
@@ -701,19 +696,6 @@ export class MenuComponent
     // =========================================
     // BUSINESS LOCATION ID
     // =========================================
-    //
-    // The route ID represents the restaurant
-    // BusinessLocation ID.
-    //
-    // Example:
-    //
-    // /restaurant/228/menu
-    //
-    // becomes:
-    //
-    // businessLocationId = 228
-    //
-    // =========================================
 
     const businessLocationId =
       Number(this.restaurantId);
@@ -745,8 +727,85 @@ export class MenuComponent
 
 
     // =========================================
-    // START ADDING
+    // GET CURRENT CART
     // =========================================
+
+    const currentCart =
+      this.cartService
+        .getCurrentCart();
+
+
+    console.log(
+      'Current cart before add:',
+      currentCart
+    );
+
+
+    // =========================================
+    // DIFFERENT RESTAURANT
+    // =========================================
+
+    if (
+      currentCart &&
+      currentCart.cartItems &&
+      currentCart.cartItems.length > 0 &&
+      Number(currentCart.businessLocationId) !==
+        businessLocationId
+    ) {
+
+      this.pendingSwitchItem =
+        item;
+
+
+      this.currentCartRestaurantName =
+        this.getCurrentCartRestaurantName(
+          currentCart.businessLocationId
+        );
+
+
+      this.showRestaurantSwitchDialog =
+        true;
+
+
+      console.log(
+        'Different restaurant detected.'
+      );
+
+
+      return;
+
+    }
+
+
+    // =========================================
+    // SAME RESTAURANT / EMPTY CART
+    // =========================================
+
+    this.performAddToCart(
+      item,
+      businessLocationId
+    );
+
+  }
+
+
+  // =========================================
+  // PERFORM ADD TO CART
+  // =========================================
+
+  private performAddToCart(
+    item: MenuItem,
+    businessLocationId: number
+  ): void {
+
+    if (
+      this.isAddingToCart
+    ) {
+
+      return;
+
+    }
+
 
     this.isAddingToCart =
       true;
@@ -767,10 +826,6 @@ export class MenuComponent
     );
 
 
-    // =========================================
-    // CALL CART API
-    // =========================================
-
     this.cartService
 
       .addItem(
@@ -781,7 +836,7 @@ export class MenuComponent
       .subscribe({
 
         // =====================================
-        // API SUCCESS
+        // SUCCESS
         // =====================================
 
         next:
@@ -804,7 +859,7 @@ export class MenuComponent
 
 
         // =====================================
-        // API ERROR
+        // ERROR
         // =====================================
 
         error:
@@ -827,6 +882,313 @@ export class MenuComponent
           }
 
       });
+
+  }
+
+
+  // =========================================
+  // GET CURRENT CART RESTAURANT NAME
+  // =========================================
+
+ // =========================================
+// GET CURRENT CART RESTAURANT NAME
+// =========================================
+
+private getCurrentCartRestaurantName(
+  businessLocationId: number
+): string {
+
+  return `Restaurant #${businessLocationId}`;
+
+}
+
+
+  // =========================================
+  // CANCEL RESTAURANT SWITCH
+  // =========================================
+
+  cancelRestaurantSwitch(): void {
+
+    console.log(
+      'Restaurant switch cancelled.'
+    );
+
+
+    this.showRestaurantSwitchDialog =
+      false;
+
+
+    this.pendingSwitchItem =
+      null;
+
+
+    this.currentCartRestaurantName =
+      'another restaurant';
+
+  }
+
+
+  // =========================================
+  // CONFIRM RESTAURANT SWITCH
+  // =========================================
+
+  confirmRestaurantSwitch(): void {
+
+    // =========================================
+    // VALIDATE PENDING ITEM
+    // =========================================
+
+    if (
+      !this.pendingSwitchItem
+    ) {
+
+      return;
+
+    }
+
+
+    // =========================================
+    // PREVENT DOUBLE CLICK
+    // =========================================
+
+    if (
+      this.isSwitchingRestaurant
+    ) {
+
+      return;
+
+    }
+
+
+    const item =
+      this.pendingSwitchItem;
+
+
+    const businessLocationId =
+      Number(this.restaurantId);
+
+
+    // =========================================
+    // VALIDATE RESTAURANT
+    // =========================================
+
+    if (
+      !businessLocationId ||
+      Number.isNaN(
+        businessLocationId
+      )
+    ) {
+
+      console.error(
+        'Invalid restaurant ID:',
+        this.restaurantId
+      );
+
+
+      return;
+
+    }
+
+
+    const currentCart =
+      this.cartService
+        .getCurrentCart();
+
+
+    // =========================================
+    // NO OLD CART
+    // =========================================
+
+    if (
+      !currentCart ||
+      currentCart.cartItems.length === 0
+    ) {
+
+      this.closeSwitchDialog();
+
+
+      this.performAddToCart(
+        item,
+        businessLocationId
+      );
+
+
+      return;
+
+    }
+
+
+    this.isSwitchingRestaurant =
+      true;
+
+
+    this.cartMessage =
+      '';
+
+
+    console.log(
+      'Clearing old restaurant cart:',
+      currentCart.businessLocationId
+    );
+
+
+    // =========================================
+    // CLEAR OLD CART
+    // =========================================
+
+    this.cartService
+
+      .clearCart(
+        currentCart.businessLocationId
+      )
+
+      .subscribe({
+
+        // =====================================
+        // CLEAR SUCCESS
+        // =====================================
+
+        next:
+          () => {
+
+            console.log(
+              'Old restaurant cart cleared.'
+            );
+
+
+            this.closeSwitchDialog();
+
+
+            this.addAfterRestaurantSwitch(
+              item,
+              businessLocationId
+            );
+
+          },
+
+
+        // =====================================
+        // CLEAR ERROR
+        // =====================================
+
+        error:
+          error => {
+
+            console.error(
+              'Clear Cart Error:',
+              error
+            );
+
+
+            this.isSwitchingRestaurant =
+              false;
+
+
+            this.cartMessage =
+              error?.error?.message ||
+              'Unable to clear the existing cart.';
+
+          }
+
+      });
+
+  }
+
+
+  // =========================================
+  // ADD AFTER RESTAURANT SWITCH
+  // =========================================
+
+  private addAfterRestaurantSwitch(
+    item: MenuItem,
+    businessLocationId: number
+  ): void {
+
+    console.log(
+      'Adding item from new restaurant:',
+      {
+        businessLocationId,
+        itemId: item.id
+      }
+    );
+
+
+    this.cartService
+
+      .addItem(
+        item,
+        businessLocationId
+      )
+
+      .subscribe({
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        next:
+          cart => {
+
+            this.isSwitchingRestaurant =
+              false;
+
+
+            this.cartMessage =
+              'Restaurant switched successfully.';
+
+
+            console.log(
+              'New restaurant item added:',
+              cart
+            );
+
+          },
+
+
+        // =====================================
+        // ERROR
+        // =====================================
+
+        error:
+          error => {
+
+            this.isSwitchingRestaurant =
+              false;
+
+
+            console.error(
+              'Add after restaurant switch failed:',
+              error
+            );
+
+
+            this.cartMessage =
+              error?.error?.message ||
+              'Restaurant switched, but item could not be added.';
+
+          }
+
+      });
+
+  }
+
+
+  // =========================================
+  // CLOSE SWITCH DIALOG
+  // =========================================
+
+  private closeSwitchDialog(): void {
+
+    this.showRestaurantSwitchDialog =
+      false;
+
+
+    this.pendingSwitchItem =
+      null;
+
+
+    this.currentCartRestaurantName =
+      'another restaurant';
 
   }
 

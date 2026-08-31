@@ -33,6 +33,7 @@
       type="button"
       routerLink="/cart"
     >
+
       🛒
 
       @if (cartItemCount > 0) {
@@ -63,9 +64,11 @@
       <button
         type="button"
         class="category-button"
+
         [class.active]="
           selectedCategory === category
         "
+
         (click)="selectCategory(category)"
       >
 
@@ -109,7 +112,6 @@
     }
 
 
-
     <!-- =========================================
          ERROR
     ========================================== -->
@@ -138,7 +140,6 @@
     }
 
 
-
     <!-- =========================================
          MENU
     ========================================== -->
@@ -151,6 +152,11 @@
 
       <section class="menu-section">
 
+
+        <!-- =====================================
+             SECTION HEADING
+        ====================================== -->
+
         <div class="section-heading">
 
           <h2>
@@ -158,12 +164,24 @@
           </h2>
 
           <span>
+
             {{ filteredMenuItems.length }}
-            items
+
+            {{
+              filteredMenuItems.length === 1
+                ? 'item'
+                : 'items'
+            }}
+
           </span>
 
         </div>
 
+
+
+        <!-- =====================================
+             MENU LIST
+        ====================================== -->
 
         <div class="menu-list">
 
@@ -177,7 +195,7 @@
 
               <!-- =================================
                    IMAGE
-              ================================= -->
+              ================================== -->
 
               <div class="menu-item-image">
 
@@ -190,6 +208,7 @@
                   />
 
                 }
+
                 @else {
 
                   <div class="image-placeholder">
@@ -204,14 +223,19 @@
 
               <!-- =================================
                    INFORMATION
-              ================================= -->
+              ================================== -->
 
               <div class="menu-item-info">
+
+
+                <!-- NAME -->
 
                 <h3>
                   {{ item.name }}
                 </h3>
 
+
+                <!-- DESCRIPTION -->
 
                 @if (item.description) {
 
@@ -222,11 +246,17 @@
                 }
 
 
+                <!-- META -->
+
                 <div class="item-meta">
 
-                  <span>
-                    {{ item.itemCategory }}
-                  </span>
+                  @if (item.itemCategory) {
+
+                    <span>
+                      {{ item.itemCategory }}
+                    </span>
+
+                  }
 
 
                   @if (
@@ -234,9 +264,13 @@
                   ) {
 
                     <span>
+
                       ⏱
+
                       {{ item.preparationTimeMinutes }}
+
                       min
+
                     </span>
 
                   }
@@ -247,7 +281,7 @@
 
                 <!-- =================================
                      PRICE
-                ================================= -->
+                ================================== -->
 
                 <div class="price-row">
 
@@ -265,6 +299,7 @@
                     </span>
 
                   }
+
                   @else {
 
                     <span class="discount-price">
@@ -281,17 +316,36 @@
 
               <!-- =================================
                    ADD BUTTON
-              ================================= -->
+              ================================== -->
 
               <button
                 type="button"
                 class="add-button"
+
                 (click)="addToCart(item)"
+
+                [disabled]="
+                  isAddingToCart ||
+                  isSwitchingRestaurant
+                "
               >
 
-                +
+                @if (isAddingToCart) {
+
+                  <span
+                    class="add-spinner"
+                  ></span>
+
+                }
+
+                @else {
+
+                  +
+
+                }
 
               </button>
+
 
             </article>
 
@@ -302,7 +356,6 @@
       </section>
 
     }
-
 
 
     <!-- =========================================
@@ -338,7 +391,23 @@
 
 
   <!-- =========================================
-       VIEW CART
+       CART MESSAGE
+  ========================================== -->
+
+  @if (cartMessage) {
+
+    <div class="cart-message">
+
+      {{ cartMessage }}
+
+    </div>
+
+  }
+
+
+
+  <!-- =========================================
+       FLOATING VIEW CART
   ========================================== -->
 
   @if (cartItemCount > 0) {
@@ -349,17 +418,184 @@
       routerLink="/cart"
     >
 
-      🛒
+      <span class="cart-icon">
+        🛒
+      </span>
 
-      <span>
+      <span class="cart-text">
         View Cart
       </span>
 
-      <strong>
+      <strong class="cart-count">
         {{ cartItemCount }}
       </strong>
 
     </button>
+
+  }
+
+
+
+  <!-- =========================================
+       SWITCH RESTAURANT POPUP
+  ========================================== -->
+
+  @if (showRestaurantSwitchDialog) {
+
+    <div
+      class="switch-dialog-overlay"
+
+      (click)="cancelRestaurantSwitch()"
+    >
+
+
+      <!-- =====================================
+           POPUP
+      ====================================== -->
+
+      <div
+        class="switch-dialog"
+
+        (click)="$event.stopPropagation()"
+      >
+
+
+        <!-- ===================================
+             ICON
+        ==================================== -->
+
+        <div class="switch-dialog-icon">
+          🛒
+        </div>
+
+
+
+        <!-- ===================================
+             TITLE
+        ==================================== -->
+
+        <h2>
+          Switch Restaurant?
+        </h2>
+
+
+
+        <!-- ===================================
+             CURRENT RESTAURANT
+        ==================================== -->
+
+        <p class="switch-message">
+
+          Your cart contains items from
+
+          <strong>
+            {{
+              currentCartRestaurantName ||
+              'another restaurant'
+            }}
+          </strong>.
+
+        </p>
+
+
+
+        <!-- ===================================
+             NEW RESTAURANT
+        ==================================== -->
+
+        <p class="switch-message">
+
+          Do you want to clear your current cart
+          and add this item from
+
+          <strong>
+            {{
+              restaurant?.name ||
+              'this restaurant'
+            }}
+          </strong>?
+
+        </p>
+
+
+
+        <!-- ===================================
+             ACTION BUTTONS
+        ==================================== -->
+
+        <div class="switch-dialog-actions">
+
+
+          <!-- =================================
+               CANCEL
+          ================================== -->
+
+          <button
+            type="button"
+
+            class="switch-cancel-button"
+
+            (click)="
+              cancelRestaurantSwitch()
+            "
+
+            [disabled]="
+              isSwitchingRestaurant
+            "
+          >
+
+            Cancel
+
+          </button>
+
+
+
+          <!-- =================================
+               CLEAR & ADD
+          ================================== -->
+
+          <button
+            type="button"
+
+            class="switch-confirm-button"
+
+            (click)="
+              confirmRestaurantSwitch()
+            "
+
+            [disabled]="
+              isSwitchingRestaurant
+            "
+          >
+
+            @if (isSwitchingRestaurant) {
+
+              <span
+                class="switch-spinner"
+              ></span>
+
+              <span>
+                Switching...
+              </span>
+
+            }
+
+            @else {
+
+              <span>
+                Clear & Add
+              </span>
+
+            }
+
+          </button>
+
+
+        </div>
+
+      </div>
+
+    </div>
 
   }
 
