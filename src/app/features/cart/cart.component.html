@@ -12,9 +12,7 @@
       class="back-button"
       routerLink="/home"
     >
-
       ←
-
     </button>
 
 
@@ -25,7 +23,8 @@
       </h1>
 
       <span>
-        {{ itemCount }} items
+        {{ itemCount }}
+        {{ itemCount === 1 ? 'item' : 'items' }}
       </span>
 
     </div>
@@ -38,16 +37,12 @@
         class="clear-button"
         (click)="clearCart()"
       >
-
         Clear
-
       </button>
 
     }
 
   </header>
-
-
 
 
   <!-- =========================================
@@ -58,10 +53,62 @@
 
 
     <!-- =========================================
+         LOADING
+    ========================================== -->
+
+    @if (isLoading) {
+
+      <section class="loading-cart">
+
+        <div class="loading-spinner"></div>
+
+        <p>
+          Loading your cart...
+        </p>
+
+      </section>
+
+    }
+
+
+    <!-- =========================================
+         ERROR
+    ========================================== -->
+
+    @else if (errorMessage) {
+
+      <section class="error-cart">
+
+        <div class="error-icon">
+          ⚠️
+        </div>
+
+        <h2>
+          Unable to load cart
+        </h2>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <button
+          type="button"
+          class="continue-button"
+          (click)="loadCart()"
+        >
+          Try Again
+        </button>
+
+      </section>
+
+    }
+
+
+    <!-- =========================================
          EMPTY CART
     ========================================== -->
 
-    @if (cartItems.length === 0) {
+    @else if (cartItems.length === 0) {
 
       <section class="empty-cart">
 
@@ -86,9 +133,7 @@
           class="continue-button"
           (click)="continueShopping()"
         >
-
           Browse Restaurants
-
         </button>
 
       </section>
@@ -107,23 +152,31 @@
 
         @for (
           item of cartItems;
-          track item.menuItem.id
+          track item.itemId
         ) {
+
+
+          <!-- ===================================
+               CART ITEM
+          ==================================== -->
 
           <article class="cart-item">
 
 
             <!-- =================================
                  IMAGE
-            ================================= -->
+            ================================== -->
 
             <div class="cart-item-image">
 
-              @if (item.menuItem.image) {
+              @if (
+                item.images &&
+                item.images.length > 0
+              ) {
 
                 <img
-                  [src]="item.menuItem.image"
-                  [alt]="item.menuItem.name"
+                  [src]="item.images[0]"
+                  [alt]="item.name"
                 />
 
               }
@@ -139,31 +192,39 @@
             </div>
 
 
-
-
             <!-- =================================
                  INFORMATION
-            ================================= -->
+            ================================== -->
 
             <div class="cart-item-info">
 
+
               <h3>
-
-                {{ item.menuItem.name }}
-
+                {{ item.name }}
               </h3>
 
 
-              @if (item.menuItem.description) {
+              @if (item.category) {
+
+                <span class="item-category">
+                  {{ item.category }}
+                </span>
+
+              }
+
+
+              @if (item.description) {
 
                 <p>
-
-                  {{ item.menuItem.description }}
-
+                  {{ item.description }}
                 </p>
 
               }
 
+
+              <!-- =================================
+                   PRICE
+              ================================== -->
 
               <strong class="item-price">
 
@@ -175,7 +236,7 @@
 
               <!-- =================================
                    QUANTITY
-              ================================= -->
+              ================================== -->
 
               <div class="quantity-control">
 
@@ -184,20 +245,17 @@
                   type="button"
                   (click)="
                     decreaseQuantity(
-                      item.menuItem.id
+                      item.itemId
                     )
                   "
+                  [disabled]="isLoading"
                 >
-
                   −
-
                 </button>
 
 
                 <span>
-
                   {{ item.quantity }}
-
                 </span>
 
 
@@ -205,28 +263,27 @@
                   type="button"
                   (click)="
                     increaseQuantity(
-                      item.menuItem.id
+                      item.itemId
                     )
                   "
+                  [disabled]="isLoading"
                 >
-
                   +
-
                 </button>
 
 
               </div>
 
+
             </div>
-
-
 
 
             <!-- =================================
                  ITEM TOTAL / REMOVE
-            ================================= -->
+            ================================== -->
 
             <div class="cart-item-right">
+
 
               <strong>
 
@@ -239,17 +296,15 @@
               <button
                 type="button"
                 class="remove-button"
-
                 (click)="
                   removeItem(
-                    item.menuItem.id
+                    item.itemId
                   )
                 "
               >
-
                 Remove
-
               </button>
+
 
             </div>
 
@@ -259,8 +314,6 @@
         }
 
       </section>
-
-
 
 
       <!-- =========================================
@@ -275,6 +328,10 @@
         </h2>
 
 
+        <!-- =======================================
+             ITEMS
+        ======================================== -->
+
         <div class="summary-row">
 
           <span>
@@ -287,6 +344,10 @@
 
         </div>
 
+
+        <!-- =======================================
+             SUBTOTAL
+        ======================================== -->
 
         <div class="summary-row">
 
@@ -301,6 +362,10 @@
         </div>
 
 
+        <!-- =======================================
+             DELIVERY
+        ======================================== -->
+
         <div class="summary-row">
 
           <span>
@@ -314,8 +379,16 @@
         </div>
 
 
+        <!-- =======================================
+             DIVIDER
+        ======================================== -->
+
         <div class="summary-divider"></div>
 
+
+        <!-- =======================================
+             TOTAL
+        ======================================== -->
 
         <div class="summary-total">
 
@@ -330,26 +403,31 @@
         </div>
 
 
+        <!-- =======================================
+             CHECKOUT
+        ======================================== -->
+
         <button
           type="button"
           class="checkout-button"
           (click)="checkout()"
         >
-
           Proceed to Checkout
-
         </button>
 
+
+        <!-- =======================================
+             CONTINUE SHOPPING
+        ======================================== -->
 
         <button
           type="button"
           class="continue-shopping-button"
           (click)="continueShopping()"
         >
-
           ← Continue Shopping
-
         </button>
+
 
       </aside>
 

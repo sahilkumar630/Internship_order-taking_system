@@ -75,6 +75,15 @@ export class MenuComponent
 
 
   // =========================================
+  // CART STATE
+  // =========================================
+
+  isAddingToCart = false;
+
+  cartMessage = '';
+
+
+  // =========================================
   // PENDING ADD-TO-CART ITEM
   // =========================================
 
@@ -122,6 +131,10 @@ export class MenuComponent
           params.get('id');
 
 
+        // =====================================
+        // RESTAURANT ID NOT FOUND
+        // =====================================
+
         if (!id) {
 
           this.errorMessage =
@@ -132,9 +145,17 @@ export class MenuComponent
         }
 
 
+        // =====================================
+        // CONVERT ID
+        // =====================================
+
         const restaurantId =
           Number(id);
 
+
+        // =====================================
+        // INVALID ID
+        // =====================================
 
         if (
           Number.isNaN(
@@ -150,27 +171,37 @@ export class MenuComponent
         }
 
 
+        // =====================================
+        // SAVE RESTAURANT ID
+        // =====================================
+
         this.restaurantId =
           restaurantId;
 
 
-        // ===================================
+        console.log(
+          'Restaurant / Business Location ID:',
+          this.restaurantId
+        );
+
+
+        // =====================================
         // CHECK PENDING ITEM
-        // ===================================
+        // =====================================
 
         this.getPendingAddItem();
 
 
-        // ===================================
+        // =====================================
         // LOAD RESTAURANT
-        // ===================================
+        // =====================================
 
         this.loadRestaurant();
 
 
-        // ===================================
+        // =====================================
         // LOAD MENU
-        // ===================================
+        // =====================================
 
         this.loadMenu();
 
@@ -579,10 +610,51 @@ export class MenuComponent
   // =========================================
   // ADD TO CART
   // =========================================
+  //
+  // IMPORTANT:
+  //
+  // We DO NOT call getNearbyRestaurants()
+  // here anymore.
+  //
+  // The current restaurant ID is directly
+  // used as businessLocationId.
+  //
+  // API:
+  //
+  // POST /api/Cart/add
+  //
+  // {
+  //   businessLocationId: 228,
+  //   itemId: 2,
+  //   quantity: 1
+  // }
+  //
+  // =========================================
 
   addToCart(
     item: MenuItem
   ): void {
+
+    // =========================================
+    // PREVENT DOUBLE CLICK
+    // =========================================
+
+    if (
+      this.isAddingToCart
+    ) {
+
+      return;
+
+    }
+
+
+    // =========================================
+    // CLEAR PREVIOUS MESSAGE
+    // =========================================
+
+    this.cartMessage =
+      '';
+
 
     // =========================================
     // GET SAVED LOCATION
@@ -616,6 +688,7 @@ export class MenuComponent
               item.id
 
           }
+
         }
       );
 
@@ -626,111 +699,130 @@ export class MenuComponent
 
 
     // =========================================
-    // CHECK NEARBY RESTAURANT
+    // BUSINESS LOCATION ID
+    // =========================================
+    //
+    // The route ID represents the restaurant
+    // BusinessLocation ID.
+    //
+    // Example:
+    //
+    // /restaurant/228/menu
+    //
+    // becomes:
+    //
+    // businessLocationId = 228
+    //
     // =========================================
 
+    const businessLocationId =
+      Number(this.restaurantId);
+
+
+    // =========================================
+    // VALIDATE BUSINESS LOCATION ID
+    // =========================================
+
+    if (
+      !businessLocationId ||
+      Number.isNaN(
+        businessLocationId
+      )
+    ) {
+
+      console.error(
+        'Invalid business location ID:',
+        this.restaurantId
+      );
+
+
+      this.cartMessage =
+        'Invalid restaurant location.';
+
+      return;
+
+    }
+
+
+    // =========================================
+    // START ADDING
+    // =========================================
+
+    this.isAddingToCart =
+      true;
+
+
     console.log(
-      'Checking restaurant availability:',
+      'Adding item to API cart:',
       {
-        restaurantId:
-          this.restaurantId,
+        businessLocationId:
+          businessLocationId,
 
-        latitude:
-          location.latitude,
+        itemId:
+          item.id,
 
-        longitude:
-          location.longitude
+        quantity:
+          1
       }
     );
 
 
-    this.restaurantService
+    // =========================================
+    // CALL CART API
+    // =========================================
 
-      .getNearbyRestaurants(
+    this.cartService
 
-        location.latitude,
-
-        location.longitude
-
+      .addItem(
+        item,
+        businessLocationId
       )
 
       .subscribe({
 
         // =====================================
-        // SUCCESS
+        // API SUCCESS
         // =====================================
 
         next:
-          (restaurants: Restaurant[]) => {
+          cart => {
 
-            const restaurantAvailable =
-              restaurants.some(
-                restaurant =>
-                  Number(restaurant.id) ===
-                  Number(this.restaurantId)
-              );
+            this.isAddingToCart =
+              false;
 
 
-            // =================================
-            // RESTAURANT AVAILABLE
-            // =================================
-
-            if (restaurantAvailable) {
-
-              this.cartService.addItem(
-                item
-              );
+            this.cartMessage =
+              'Item added to cart successfully.';
 
 
-              console.log(
-                'Restaurant available. Item added to cart:',
-                item
-              );
-
-
-              return;
-
-            }
-
-
-            // =================================
-            // RESTAURANT NOT AVAILABLE
-            // =================================
-
-            console.warn(
-              'Restaurant is not available at the selected location.',
-              {
-                restaurantId:
-                  this.restaurantId,
-
-                selectedLocation:
-                  location
-              }
+            console.log(
+              'Item added to API cart:',
+              cart
             );
-
-
-            // =================================
-            // GO TO NEARBY RESTAURANTS
-            // =================================
-
-            this.router.navigate([
-              '/restaurants'
-            ]);
 
           },
 
 
         // =====================================
-        // ERROR
+        // API ERROR
         // =====================================
 
         error:
           error => {
 
+            this.isAddingToCart =
+              false;
+
+
             console.error(
-              'Restaurant availability check failed:',
+              'Add to Cart API Error:',
               error
             );
+
+
+            this.cartMessage =
+              error?.error?.message ||
+              'Unable to add item to cart.';
 
           }
 

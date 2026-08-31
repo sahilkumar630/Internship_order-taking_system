@@ -1,11 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
 
-import { CartService }
-  from '../../core/services/cart.service';
+import {
+  Router,
+  RouterLink
+} from '@angular/router';
 
-import { CartItem }
-  from '../../shared/models/cart-item.model';
+import {
+  CartService
+} from '../../core/services/cart.service';
+
+import {
+  CartItem
+} from '../../shared/models/cart-item.model';
 
 
 @Component({
@@ -15,27 +24,47 @@ import { CartItem }
     RouterLink
   ],
 
-  templateUrl: './cart.component.html',
+  templateUrl:
+    './cart.component.html',
 
-  styleUrl: './cart.component.css'
+  styleUrl:
+    './cart.component.css'
 })
-export class CartComponent implements OnInit {
+export class CartComponent
+  implements OnInit {
 
 
   // =========================================
   // CART ITEMS
   // =========================================
 
-  cartItems: CartItem[] = [];
+  cartItems:
+    CartItem[] = [];
+
+
+  // =========================================
+  // CART STATE
+  // =========================================
+
+  isLoading =
+    false;
+
+  isUpdating =
+    false;
+
+  errorMessage =
+    '';
 
 
   // =========================================
   // TOTALS
   // =========================================
 
-  subtotal = 0;
+  subtotal =
+    0;
 
-  itemCount = 0;
+  itemCount =
+    0;
 
 
   // =========================================
@@ -44,9 +73,11 @@ export class CartComponent implements OnInit {
 
   constructor(
 
-    private cartService: CartService,
+    private cartService:
+      CartService,
 
-    private router: Router
+    private router:
+      Router
 
   ) {}
 
@@ -68,10 +99,61 @@ export class CartComponent implements OnInit {
 
   loadCart(): void {
 
-    this.cartItems =
-      this.cartService.getItems();
+    this.isLoading =
+      true;
 
-    this.updateTotals();
+    this.errorMessage =
+      '';
+
+
+    this.cartService
+
+      .getCart()
+
+      .subscribe({
+
+        next:
+          cart => {
+
+            this.cartItems =
+              cart?.cartItems || [];
+
+
+            this.updateTotals();
+
+
+            this.isLoading =
+              false;
+
+
+            console.log(
+              'Cart loaded:',
+              cart
+            );
+
+          },
+
+
+        error:
+          error => {
+
+            this.isLoading =
+              false;
+
+
+            console.error(
+              'Cart Load Error:',
+              error
+            );
+
+
+            this.errorMessage =
+              error?.error?.message ||
+              'Unable to load cart.';
+
+          }
+
+      });
 
   }
 
@@ -83,10 +165,13 @@ export class CartComponent implements OnInit {
   private updateTotals(): void {
 
     this.subtotal =
-      this.cartService.getSubtotal();
+      this.cartService
+        .getSubtotal();
+
 
     this.itemCount =
-      this.cartService.getItemCount();
+      this.cartService
+        .getItemCount();
 
   }
 
@@ -96,14 +181,61 @@ export class CartComponent implements OnInit {
   // =========================================
 
   increaseQuantity(
-    menuItemId: number
+    itemId: number
   ): void {
 
-    this.cartService.increaseQuantity(
-      menuItemId
-    );
+    if (
+      this.isUpdating
+    ) {
 
-    this.loadCart();
+      return;
+
+    }
+
+
+    this.isUpdating =
+      true;
+
+
+    this.cartService
+
+      .increaseQuantity(
+        itemId
+      )
+
+      .subscribe({
+
+        next:
+          cart => {
+
+            this.cartItems =
+              cart?.cartItems || [];
+
+
+            this.updateTotals();
+
+
+            this.isUpdating =
+              false;
+
+          },
+
+
+        error:
+          error => {
+
+            console.error(
+              'Increase Quantity Error:',
+              error
+            );
+
+
+            this.isUpdating =
+              false;
+
+          }
+
+      });
 
   }
 
@@ -113,14 +245,61 @@ export class CartComponent implements OnInit {
   // =========================================
 
   decreaseQuantity(
-    menuItemId: number
+    itemId: number
   ): void {
 
-    this.cartService.decreaseQuantity(
-      menuItemId
-    );
+    if (
+      this.isUpdating
+    ) {
 
-    this.loadCart();
+      return;
+
+    }
+
+
+    this.isUpdating =
+      true;
+
+
+    this.cartService
+
+      .decreaseQuantity(
+        itemId
+      )
+
+      .subscribe({
+
+        next:
+          cart => {
+
+            this.cartItems =
+              cart?.cartItems || [];
+
+
+            this.updateTotals();
+
+
+            this.isUpdating =
+              false;
+
+          },
+
+
+        error:
+          error => {
+
+            console.error(
+              'Decrease Quantity Error:',
+              error
+            );
+
+
+            this.isUpdating =
+              false;
+
+          }
+
+      });
 
   }
 
@@ -130,14 +309,73 @@ export class CartComponent implements OnInit {
   // =========================================
 
   removeItem(
-    menuItemId: number
+    itemId: number
   ): void {
 
-    this.cartService.removeItem(
-      menuItemId
+    if (
+      this.isUpdating
+    ) {
+
+      return;
+
+    }
+
+
+    this.isUpdating =
+      true;
+
+
+    console.log(
+      'Removing item from cart:',
+      itemId
     );
 
-    this.loadCart();
+
+    this.cartService
+
+      .removeItem(
+        itemId
+      )
+
+      .subscribe({
+
+        next:
+          cart => {
+
+            this.cartItems =
+              cart?.cartItems || [];
+
+
+            this.updateTotals();
+
+
+            this.isUpdating =
+              false;
+
+
+            console.log(
+              'Item removed successfully:',
+              cart
+            );
+
+          },
+
+
+        error:
+          error => {
+
+            console.error(
+              'Remove Item Error:',
+              error
+            );
+
+
+            this.isUpdating =
+              false;
+
+          }
+
+      });
 
   }
 
@@ -148,9 +386,65 @@ export class CartComponent implements OnInit {
 
   clearCart(): void {
 
-    this.cartService.clearCart();
+    if (
+      this.cartItems.length === 0 ||
+      this.isUpdating
+    ) {
 
-    this.loadCart();
+      return;
+
+    }
+
+
+    this.isUpdating =
+      true;
+
+
+    this.cartService
+
+      .clearCart()
+
+      .subscribe({
+
+        next:
+          () => {
+
+            this.cartItems =
+              [];
+
+            this.subtotal =
+              0;
+
+            this.itemCount =
+              0;
+
+
+            this.isUpdating =
+              false;
+
+
+            console.log(
+              'Cart cleared successfully.'
+            );
+
+          },
+
+
+        error:
+          error => {
+
+            console.error(
+              'Clear Cart Error:',
+              error
+            );
+
+
+            this.isUpdating =
+              false;
+
+          }
+
+      });
 
   }
 
@@ -174,7 +468,9 @@ export class CartComponent implements OnInit {
 
   checkout(): void {
 
-    if (this.cartItems.length === 0) {
+    if (
+      this.cartItems.length === 0
+    ) {
 
       return;
 
@@ -196,12 +492,9 @@ export class CartComponent implements OnInit {
     item: CartItem
   ): number {
 
-    return (
-      item.menuItem.discountPrice > 0 &&
-      item.menuItem.discountPrice < item.menuItem.price
-    )
-      ? item.menuItem.discountPrice
-      : item.menuItem.price;
+    return Number(
+      item.price || 0
+    );
 
   }
 
@@ -214,9 +507,12 @@ export class CartComponent implements OnInit {
     item: CartItem
   ): number {
 
-    return (
-      this.getItemPrice(item) *
-      item.quantity
+    return Number(
+      item.totalPrice ||
+      (
+        item.price *
+        item.quantity
+      )
     );
 
   }

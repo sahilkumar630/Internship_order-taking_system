@@ -1,71 +1,329 @@
 import { Injectable } from '@angular/core';
 
-import { CartItem }
-  from '../../shared/models/cart-item.model';
+import {
+  HttpClient
+} from '@angular/common/http';
 
-import { MenuItem }
-  from '../../shared/models/menu-item.model';
+import {
+  Observable,
+  of,
+  map,
+  catchError
+} from 'rxjs';
+
+import {
+  Cart,
+  CartItem
+} from '../../shared/models/cart-item.model';
+
+import {
+  MenuItem
+} from '../../shared/models/menu-item.model';
+
+import {
+  ApiResponse
+} from '../../shared/models/api-response.model';
+
+import {
+  environment
+} from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
 
-  private cartItems: CartItem[] = [];
+
+  // =========================================
+  // CART API
+  // =========================================
+
+  private readonly apiUrl =
+    `${environment.apiUrl}/Cart`;
 
 
   // =========================================
-  // GET CART ITEMS
+  // CURRENT CART
+  // =========================================
+
+  private cart:
+    Cart | null = null;
+
+
+  // =========================================
+  // CONSTRUCTOR
+  // =========================================
+
+  constructor(
+    private http: HttpClient
+  ) {}
+
+
+  // =========================================
+  // GET CART
+  // =========================================
+
+  getCart(): Observable<Cart | null> {
+
+    return this.http
+
+      .get<ApiResponse<Cart>>(
+        this.apiUrl
+      )
+
+      .pipe(
+
+        map(response => {
+
+          console.log(
+            'Get Cart Response:',
+            response
+          );
+
+
+          // =====================================
+          // CART NOT FOUND / EMPTY
+          // =====================================
+
+          if (
+            !response.data ||
+            response.message === 'Cart not found.'
+          ) {
+
+            this.cart =
+              null;
+
+            return null;
+
+          }
+
+
+          // =====================================
+          // SAVE CART
+          // =====================================
+
+          this.cart =
+            response.data;
+
+
+          return this.cart;
+
+        }),
+
+
+        // =====================================
+        // ERROR
+        // =====================================
+
+        catchError(error => {
+
+          console.error(
+            'Get Cart API Error:',
+            error
+          );
+
+
+          this.cart =
+            null;
+
+
+          return of(null);
+
+        })
+
+      );
+
+  }
+
+
+  // =========================================
+  // GET CURRENT CART ITEMS
   // =========================================
 
   getItems(): CartItem[] {
 
-    return this.cartItems;
+    if (!this.cart) {
 
-  }
-
-
-  // =========================================
-  // ADD ITEM
-  // =========================================
-
-  addItem(menuItem: MenuItem): void {
-
-    const existingItem =
-      this.cartItems.find(
-        item => item.menuItem.id === menuItem.id
-      );
-
-
-    if (existingItem) {
-
-      existingItem.quantity++;
-
-      return;
+      return [];
 
     }
 
 
-    this.cartItems.push({
-
-      menuItem: menuItem,
-
-      quantity: 1
-
-    });
+    return this.cart.cartItems || [];
 
   }
 
 
   // =========================================
-  // REMOVE ITEM
+  // ADD ITEM TO CART
   // =========================================
 
-  removeItem(menuItemId: number): void {
+  addItem(
+    menuItem: MenuItem,
+    businessLocationId: number
+  ): Observable<Cart | null> {
 
-    this.cartItems =
-      this.cartItems.filter(
-        item => item.menuItem.id !== menuItemId
+
+    // =========================================
+    // REQUEST BODY
+    // =========================================
+
+    const body = {
+
+      businessLocationId:
+        businessLocationId,
+
+      itemId:
+        menuItem.id,
+
+      quantity:
+        1
+
+    };
+
+
+    console.log(
+      'Adding item to cart:',
+      body
+    );
+
+
+    return this.http
+
+      .post<ApiResponse<Cart>>(
+        `${this.apiUrl}/add`,
+        body
+      )
+
+      .pipe(
+
+        map(response => {
+
+          console.log(
+            'Cart Add Response:',
+            response
+          );
+
+
+          if (
+            response.data
+          ) {
+
+            this.cart =
+              response.data;
+
+          }
+
+
+          return this.cart;
+
+        }),
+
+
+        catchError(error => {
+
+          console.error(
+            'Add Cart Item API Error:',
+            error
+          );
+
+
+          throw error;
+
+        })
+
+      );
+
+  }
+
+
+  // =========================================
+  // UPDATE QUANTITY
+  // =========================================
+
+  updateQuantity(
+    businessLocationId: number,
+    itemId: number,
+    quantity: number
+  ): Observable<Cart | null> {
+
+
+    if (
+      quantity < 1
+    ) {
+
+      return of(
+        this.cart
+      );
+
+    }
+
+
+    const body = {
+
+      businessLocationId:
+        businessLocationId,
+
+      itemId:
+        itemId,
+
+      quantity:
+        quantity
+
+    };
+
+
+    console.log(
+      'Updating cart quantity:',
+      body
+    );
+
+
+    return this.http
+
+      .put<ApiResponse<Cart>>(
+        `${this.apiUrl}/quantity`,
+        body
+      )
+
+      .pipe(
+
+        map(response => {
+
+          console.log(
+            'Cart Quantity Response:',
+            response
+          );
+
+
+          if (
+            response.data
+          ) {
+
+            this.cart =
+              response.data;
+
+          }
+
+
+          return this.cart;
+
+        }),
+
+
+        catchError(error => {
+
+          console.error(
+            'Update Cart Quantity API Error:',
+            error
+          );
+
+
+          throw error;
+
+        })
+
       );
 
   }
@@ -75,19 +333,65 @@ export class CartService {
   // INCREASE QUANTITY
   // =========================================
 
-  increaseQuantity(menuItemId: number): void {
+  increaseQuantity(
+    itemId: number
+  ): Observable<Cart | null> {
+
 
     const item =
-      this.cartItems.find(
-        item => item.menuItem.id === menuItemId
+      this.getItems().find(
+
+        cartItem =>
+          Number(cartItem.itemId) ===
+          Number(itemId)
+
       );
 
 
-    if (item) {
+    if (!item) {
 
-      item.quantity++;
+      console.warn(
+        'Cart item not found:',
+        itemId
+      );
+
+
+      return of(
+        this.cart
+      );
 
     }
+
+
+    const businessLocationId =
+      this.cart?.businessLocationId;
+
+
+    if (
+      !businessLocationId
+    ) {
+
+      console.warn(
+        'Business location ID not found.'
+      );
+
+
+      return of(
+        this.cart
+      );
+
+    }
+
+
+    return this.updateQuantity(
+
+      businessLocationId,
+
+      item.itemId,
+
+      item.quantity + 1
+
+    );
 
   }
 
@@ -96,31 +400,272 @@ export class CartService {
   // DECREASE QUANTITY
   // =========================================
 
-  decreaseQuantity(menuItemId: number): void {
+  decreaseQuantity(
+    itemId: number
+  ): Observable<Cart | null> {
+
 
     const item =
-      this.cartItems.find(
-        item => item.menuItem.id === menuItemId
+      this.getItems().find(
+
+        cartItem =>
+          Number(cartItem.itemId) ===
+          Number(itemId)
+
       );
 
 
     if (!item) {
 
-      return;
+      console.warn(
+        'Cart item not found:',
+        itemId
+      );
+
+
+      return of(
+        this.cart
+      );
 
     }
 
 
-    if (item.quantity > 1) {
+    // =========================================
+    // QUANTITY = 1
+    //
+    // Remove item completely
+    // =========================================
 
-      item.quantity--;
+    if (
+      item.quantity <= 1
+    ) {
 
-      return;
+      return this.removeItem(
+        itemId
+      );
 
     }
 
 
-    this.removeItem(menuItemId);
+    const businessLocationId =
+      this.cart?.businessLocationId;
+
+
+    if (
+      !businessLocationId
+    ) {
+
+      console.warn(
+        'Business location ID not found.'
+      );
+
+
+      return of(
+        this.cart
+      );
+
+    }
+
+
+    return this.updateQuantity(
+
+      businessLocationId,
+
+      item.itemId,
+
+      item.quantity - 1
+
+    );
+
+  }
+
+
+  // =========================================
+  // REMOVE ITEM
+  // =========================================
+  //
+  // API:
+  //
+  // DELETE /api/Cart/item/{itemId}
+  //
+  // Body:
+  //
+  // {
+  //   businessLocationId: 228,
+  //   itemId: 2
+  // }
+  //
+  // =========================================
+
+  removeItem(
+    itemId: number
+  ): Observable<Cart | null> {
+
+
+    const businessLocationId =
+      this.cart?.businessLocationId;
+
+
+    // =========================================
+    // BUSINESS LOCATION REQUIRED
+    // =========================================
+
+    if (
+      !businessLocationId
+    ) {
+
+      console.error(
+        'Cannot remove item. Business location ID is missing.'
+      );
+
+
+      return of(
+        this.cart
+      );
+
+    }
+
+
+    const body = {
+
+      businessLocationId:
+        businessLocationId,
+
+      itemId:
+        itemId
+
+    };
+
+
+    console.log(
+      'Removing cart item:',
+      body
+    );
+
+
+    // =========================================
+    // DELETE REQUEST
+    // =========================================
+
+    return this.http
+
+      .delete<ApiResponse<Cart>>(
+        `${this.apiUrl}/item/${itemId}`,
+
+        {
+          body:
+            body
+        }
+
+      )
+
+      .pipe(
+
+        map(response => {
+
+          console.log(
+            'Remove Cart Item Response:',
+            response
+          );
+
+
+          // ===================================
+          // UPDATED CART
+          // ===================================
+
+          if (
+            response.data
+          ) {
+
+            this.cart =
+              response.data;
+
+          }
+
+          else {
+
+            // =================================
+            // CART IS NOW EMPTY
+            // =================================
+
+            this.cart =
+              null;
+
+          }
+
+
+          return this.cart;
+
+        }),
+
+
+        catchError(error => {
+
+          console.error(
+            'Remove Cart Item API Error:',
+            error
+          );
+
+
+          throw error;
+
+        })
+
+      );
+
+  }
+
+
+  // =========================================
+  // CLEAR CART
+  // =========================================
+
+  clearCart(): Observable<Cart | null> {
+
+
+    console.log(
+      'Clearing cart...'
+    );
+
+
+    return this.http
+
+      .delete<ApiResponse<Cart>>(
+        `${this.apiUrl}/clear`
+      )
+
+      .pipe(
+
+        map(response => {
+
+          console.log(
+            'Clear Cart Response:',
+            response
+          );
+
+
+          this.cart =
+            null;
+
+
+          return null;
+
+        }),
+
+
+        catchError(error => {
+
+          console.error(
+            'Clear Cart API Error:',
+            error
+          );
+
+
+          throw error;
+
+        })
+
+      );
 
   }
 
@@ -131,12 +676,17 @@ export class CartService {
 
   getSubtotal(): number {
 
-    return this.cartItems.reduce(
+    return this.getItems().reduce(
 
-      (total, item) => {
+      (
+        total,
+        item
+      ) => {
 
         return total +
-          (item.menuItem.price * item.quantity);
+          Number(
+            item.totalPrice || 0
+          );
 
       },
 
@@ -153,11 +703,17 @@ export class CartService {
 
   getItemCount(): number {
 
-    return this.cartItems.reduce(
+    return this.getItems().reduce(
 
-      (total, item) => {
+      (
+        total,
+        item
+      ) => {
 
-        return total + item.quantity;
+        return total +
+          Number(
+            item.quantity || 0
+          );
 
       },
 
@@ -169,12 +725,28 @@ export class CartService {
 
 
   // =========================================
-  // CLEAR CART
+  // GET BUSINESS LOCATION ID
   // =========================================
 
-  clearCart(): void {
+  getBusinessLocationId():
+    number | null {
 
-    this.cartItems = [];
+    return (
+      this.cart?.businessLocationId ??
+      null
+    );
+
+  }
+
+
+  // =========================================
+  // GET CURRENT CART
+  // =========================================
+
+  getCurrentCart():
+    Cart | null {
+
+    return this.cart;
 
   }
 

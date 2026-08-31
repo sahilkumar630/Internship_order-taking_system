@@ -8,8 +8,9 @@ export const routes: Routes = [
 
   {
     path: '',
-    redirectTo: 'login',
-    pathMatch: 'full'
+    loadComponent: () =>
+      import('./features/home/home.component')
+        .then(m => m.HomeComponent)
   },
 
 
