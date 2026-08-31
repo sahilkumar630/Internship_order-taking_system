@@ -4,12 +4,16 @@ import {
 } from '@angular/core';
 
 import {
+  CommonModule
+} from '@angular/common';
+
+import {
   FormsModule
 } from '@angular/forms';
 
 import {
-  ActivatedRoute,
-  Router
+  Router,
+  ActivatedRoute
 } from '@angular/router';
 
 import {
@@ -17,14 +21,18 @@ import {
 } from '../../core/services/location.service';
 
 import {
-  UserLocation
+  UserLocation,
+  City
 } from '../../shared/models/location.model';
 
 
 @Component({
   selector: 'app-location',
 
+  standalone: true,
+
   imports: [
+    CommonModule,
     FormsModule
   ],
 
@@ -39,70 +47,10 @@ export class LocationComponent
 
 
   // =========================================
-  // SELECTED LOCATION
-  // =========================================
-
-  selectedLocation:
-    UserLocation | null = null;
-
-
-  // =========================================
-  // UI STATE
-  // =========================================
-
-  isLoading =
-    false;
-
-  errorMessage =
-    '';
-
-  showManualLocation =
-    false;
-
-
-  // =========================================
-  // MANUAL LOCATION
-  // =========================================
-
-  selectedCity =
-    '';
-
-  selectedArea =
-    '';
-
-
-  // =========================================
-  // RETURN FLOW
-  // =========================================
-
-  private returnUrl:
-    string | null = null;
-
-  private addItemId:
-    number | null = null;
-
-
-  // =========================================
   // CITIES
   // =========================================
 
-  cities: string[] = [
-
-    'Karachi',
-
-    'Lahore',
-
-    'Islamabad',
-
-    'Rawalpindi',
-
-    'Faisalabad',
-
-    'Multan',
-
-    'Hyderabad'
-
-  ];
+  cities: City[] = [];
 
 
   // =========================================
@@ -111,27 +59,63 @@ export class LocationComponent
 
   areas: string[] = [
 
+    'PECHS',
+
     'DHA',
 
-    'Clifton',
-
-    'Gulshan-e-Iqbal',
-
-    'Gulistan-e-Johar',
+    'Gulshan',
 
     'North Nazimabad',
 
-    'PECHS',
+    'Clifton',
 
-    'Saddar',
+    'Johar',
 
-    'Bahadurabad',
+    'Gulistan-e-Johar',
 
-    'Nazimabad',
-
-    'Korangi'
+    'Saddar'
 
   ];
+
+
+  // =========================================
+  // SELECTED CITY
+  // =========================================
+
+  selectedCity = '';
+
+  selectedCityId:
+    number | null = null;
+
+
+  // =========================================
+  // SELECTED AREA
+  // =========================================
+
+  selectedArea = '';
+
+
+  // =========================================
+  // UI STATE
+  // =========================================
+
+  isLoading = false;
+
+  isSavingAddress = false;
+
+  isLoadingCities = false;
+
+  showManualLocation = false;
+
+  errorMessage = '';
+
+
+  // =========================================
+  // RETURN ROUTE
+  // =========================================
+
+  private returnUrl =
+    '/home';
 
 
   // =========================================
@@ -153,67 +137,67 @@ export class LocationComponent
 
 
   // =========================================
-  // INITIALIZATION
+  // INIT
   // =========================================
 
   ngOnInit(): void {
 
-    this.selectedLocation =
-      this.locationService.getLocation();
-
-
-    // =========================================
-    // READ RETURN PARAMETERS
-    // =========================================
-
     this.returnUrl =
       this.route.snapshot.queryParamMap
-        .get('returnUrl');
+        .get('returnUrl')
+      || '/home';
 
 
-    const addItem =
-      this.route.snapshot.queryParamMap
-        .get('addItem');
+    this.loadCities();
+
+  }
 
 
-    if (addItem) {
+  // =========================================
+  // LOAD CITIES
+  // =========================================
 
-      const itemId =
-        Number(addItem);
+  private loadCities(): void {
 
+    this.isLoadingCities = true;
 
-      if (!Number.isNaN(itemId)) {
-
-        this.addItemId =
-          itemId;
-
-      }
-
-    }
+    this.errorMessage = '';
 
 
-    console.log(
-      'Location return flow:',
-      {
-        returnUrl:
-          this.returnUrl,
+    this.locationService
 
-        addItemId:
-          this.addItemId
-      }
-    );
+      .getCities()
+
+      .subscribe({
+
+        next: cities => {
+
+          this.cities =
+            cities;
+
+          this.isLoadingCities =
+            false;
+
+        },
 
 
-    // =========================================
-    // IF LOCATION ALREADY EXISTS
-    // =========================================
+        error: error => {
 
-    if (this.selectedLocation) {
+          this.isLoadingCities =
+            false;
 
-      this.showManualLocation =
-        false;
+          this.errorMessage =
+            error?.message ||
+            'Unable to load cities.';
 
-    }
+          console.error(
+            'City API Error:',
+            error
+          );
+
+        }
+
+      });
 
   }
 
@@ -224,84 +208,41 @@ export class LocationComponent
 
   useCurrentLocation(): void {
 
-    this.isLoading =
-      true;
+    this.isLoading = true;
 
-    this.errorMessage =
-      '';
-
-    this.showManualLocation =
-      false;
+    this.errorMessage = '';
 
 
     this.locationService
 
       .getCurrentLocation()
 
-      .then(
-        (location: UserLocation) => {
+      .then(location => {
 
-          this.selectedLocation =
-            location;
-
-          this.isLoading =
-            false;
+        console.log(
+          'Current location:',
+          location
+        );
 
 
-          console.log(
-            'Current location:',
-            location
-          );
+        this.isLoading =
+          false;
 
 
-          // -----------------------------------
-          // CONTINUE ORIGINAL FLOW
-          // OR RETURN TO MENU
-          // -----------------------------------
+        this.continueAfterLocation();
 
-          this.continueAfterLocation();
+      })
 
-        }
-      )
+      .catch(error => {
 
-      .catch(
-        (error: Error) => {
+        this.isLoading =
+          false;
 
-          this.isLoading =
-            false;
+        this.errorMessage =
+          error?.message ||
+          'Unable to get your location.';
 
-
-          console.error(
-            'Location Error:',
-            error
-          );
-
-
-          this.errorMessage =
-            error.message ||
-            'Unable to get your location.';
-
-
-          // -----------------------------------
-          // SHOW MANUAL OPTION
-          // -----------------------------------
-
-          this.showManualLocation =
-            true;
-
-        }
-      );
-
-  }
-
-
-  // =========================================
-  // SHOW MANUAL LOCATION
-  // =========================================
-
-  showManual(): void {
-
-    this.openManualLocation();
+      });
 
   }
 
@@ -312,11 +253,11 @@ export class LocationComponent
 
   openManualLocation(): void {
 
-    this.errorMessage =
-      '';
-
     this.showManualLocation =
       true;
+
+    this.errorMessage =
+      '';
 
   }
 
@@ -330,7 +271,38 @@ export class LocationComponent
     this.showManualLocation =
       false;
 
-    this.errorMessage =
+    this.selectedCity =
+      '';
+
+    this.selectedCityId =
+      null;
+
+    this.selectedArea =
+      '';
+
+  }
+
+
+  // =========================================
+  // CITY CHANGE
+  // =========================================
+
+  onCityChange(): void {
+
+    const city =
+      this.cities.find(
+        item =>
+          item.name ===
+          this.selectedCity
+      );
+
+
+    this.selectedCityId =
+      city?.id ??
+      null;
+
+
+    this.selectedArea =
       '';
 
   }
@@ -342,121 +314,151 @@ export class LocationComponent
 
   saveManualLocation(): void {
 
+    // -----------------------------------------
+    // VALIDATE CITY
+    // -----------------------------------------
+
+    if (
+      !this.selectedCityId
+    ) {
+
+      this.errorMessage =
+        'Please select a valid city.';
+
+      return;
+
+    }
+
+
+    // -----------------------------------------
+    // VALIDATE AREA
+    // -----------------------------------------
+
+    if (
+      !this.selectedArea
+    ) {
+
+      this.errorMessage =
+        'Please select your delivery area.';
+
+      return;
+
+    }
+
+
+    this.isSavingAddress =
+      true;
+
     this.errorMessage =
       '';
 
 
-    // =========================================
-    // VALIDATE CITY
-    // =========================================
-
-    if (!this.selectedCity) {
-
-      this.errorMessage =
-        'Please select your city.';
-
-      return;
-
-    }
-
-
-    // =========================================
-    // VALIDATE AREA
-    // =========================================
-
-    if (!this.selectedArea) {
-
-      this.errorMessage =
-        'Please select your area.';
-
-      return;
-
-    }
-
-
-    // =========================================
-    // GET COORDINATES
-    // =========================================
+    // -----------------------------------------
+    // CURRENT COORDINATES
+    // -----------------------------------------
 
     const coordinates =
       this.getAreaCoordinates(
-
         this.selectedCity,
-
         this.selectedArea
-
       );
 
 
-    if (!coordinates) {
+    // -----------------------------------------
+    // ADDRESS
+    // -----------------------------------------
 
-      this.errorMessage =
-        'Coordinates are not available for this location yet.';
-
-      return;
-
-    }
+    const address =
+      `${this.selectedArea}, ${this.selectedCity}`;
 
 
-    // =========================================
+    // -----------------------------------------
     // CREATE LOCATION
-    // =========================================
+    // -----------------------------------------
 
     const location:
       UserLocation = {
 
-      latitude:
-        coordinates.latitude,
+        latitude:
+          coordinates.latitude,
 
-      longitude:
-        coordinates.longitude,
+        longitude:
+          coordinates.longitude,
 
-      address:
-        `${this.selectedArea}, ${this.selectedCity}`,
+        address,
 
-      source:
-        'manual'
+        source:
+          'manual',
 
-    };
+        cityId:
+          this.selectedCityId,
+
+        label:
+          'Home',
+
+        area:
+          this.selectedArea,
+
+        isDefault:
+          true
+
+      };
 
 
-    // =========================================
-    // SAVE
-    // =========================================
+    // -----------------------------------------
+    // SAVE TO BACKEND
+    // -----------------------------------------
 
     this.locationService
-      .saveLocation(
+
+      .saveLocationWithAddress(
         location
-      );
+      )
+
+      .subscribe({
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        next: savedLocation => {
+
+          console.log(
+            'Address saved successfully:',
+            savedLocation
+          );
 
 
-    this.selectedLocation =
-      location;
+          this.isSavingAddress =
+            false;
 
 
-    console.log(
-      'Manual location:',
-      location
-    );
+          this.continueAfterLocation();
+
+        },
 
 
-    // =========================================
-    // CONTINUE ORIGINAL FLOW
-    // OR RETURN TO MENU
-    // =========================================
+        // =====================================
+        // ERROR
+        // =====================================
 
-    this.continueAfterLocation();
+        error: error => {
 
-  }
+          this.isSavingAddress =
+            false;
 
+          this.errorMessage =
+            error?.message ||
+            'Unable to save your address. Please try again.';
 
-  // =========================================
-  // CONTINUE WITH MANUAL LOCATION
-  // =========================================
+          console.error(
+            'Address API Error:',
+            error
+          );
 
-  continueWithManualLocation(): void {
+        }
 
-    this.saveManualLocation();
+      });
 
   }
 
@@ -467,49 +469,15 @@ export class LocationComponent
 
   private continueAfterLocation(): void {
 
-    // =========================================
-    // ADD-TO-CART FLOW
-    // =========================================
-
-    if (
-      this.returnUrl &&
-      this.addItemId !== null
-    ) {
-
-      console.log(
-        'Returning to menu after location selection.',
-        {
-          returnUrl:
-            this.returnUrl,
-
-          addItemId:
-            this.addItemId
-        }
-      );
-
-
-      this.router.navigateByUrl(
-
-        `${this.returnUrl}?addItem=${this.addItemId}`
-
-      );
-
-      return;
-
-    }
-
-
-    // =========================================
-    // NORMAL LOCATION FLOW
-    // =========================================
-
-    this.goToHome();
+    this.router.navigateByUrl(
+      this.returnUrl
+    );
 
   }
 
 
   // =========================================
-  // GET AREA COORDINATES
+  // AREA COORDINATES
   // =========================================
 
   private getAreaCoordinates(
@@ -519,286 +487,94 @@ export class LocationComponent
     area: string
 
   ): {
-
     latitude: number;
-
     longitude: number;
+  } {
 
-  } | null {
+    // -----------------------------------------
+    // KARACHI
+    // -----------------------------------------
 
+    if (
+      city === 'Karachi'
+    ) {
 
-    // =========================================
-    // KARACHI AREAS
-    // =========================================
-
-    if (city === 'Karachi') {
-
-      const karachiAreas: {
-
-        [key: string]: {
-
-          latitude: number;
-
-          longitude: number;
-
-        };
-
-      } = {
-
-        'DHA': {
-
-          latitude:
-            24.8138,
-
-          longitude:
-            67.0307
-
-        },
-
-
-        'Clifton': {
-
-          latitude:
-            24.8138,
-
-          longitude:
-            67.0281
-
-        },
-
-
-        'Gulshan-e-Iqbal': {
-
-          latitude:
-            24.9207,
-
-          longitude:
-            67.0927
-
-        },
-
-
-        'Gulistan-e-Johar': {
-
-          latitude:
-            24.9056,
-
-          longitude:
-            67.1248
-
-        },
-
-
-        'North Nazimabad': {
-
-          latitude:
-            24.9434,
-
-          longitude:
-            67.0547
-
-        },
-
+      const coordinates:
+        Record<
+          string,
+          {
+            latitude: number;
+            longitude: number;
+          }
+        > = {
 
         'PECHS': {
-
-          latitude:
-            24.8697,
-
-          longitude:
-            67.0656
-
+          latitude: 24.8742,
+          longitude: 67.0608
         },
 
+        'DHA': {
+          latitude: 24.8138,
+          longitude: 67.0304
+        },
+
+        'Gulshan': {
+          latitude: 24.9263,
+          longitude: 67.0997
+        },
+
+        'North Nazimabad': {
+          latitude: 24.9441,
+          longitude: 67.0347
+        },
+
+        'Clifton': {
+          latitude: 24.8138,
+          longitude: 67.0287
+        },
+
+        'Johar': {
+          latitude: 24.9167,
+          longitude: 67.1333
+        },
+
+        'Gulistan-e-Johar': {
+          latitude: 24.9180,
+          longitude: 67.1330
+        },
 
         'Saddar': {
-
-          latitude:
-            24.8580,
-
-          longitude:
-            67.0099
-
-        },
-
-
-        'Bahadurabad': {
-
-          latitude:
-            24.8836,
-
-          longitude:
-            67.0738
-
-        },
-
-
-        'Nazimabad': {
-
-          latitude:
-            24.9126,
-
-          longitude:
-            67.0314
-
-        },
-
-
-        'Korangi': {
-
-          latitude:
-            24.8297,
-
-          longitude:
-            67.1403
-
+          latitude: 24.8607,
+          longitude: 67.0011
         }
 
       };
 
 
       return (
-        karachiAreas[area] ||
-        null
+        coordinates[area] ||
+        {
+          latitude: 24.8607,
+          longitude: 67.0011
+        }
       );
 
     }
 
 
-    // =========================================
-    // CITY COORDINATES
-    // =========================================
+    // -----------------------------------------
+    // DEFAULT
+    // -----------------------------------------
 
-    const cityCoordinates: {
+    return {
 
-      [key: string]: {
+      latitude:
+        24.8607,
 
-        latitude: number;
-
-        longitude: number;
-
-      };
-
-    } = {
-
-      'Lahore': {
-
-        latitude:
-          31.5204,
-
-        longitude:
-          74.3587
-
-      },
-
-
-      'Islamabad': {
-
-        latitude:
-          33.6844,
-
-        longitude:
-          73.0479
-
-      },
-
-
-      'Rawalpindi': {
-
-        latitude:
-          33.5651,
-
-        longitude:
-          73.0169
-
-      },
-
-
-      'Faisalabad': {
-
-        latitude:
-          31.4504,
-
-        longitude:
-          73.1350
-
-      },
-
-
-      'Multan': {
-
-        latitude:
-          30.1575,
-
-        longitude:
-          71.5249
-
-      },
-
-
-      'Hyderabad': {
-
-        latitude:
-          25.3960,
-
-        longitude:
-          68.3578
-
-      }
+      longitude:
+        67.0011
 
     };
-
-
-    return (
-      cityCoordinates[city] ||
-      null
-    );
-
-  }
-
-
-  // =========================================
-  // GO HOME
-  // =========================================
-
-  private goToHome(): void {
-
-    this.router.navigate([
-      '/home'
-    ]);
-
-  }
-
-
-  // =========================================
-  // CHANGE LOCATION
-  // =========================================
-
-  changeLocation(): void {
-
-    this.errorMessage =
-      '';
-
-    this.showManualLocation =
-      true;
-
-  }
-
-
-  // =========================================
-  // LOCATION DISPLAY NAME
-  // =========================================
-
-  get locationDisplayName(): string {
-
-    if (!this.selectedLocation) {
-
-      return 'Your location';
-
-    }
-
-
-    return this.selectedLocation.address;
 
   }
 

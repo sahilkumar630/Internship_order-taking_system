@@ -299,6 +299,44 @@
 }
 
 
+.area-label {
+
+  margin-top: 16px;
+
+}
+
+
+/* =========================================
+   CITY LOADING
+========================================= */
+
+.location-loading {
+
+  width: 100%;
+
+  min-height: 50px;
+
+  display: flex;
+
+  align-items: center;
+
+  padding: 0 14px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #e3d8eb;
+
+  border-radius: 12px;
+
+  background: white;
+
+  color: #888;
+
+  font-size: 13px;
+
+}
+
+
 /* =========================================
    SELECT
 ========================================= */
@@ -327,6 +365,10 @@
 
   box-sizing: border-box;
 
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
 }
 
 
@@ -345,6 +387,87 @@
   opacity: 0.65;
 
   cursor: not-allowed;
+
+}
+
+
+/* =========================================
+   SELECTED LOCATION PREVIEW
+========================================= */
+
+.selected-location-preview {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 16px;
+
+  padding: 12px 14px;
+
+  border: 1px solid #eadcf5;
+
+  border-radius: 12px;
+
+  background: #f8f1ff;
+
+}
+
+
+.preview-icon {
+
+  width: 36px;
+
+  height: 36px;
+
+  flex: 0 0 36px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: white;
+
+  font-size: 18px;
+
+}
+
+
+.selected-location-preview div {
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+}
+
+
+.selected-location-preview strong {
+
+  color: #33243d;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+}
+
+
+.selected-location-preview small {
+
+  color: #8d8195;
+
+  font-size: 11px;
 
 }
 
@@ -405,6 +528,55 @@
 
 
 /* =========================================
+   CANCEL BUTTON
+========================================= */
+
+.cancel-button {
+
+  width: 100%;
+
+  height: 45px;
+
+  margin-top: 9px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: transparent;
+
+  color: #777;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+
+}
+
+
+.cancel-button:hover:not(:disabled) {
+
+  background: #f3eef7;
+
+  color: #7b2cbf;
+
+}
+
+
+.cancel-button:disabled {
+
+  opacity: 0.5;
+
+  cursor: not-allowed;
+
+}
+
+
+/* =========================================
    MOBILE
 ========================================= */
 
@@ -443,6 +615,13 @@
   .manual-location {
 
     padding: 18px;
+
+  }
+
+
+  .selected-location-preview {
+
+    padding: 11px 12px;
 
   }
 

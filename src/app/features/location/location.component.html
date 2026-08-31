@@ -19,6 +19,7 @@
       Where should we deliver?
     </h1>
 
+
     <p>
       Allow Foodie to use your location
       to find restaurants that deliver to you.
@@ -32,14 +33,20 @@
     <button
       type="button"
       class="location-button"
-      [disabled]="isLoading"
-      (click)="useCurrentLocation()">
+      [disabled]="
+        isLoading ||
+        isSavingAddress
+      "
+      (click)="useCurrentLocation()"
+    >
 
       @if (isLoading) {
 
         Getting your location...
 
-      } @else {
+      }
+
+      @else {
 
         📍 Use My Current Location
 
@@ -55,7 +62,12 @@
     <button
       type="button"
       class="manual-button"
-      (click)="openManualLocation()">
+      [disabled]="
+        isLoading ||
+        isSavingAddress
+      "
+      (click)="openManualLocation()"
+    >
 
       Enter Location Manually
 
@@ -89,6 +101,7 @@
           Select your delivery location
         </h3>
 
+
         <p>
           Choose your city and area so we can
           find restaurants that deliver to you.
@@ -103,35 +116,54 @@
           City
         </label>
 
-        <select
-          id="city"
-          [(ngModel)]="selectedCity"
-          (change)="selectedArea = ''">
 
-          <option
-            value=""
-            disabled>
+        @if (isLoadingCities) {
 
-            Select your city
+          <div class="location-loading">
 
-          </option>
+            Loading cities...
 
+          </div>
 
-          @for (
-            city of cities;
-            track city
-          ) {
+        }
+
+        @else {
+
+          <select
+            id="city"
+            [(ngModel)]="selectedCity"
+            (change)="onCityChange()"
+            [disabled]="isSavingAddress"
+          >
 
             <option
-              [value]="city">
+              value=""
+              disabled
+            >
 
-              {{ city }}
+              Select your city
 
             </option>
 
-          }
 
-        </select>
+            @for (
+              city of cities;
+              track city.id
+            ) {
+
+              <option
+                [value]="city.name"
+              >
+
+                {{ city.name }}
+
+              </option>
+
+            }
+
+          </select>
+
+        }
 
 
         <!-- =====================================
@@ -140,19 +172,27 @@
 
         <label
           for="area"
-          class="area-label">
+          class="area-label"
+        >
 
           Delivery Area
 
         </label>
 
+
         <select
           id="area"
-          [(ngModel)]="selectedArea">
+          [(ngModel)]="selectedArea"
+          [disabled]="
+            !selectedCityId ||
+            isSavingAddress
+          "
+        >
 
           <option
             value=""
-            disabled>
+            disabled
+          >
 
             Select your area
 
@@ -165,7 +205,8 @@
           ) {
 
             <option
-              [value]="area">
+              [value]="area"
+            >
 
               {{ area }}
 
@@ -177,19 +218,66 @@
 
 
         <!-- =====================================
+             SELECTED LOCATION PREVIEW
+        ====================================== -->
+
+        @if (
+          selectedCity &&
+          selectedArea
+        ) {
+
+          <div class="selected-location-preview">
+
+            <span class="preview-icon">
+              📍
+            </span>
+
+            <div>
+
+              <strong>
+                {{ selectedArea }}
+              </strong>
+
+              <small>
+                {{ selectedCity }}
+              </small>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- =====================================
              CONTINUE
         ====================================== -->
 
         <button
           type="button"
           class="continue-button"
-          [disabled]="
-            !selectedCity ||
-            !selectedArea
-          "
-          (click)="saveManualLocation()">
 
-          Continue
+          [disabled]="
+            !selectedCityId ||
+            !selectedArea ||
+            isSavingAddress ||
+            isLoadingCities
+          "
+
+          (click)="saveManualLocation()"
+        >
+
+          @if (isSavingAddress) {
+
+            Saving location...
+
+          }
+
+          @else {
+
+            Continue
+
+          }
 
         </button>
 
@@ -201,7 +289,11 @@
         <button
           type="button"
           class="cancel-button"
-          (click)="closeManualLocation()">
+
+          [disabled]="isSavingAddress"
+
+          (click)="closeManualLocation()"
+        >
 
           Cancel
 
