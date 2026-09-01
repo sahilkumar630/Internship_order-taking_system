@@ -83,7 +83,7 @@ export const routes: Routes = [
   {
     path: 'restaurant/:id/menu',
     loadComponent: () =>
-      import('./features/restaurant/menu/menu.component')
+      import('./features/restaurant/Menu/menu.component')
         .then(m => m.MenuComponent)
   },
 
