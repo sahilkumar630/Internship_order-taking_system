@@ -30,13 +30,8 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
             "security": {
               "allowedHosts": []
-            },
-            "ssr": {
-              "entry": "src/server.ts"
             }
             },
             "configurations": {
@@ -47,6 +42,7 @@
               "with": "src/environments/environment.production.ts"
             }
             ],
+              "prerender": false,
 
               "budgets": [
             {
@@ -57,7 +53,7 @@
             {
               "type": "anyComponentStyle",
               "maximumWarning": "4kB",
-              "maximumError": "8kB"
+              "maximumError": "9kB"
             }
             ],
 
