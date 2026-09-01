@@ -1,1 +1,670 @@
-<p>checkout works!</p>
+<div class="checkout-page">
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <header class="checkout-header">
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="backToCart()">
+
+      ←
+
+    </button>
+
+
+    <div class="checkout-title">
+
+      <h1>
+        Checkout
+      </h1>
+
+      <span>
+        Complete your order
+      </span>
+
+    </div>
+
+
+    <div class="header-spacer"></div>
+
+  </header>
+
+
+  <!-- =========================================
+       LOADING CHECKOUT
+  ========================================== -->
+
+  @if (isLoading) {
+
+    <main class="checkout-content">
+
+      <div class="state-message">
+
+        <div class="loading-spinner"></div>
+
+        <h2>
+          Loading checkout...
+        </h2>
+
+        <p>
+          Please wait while we prepare your order.
+        </p>
+
+      </div>
+
+    </main>
+
+  }
+
+  @else {
+
+    <main class="checkout-content">
+
+
+      <!-- =====================================
+           ERROR
+      ====================================== -->
+
+      @if (errorMessage) {
+
+        <div class="error-message">
+
+          <span>
+            ⚠️
+          </span>
+
+          <span>
+            {{ errorMessage }}
+          </span>
+
+        </div>
+
+      }
+
+
+      <!-- =====================================
+           DELIVERY ADDRESS
+      ====================================== -->
+
+      <section class="checkout-card">
+
+        <div class="card-heading">
+
+          <div>
+
+            <span class="heading-icon">
+              📍
+            </span>
+
+            <div>
+
+              <h2>
+                Delivery Address
+              </h2>
+
+              <p>
+                Where should we deliver your order?
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="change-button"
+            (click)="changeAddress()">
+
+            Change
+
+          </button>
+
+        </div>
+
+
+        <!-- ===================================
+             LOADING ADDRESS
+        ==================================== -->
+
+        @if (isLoadingAddress) {
+
+          <div class="address-loading">
+
+            <div class="loading-spinner small"></div>
+
+            <div>
+
+              <strong>
+                Loading delivery address
+              </strong>
+
+              <p>
+                Checking your saved addresses...
+              </p>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- ===================================
+             SAVED ADDRESS
+        ==================================== -->
+
+        @else if (hasDeliveryAddress()) {
+
+          <div class="address-box">
+
+            <div class="address-icon">
+              🏠
+            </div>
+
+
+            <div class="address-details">
+
+              <strong>
+                {{ userLocation?.label || 'Delivery Address' }}
+              </strong>
+
+
+              <p>
+                {{ getDeliveryAddress() }}
+              </p>
+
+
+              @if (getDeliveryArea()) {
+
+                <small>
+                  {{ getDeliveryArea() }}
+                </small>
+
+              }
+
+
+              @if (userLocation?.userAddressId) {
+
+                <small class="address-id">
+
+                  Address ID:
+                  {{ userLocation?.userAddressId }}
+
+                </small>
+
+              }
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- ===================================
+             NO ADDRESS
+        ==================================== -->
+
+        @else {
+
+          <div class="no-address">
+
+            <span>
+              📍
+            </span>
+
+
+            <div>
+
+              <strong>
+                No delivery address
+              </strong>
+
+              <p>
+                Please select your delivery location.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              (click)="changeAddress()">
+
+              Select
+
+            </button>
+
+          </div>
+
+        }
+
+      </section>
+
+
+      <!-- =====================================
+           ORDER SUMMARY
+      ====================================== -->
+
+      <section class="checkout-card">
+
+        <div class="section-title">
+
+          <div>
+
+            <h2>
+              Order Summary
+            </h2>
+
+            <span>
+
+              {{ itemCount }}
+              {{ getItemCountLabel() }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================
+             CART ITEMS
+        ==================================== -->
+
+        <div class="checkout-items">
+
+          @for (
+            item of cartItems;
+            track $index
+          ) {
+
+            <div class="checkout-item">
+
+
+              <!-- ===============================
+                   ITEM IMAGE
+              ================================= -->
+
+              <div class="item-image">
+
+                @if (
+                  item.images &&
+                  item.images.length > 0
+                ) {
+
+                  <img
+                    [src]="item.images[0]"
+                    [alt]="item.name"
+                  />
+
+                }
+
+                @else {
+
+                  <span>
+                    🍽️
+                  </span>
+
+                }
+
+              </div>
+
+
+              <!-- ===============================
+                   ITEM INFORMATION
+              ================================= -->
+
+              <div class="item-info">
+
+                <h3>
+                  {{ item.name }}
+                </h3>
+
+                <span>
+                  Qty: {{ item.quantity }}
+                </span>
+
+              </div>
+
+
+              <!-- ===============================
+                   ITEM PRICE
+              ================================= -->
+
+              <div class="item-price">
+
+                Rs.
+                {{ getItemTotal(item) | number:'1.2-2' }}
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+
+        <!-- ===================================
+             TOTALS
+        ==================================== -->
+
+        <div class="price-summary">
+
+          <div>
+
+            <span>
+              Subtotal
+            </span>
+
+            <strong>
+
+              Rs.
+              {{ subtotal | number:'1.2-2' }}
+
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Delivery Fee
+            </span>
+
+            <strong>
+              Rs. 0.00
+            </strong>
+
+          </div>
+
+
+          <div class="total-row">
+
+            <span>
+              Total
+            </span>
+
+            <strong>
+
+              Rs.
+              {{ subtotal | number:'1.2-2' }}
+
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================
+           PAYMENT METHOD
+      ====================================== -->
+
+      <section class="checkout-card">
+
+        <div class="section-title">
+
+          <div>
+
+            <h2>
+              Payment Method
+            </h2>
+
+            <span>
+              Choose how you want to pay
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="payment-options">
+
+
+          <!-- =================================
+               CASH ON DELIVERY
+          ================================== -->
+
+          <button
+            type="button"
+            class="payment-option"
+
+            [class.selected]="
+              paymentMethod === 'cash'
+            "
+
+            (click)="
+              selectPaymentMethod('cash')
+            "
+          >
+
+            <div class="payment-icon cash">
+              💵
+            </div>
+
+
+            <div class="payment-info">
+
+              <strong>
+                Cash on Delivery
+              </strong>
+
+              <span>
+                Pay when your order arrives
+              </span>
+
+            </div>
+
+
+            <span
+              class="radio"
+
+              [class.active]="
+                paymentMethod === 'cash'
+              "
+            ></span>
+
+          </button>
+
+
+          <!-- =================================
+               WALLET
+          ================================== -->
+
+          <button
+            type="button"
+            class="payment-option"
+
+            [class.selected]="
+              paymentMethod === 'wallet'
+            "
+
+            (click)="
+              selectPaymentMethod('wallet')
+            "
+          >
+
+            <div class="payment-icon wallet">
+              💳
+            </div>
+
+
+            <div class="payment-info">
+
+              <strong>
+                Pay with Wallet
+              </strong>
+
+              <span>
+                Use your Foodie wallet balance
+              </span>
+
+            </div>
+
+
+            <span
+              class="radio"
+
+              [class.active]="
+                paymentMethod === 'wallet'
+              "
+            ></span>
+
+          </button>
+
+        </div>
+
+
+        <!-- ===================================
+             WALLET INFORMATION
+        ==================================== -->
+
+        @if (
+          paymentMethod === 'wallet'
+        ) {
+
+          <div class="wallet-info">
+
+            <div class="wallet-info-icon">
+              💳
+            </div>
+
+            <div>
+
+              <strong>
+                Wallet Payment
+              </strong>
+
+              <p>
+                Your wallet balance will be used
+                for this order.
+              </p>
+
+            </div>
+
+          </div>
+
+        }
+
+      </section>
+
+
+      <!-- =====================================
+           ORDER NOTES
+      ====================================== -->
+
+      <section class="checkout-card">
+
+        <div class="section-title">
+
+          <div>
+
+            <h2>
+              Order Notes
+            </h2>
+
+            <span>
+              Optional instructions for the restaurant
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <textarea
+          [(ngModel)]="notes"
+          placeholder="Add any special instructions..."
+          rows="4"
+        ></textarea>
+
+      </section>
+
+
+      <!-- =====================================
+           PLACE ORDER
+      ====================================== -->
+
+      <section class="place-order-section">
+
+        <div class="final-total">
+
+          <span>
+            Total Amount
+          </span>
+
+          <strong>
+
+            Rs.
+            {{ subtotal | number:'1.2-2' }}
+
+          </strong>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="place-order-button"
+
+          [disabled]="
+            isPlacingOrder ||
+            isLoadingAddress ||
+            cartItems.length === 0 ||
+            !hasDeliveryAddress()
+          "
+
+          (click)="placeOrder()"
+        >
+
+          @if (isPlacingOrder) {
+
+            <span
+              class="button-spinner"
+            ></span>
+
+            Placing Order...
+
+          }
+
+          @else if (isLoadingAddress) {
+
+            <span
+              class="button-spinner"
+            ></span>
+
+            Loading Address...
+
+          }
+
+          @else {
+
+            <span>
+              🛒
+            </span>
+
+            Place Order
+
+          }
+
+        </button>
+
+      </section>
+
+
+    </main>
+
+  }
+
+</div>

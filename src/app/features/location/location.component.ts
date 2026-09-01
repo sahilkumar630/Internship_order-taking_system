@@ -22,11 +22,13 @@ import {
 
 import {
   UserLocation,
-  City
+  City,
+  SavedAddress
 } from '../../shared/models/location.model';
 
 
 @Component({
+
   selector: 'app-location',
 
   standalone: true,
@@ -41,6 +43,7 @@ import {
 
   styleUrl:
     './location.component.css'
+
 })
 export class LocationComponent
   implements OnInit {
@@ -51,6 +54,21 @@ export class LocationComponent
   // =========================================
 
   cities: City[] = [];
+
+
+  // =========================================
+  // SAVED ADDRESSES
+  // =========================================
+
+  savedAddresses: SavedAddress[] = [];
+
+
+  // =========================================
+  // SELECTED SAVED ADDRESS
+  // =========================================
+
+  selectedAddressId:
+    number | null = null;
 
 
   // =========================================
@@ -105,6 +123,8 @@ export class LocationComponent
 
   isLoadingCities = false;
 
+  isLoadingAddresses = false;
+
   showManualLocation = false;
 
   errorMessage = '';
@@ -150,6 +170,8 @@ export class LocationComponent
 
     this.loadCities();
 
+    this.loadSavedAddresses();
+
   }
 
 
@@ -170,34 +192,237 @@ export class LocationComponent
 
       .subscribe({
 
-        next: cities => {
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        next: (cities: City[]) => {
 
           this.cities =
-            cities;
+            cities ?? [];
+
 
           this.isLoadingCities =
             false;
+
+
+          console.log(
+            'Cities loaded:',
+            this.cities
+          );
 
         },
 
 
-        error: error => {
+        // =====================================
+        // ERROR
+        // =====================================
+
+        error: (error: unknown) => {
 
           this.isLoadingCities =
             false;
 
-          this.errorMessage =
-            error?.message ||
-            'Unable to load cities.';
 
           console.error(
             'City API Error:',
             error
           );
 
+
+          this.errorMessage =
+            this.getErrorMessage(
+              error,
+              'Unable to load cities.'
+            );
+
         }
 
       });
+
+  }
+
+
+  // =========================================
+  // LOAD SAVED ADDRESSES
+  // =========================================
+
+  private loadSavedAddresses(): void {
+
+    this.isLoadingAddresses =
+      true;
+
+
+    this.locationService
+
+      .getMyAddresses()
+
+      .subscribe({
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        next: (addresses: SavedAddress[]) => {
+
+          this.savedAddresses =
+            addresses ?? [];
+
+
+          this.isLoadingAddresses =
+            false;
+
+
+          console.log(
+            'Saved addresses:',
+            this.savedAddresses
+          );
+
+
+          // -----------------------------------
+          // SELECT DEFAULT ADDRESS
+          // -----------------------------------
+
+          const defaultAddress =
+            this.savedAddresses.find(
+              address =>
+                address.default === true
+            );
+
+
+          if (defaultAddress) {
+
+            this.selectSavedAddress(
+              defaultAddress
+            );
+
+          }
+
+        },
+
+
+        // =====================================
+        // ERROR
+        // =====================================
+
+        error: (error: unknown) => {
+
+          this.isLoadingAddresses =
+            false;
+
+
+          console.error(
+            'Saved Address API Error:',
+            error
+          );
+
+
+          /*
+           * Do not block the user from adding
+           * a new address if the saved-address
+           * API fails.
+           */
+
+        }
+
+      });
+
+  }
+
+
+  // =========================================
+  // SELECT SAVED ADDRESS
+  // =========================================
+
+  selectSavedAddress(
+    address: SavedAddress
+  ): void {
+
+    if (
+      !address ||
+      !address.id
+    ) {
+
+      return;
+
+    }
+
+
+    // -----------------------------------------
+    // SAVE SELECTED ADDRESS ID
+    // -----------------------------------------
+
+    this.selectedAddressId =
+      address.id;
+
+
+    // -----------------------------------------
+    // CREATE USER LOCATION
+    // -----------------------------------------
+
+    const location:
+      UserLocation = {
+
+        latitude:
+          Number(
+            address.latitude ?? 0
+          ),
+
+        longitude:
+          Number(
+            address.longitude ?? 0
+          ),
+
+        address:
+          address.address ??
+          '',
+
+        source:
+          'manual',
+
+        cityId:
+          address.cityId,
+
+        userAddressId:
+          address.id,
+
+        label:
+          address.label,
+
+        area:
+          address.area,
+
+        houseNumber:
+          address.houseNumber,
+
+        floor:
+          address.floor,
+
+        apartment:
+          address.apartment,
+
+        landmark:
+          address.landmark,
+
+        isDefault:
+          address.default
+
+      };
+
+
+    // -----------------------------------------
+    // SAVE LOCATION LOCALLY
+    // -----------------------------------------
+
+    this.locationService.saveLocation(
+      location
+    );
+
+
+    console.log(
+      'Selected saved address:',
+      location
+    );
 
   }
 
@@ -217,32 +442,56 @@ export class LocationComponent
 
       .getCurrentLocation()
 
-      .then(location => {
+      .then(
+        (location: UserLocation) => {
 
-        console.log(
-          'Current location:',
-          location
-        );
-
-
-        this.isLoading =
-          false;
+          console.log(
+            'Current GPS location:',
+            location
+          );
 
 
-        this.continueAfterLocation();
+          this.isLoading =
+            false;
 
-      })
 
-      .catch(error => {
+          /*
+           * Current GPS location does not
+           * automatically have a backend
+           * userAddressId.
+           *
+           * Therefore GPS coordinates are saved
+           * locally. Checkout will require a
+           * backend saved address before an order
+           * can be placed.
+           */
 
-        this.isLoading =
-          false;
+          this.continueAfterLocation();
 
-        this.errorMessage =
-          error?.message ||
-          'Unable to get your location.';
+        }
+      )
 
-      });
+      .catch(
+        (error: unknown) => {
+
+          this.isLoading =
+            false;
+
+
+          this.errorMessage =
+            this.getErrorMessage(
+              error,
+              'Unable to get your location.'
+            );
+
+
+          console.error(
+            'Current Location Error:',
+            error
+          );
+
+        }
+      );
 
   }
 
@@ -255,6 +504,7 @@ export class LocationComponent
 
     this.showManualLocation =
       true;
+
 
     this.errorMessage =
       '';
@@ -271,11 +521,14 @@ export class LocationComponent
     this.showManualLocation =
       false;
 
+
     this.selectedCity =
       '';
 
+
     this.selectedCityId =
       null;
+
 
     this.selectedArea =
       '';
@@ -349,23 +602,27 @@ export class LocationComponent
     this.isSavingAddress =
       true;
 
+
     this.errorMessage =
       '';
 
 
     // -----------------------------------------
-    // CURRENT COORDINATES
+    // GET AREA COORDINATES
     // -----------------------------------------
 
     const coordinates =
       this.getAreaCoordinates(
+
         this.selectedCity,
+
         this.selectedArea
+
       );
 
 
     // -----------------------------------------
-    // ADDRESS
+    // CREATE ADDRESS
     // -----------------------------------------
 
     const address =
@@ -373,7 +630,7 @@ export class LocationComponent
 
 
     // -----------------------------------------
-    // CREATE LOCATION
+    // CREATE LOCATION OBJECT
     // -----------------------------------------
 
     const location:
@@ -405,8 +662,14 @@ export class LocationComponent
       };
 
 
+    console.log(
+      'Creating new address:',
+      location
+    );
+
+
     // -----------------------------------------
-    // SAVE TO BACKEND
+    // SAVE ADDRESS TO BACKEND
     // -----------------------------------------
 
     this.locationService
@@ -421,7 +684,7 @@ export class LocationComponent
         // SUCCESS
         // =====================================
 
-        next: savedLocation => {
+        next: (savedLocation: UserLocation) => {
 
           console.log(
             'Address saved successfully:',
@@ -433,6 +696,30 @@ export class LocationComponent
             false;
 
 
+          // -----------------------------------
+          // SAVE BACKEND ADDRESS LOCALLY
+          // -----------------------------------
+
+          if (
+            savedLocation
+          ) {
+
+            this.locationService.saveLocation(
+              savedLocation
+            );
+
+
+            this.userAddressWasSaved(
+              savedLocation
+            );
+
+          }
+
+
+          // -----------------------------------
+          // CONTINUE
+          // -----------------------------------
+
           this.continueAfterLocation();
 
         },
@@ -442,14 +729,18 @@ export class LocationComponent
         // ERROR
         // =====================================
 
-        error: error => {
+        error: (error: unknown) => {
 
           this.isSavingAddress =
             false;
 
+
           this.errorMessage =
-            error?.message ||
-            'Unable to save your address. Please try again.';
+            this.getErrorMessage(
+              error,
+              'Unable to save your address. Please try again.'
+            );
+
 
           console.error(
             'Address API Error:',
@@ -464,10 +755,49 @@ export class LocationComponent
 
 
   // =========================================
-  // CONTINUE AFTER LOCATION
+  // HANDLE SAVED ADDRESS
   // =========================================
 
-  private continueAfterLocation(): void {
+  private userAddressWasSaved(
+    location: UserLocation
+  ): void {
+
+    if (
+      !location.userAddressId
+    ) {
+
+      console.warn(
+        'Address was saved but userAddressId was not returned.'
+      );
+
+
+      return;
+
+    }
+
+
+    this.selectedAddressId =
+      location.userAddressId;
+
+
+    console.log(
+      'Backend userAddressId:',
+      location.userAddressId
+    );
+
+  }
+
+
+  // =========================================
+  // CONTINUE AFTER LOCATION
+  // =========================================
+  //
+  // IMPORTANT:
+  // This method is public because the HTML
+  // template calls it directly.
+  //
+
+  continueAfterLocation(): void {
 
     this.router.navigateByUrl(
       this.returnUrl
@@ -491,9 +821,10 @@ export class LocationComponent
     longitude: number;
   } {
 
-    // -----------------------------------------
+
+    // =========================================
     // KARACHI
-    // -----------------------------------------
+    // =========================================
 
     if (
       city === 'Karachi'
@@ -508,63 +839,151 @@ export class LocationComponent
           }
         > = {
 
+
+        // -------------------------------------
+        // PECHS
+        // -------------------------------------
+
         'PECHS': {
-          latitude: 24.8742,
-          longitude: 67.0608
+
+          latitude:
+            24.8742,
+
+          longitude:
+            67.0608
+
         },
+
+
+        // -------------------------------------
+        // DHA
+        // -------------------------------------
 
         'DHA': {
-          latitude: 24.8138,
-          longitude: 67.0304
+
+          latitude:
+            24.8138,
+
+          longitude:
+            67.0304
+
         },
+
+
+        // -------------------------------------
+        // GULSHAN
+        // -------------------------------------
 
         'Gulshan': {
-          latitude: 24.9263,
-          longitude: 67.0997
+
+          latitude:
+            24.9263,
+
+          longitude:
+            67.0997
+
         },
+
+
+        // -------------------------------------
+        // NORTH NAZIMABAD
+        // -------------------------------------
 
         'North Nazimabad': {
-          latitude: 24.9441,
-          longitude: 67.0347
+
+          latitude:
+            24.9441,
+
+          longitude:
+            67.0347
+
         },
+
+
+        // -------------------------------------
+        // CLIFTON
+        // -------------------------------------
 
         'Clifton': {
-          latitude: 24.8138,
-          longitude: 67.0287
+
+          latitude:
+            24.8138,
+
+          longitude:
+            67.0287
+
         },
+
+
+        // -------------------------------------
+        // JOHAR
+        // -------------------------------------
 
         'Johar': {
-          latitude: 24.9167,
-          longitude: 67.1333
+
+          latitude:
+            24.9167,
+
+          longitude:
+            67.1333
+
         },
+
+
+        // -------------------------------------
+        // GULISTAN-E-JOHAR
+        // -------------------------------------
 
         'Gulistan-e-Johar': {
-          latitude: 24.9180,
-          longitude: 67.1330
+
+          latitude:
+            24.9180,
+
+          longitude:
+            67.1330
+
         },
 
+
+        // -------------------------------------
+        // SADDAR
+        // -------------------------------------
+
         'Saddar': {
-          latitude: 24.8607,
-          longitude: 67.0011
+
+          latitude:
+            24.8607,
+
+          longitude:
+            67.0011
+
         }
 
       };
 
 
       return (
+
         coordinates[area] ||
+
         {
-          latitude: 24.8607,
-          longitude: 67.0011
+
+          latitude:
+            24.8607,
+
+          longitude:
+            67.0011
+
         }
+
       );
 
     }
 
 
-    // -----------------------------------------
-    // DEFAULT
-    // -----------------------------------------
+    // =========================================
+    // DEFAULT COORDINATES
+    // =========================================
 
     return {
 
@@ -575,6 +994,53 @@ export class LocationComponent
         67.0011
 
     };
+
+  }
+
+
+  // =========================================
+  // ERROR MESSAGE HELPER
+  // =========================================
+
+  private getErrorMessage(
+    error: unknown,
+    fallback: string
+  ): string {
+
+    if (
+      error instanceof Error &&
+      error.message
+    ) {
+
+      return error.message;
+
+    }
+
+
+    if (
+      typeof error === 'object' &&
+      error !== null
+    ) {
+
+      const apiError =
+        error as {
+          error?: {
+            message?: string;
+          };
+          message?: string;
+        };
+
+
+      return (
+        apiError.error?.message ||
+        apiError.message ||
+        fallback
+      );
+
+    }
+
+
+    return fallback;
 
   }
 

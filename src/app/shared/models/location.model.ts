@@ -1,29 +1,12 @@
 export interface UserLocation {
 
-  // =========================================
-  // LOCATION COORDINATES
-  // =========================================
-
   latitude: number;
 
   longitude: number;
 
-
-  // =========================================
-  // ADDRESS
-  // =========================================
-
   address: string;
 
-
-  // =========================================
-  // LOCATION SOURCE
-  // =========================================
-
-  source:
-    | 'current'
-    | 'manual';
-
+  source: 'current' | 'manual';
 
   // =========================================
   // BACKEND CITY ID
@@ -33,14 +16,14 @@ export interface UserLocation {
 
 
   // =========================================
-  // BACKEND USER ADDRESS ID
+  // BACKEND SAVED ADDRESS ID
   // =========================================
 
   userAddressId?: number;
 
 
   // =========================================
-  // ADDRESS DETAILS
+  // ADDRESS INFORMATION
   // =========================================
 
   label?: string;
@@ -55,31 +38,56 @@ export interface UserLocation {
 
   landmark?: string;
 
-
-  // =========================================
-  // DEFAULT ADDRESS
-  // =========================================
-
   isDefault?: boolean;
 
 }
 
 
-/* =========================================
-   CITY
-========================================= */
-
 export interface City {
 
-  // Backend city ID
   id: number;
 
-
-  // City display name
   name: string;
 
-
-  // Backend province ID
   provinceId?: string;
+
+}
+
+
+export interface SavedAddress {
+
+  id: number;
+
+  userFriendlyName?: string;
+
+  userId?: number;
+
+  cityId?: number;
+
+  cityName?: string;
+
+  label?: string;
+
+  address?: string;
+
+  area?: string;
+
+  houseNumber?: string;
+
+  floor?: string;
+
+  apartment?: string;
+
+  landmark?: string;
+
+  latitude?: number;
+
+  longitude?: number;
+
+  default?: boolean;
+
+  name?: string | null;
+
+  addedOn?: string;
 
 }

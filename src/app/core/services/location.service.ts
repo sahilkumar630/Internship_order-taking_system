@@ -19,7 +19,8 @@ import {
 
 import {
   UserLocation,
-  City
+  City,
+  SavedAddress
 } from '../../shared/models/location.model';
 
 import {
@@ -51,6 +52,10 @@ export class LocationService {
 
   private readonly addressApiUrl =
     `${environment.apiUrl}/User/address`;
+
+
+  private readonly myAddressesApiUrl =
+    `${environment.apiUrl}/User/myaddresses`;
 
 
   // =========================================
@@ -124,10 +129,14 @@ export class LocationService {
               (city: any): City => ({
 
                 id:
-                  Number(city.id),
+                  Number(
+                    city.id
+                  ),
 
                 name:
-                  String(city.name ?? ''),
+                  String(
+                    city.name ?? ''
+                  ),
 
                 provinceId:
                   city.provinceId
@@ -139,6 +148,129 @@ export class LocationService {
               (city: City) =>
                 city.id > 0 &&
                 city.name.trim().length > 0
+            );
+
+        })
+
+      );
+
+  }
+
+
+  // =========================================
+  // GET MY SAVED ADDRESSES
+  // =========================================
+
+  getMyAddresses(): Observable<SavedAddress[]> {
+
+    return this.http
+
+      .get<any>(
+        this.myAddressesApiUrl
+      )
+
+      .pipe(
+
+        map(response => {
+
+          // -----------------------------------
+          // VALIDATE RESPONSE
+          // -----------------------------------
+
+          if (
+            !response ||
+            response.responseStatus !== 1
+          ) {
+
+            throw new Error(
+              response?.message ||
+              'Unable to load saved addresses.'
+            );
+
+          }
+
+
+          // -----------------------------------
+          // VALIDATE DATA
+          // -----------------------------------
+
+          if (
+            !Array.isArray(response.data)
+          ) {
+
+            return [];
+
+          }
+
+
+          // -----------------------------------
+          // MAP ADDRESS DATA
+          // -----------------------------------
+
+          return response.data
+
+            .map(
+              (address: any): SavedAddress => ({
+
+                id:
+                  Number(
+                    address.id
+                  ),
+
+                userFriendlyName:
+                  address.userFriendlyName,
+
+                userId:
+                  address.userId,
+
+                cityId:
+                  address.cityId,
+
+                cityName:
+                  address.cityName,
+
+                label:
+                  address.label,
+
+                address:
+                  address.address,
+
+                area:
+                  address.area,
+
+                houseNumber:
+                  address.houseNumber,
+
+                floor:
+                  address.floor,
+
+                apartment:
+                  address.apartment,
+
+                landmark:
+                  address.landmark,
+
+                latitude:
+                  address.latitude,
+
+                longitude:
+                  address.longitude,
+
+                default:
+                  address.default,
+
+                name:
+                  address.name,
+
+                addedOn:
+                  address.addedOn
+
+              })
+            )
+
+            .filter(
+              (address: SavedAddress) =>
+                address.id > 0
             );
 
         })
@@ -247,7 +379,9 @@ export class LocationService {
               'Unable to get your location.';
 
 
-            switch (error.code) {
+            switch (
+              error.code
+            ) {
 
               case error.PERMISSION_DENIED:
 
@@ -276,7 +410,9 @@ export class LocationService {
 
 
             reject(
-              new Error(message)
+              new Error(
+                message
+              )
             );
 
           },
@@ -544,7 +680,9 @@ export class LocationService {
     // SSR PROTECTION
     // -----------------------------------------
 
-    if (!this.isBrowser()) {
+    if (
+      !this.isBrowser()
+    ) {
 
       return;
 
@@ -568,13 +706,16 @@ export class LocationService {
   // GET SAVED LOCATION
   // =========================================
 
-  getLocation(): UserLocation | null {
+  getLocation():
+    UserLocation | null {
 
     // -----------------------------------------
     // SSR PROTECTION
     // -----------------------------------------
 
-    if (!this.isBrowser()) {
+    if (
+      !this.isBrowser()
+    ) {
 
       return null;
 
@@ -587,7 +728,9 @@ export class LocationService {
       );
 
 
-    if (!storedLocation) {
+    if (
+      !storedLocation
+    ) {
 
       return null;
 
@@ -619,7 +762,8 @@ export class LocationService {
   // GET USER ADDRESS ID
   // =========================================
 
-  getUserAddressId(): number | null {
+  getUserAddressId():
+    number | null {
 
     const location =
       this.getLocation();
@@ -664,7 +808,9 @@ export class LocationService {
     // SSR PROTECTION
     // -----------------------------------------
 
-    if (!this.isBrowser()) {
+    if (
+      !this.isBrowser()
+    ) {
 
       return;
 

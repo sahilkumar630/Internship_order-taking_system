@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import {
+  Injectable
+} from '@angular/core';
 
 import {
   HttpClient
@@ -189,6 +191,10 @@ export class CartService {
     );
 
 
+    // =========================================
+    // API REQUEST
+    // =========================================
+
     return this.http
 
       .post<ApiResponse<Cart>>(
@@ -206,20 +212,81 @@ export class CartService {
           );
 
 
+          // =====================================
+          // API FAILED
+          // =====================================
+
           if (
-            response.data
+            response.responseStatus !== 1
           ) {
 
-            this.cart =
-              response.data;
+            const message =
+              response.message ||
+              'Unable to add item to cart.';
+
+
+            console.error(
+              'Cart Add Failed:',
+              message
+            );
+
+
+            /*
+             * IMPORTANT:
+             *
+             * Do NOT return the existing cart here.
+             *
+             * Throwing the error sends execution
+             * to the component's error handler.
+             *
+             * Therefore the success popup will NOT
+             * be shown when the API rejects the item.
+             */
+
+            throw new Error(
+              message
+            );
 
           }
+
+
+          // =====================================
+          // API SUCCESS BUT NO DATA
+          // =====================================
+
+          if (
+            !response.data
+          ) {
+
+            throw new Error(
+              'Item was accepted but no cart data was returned.'
+            );
+
+          }
+
+
+          // =====================================
+          // SAVE UPDATED CART
+          // =====================================
+
+          this.cart =
+            response.data;
+
+
+          console.log(
+            'Item successfully added to cart:',
+            this.cart
+          );
 
 
           return this.cart;
 
         }),
 
+
+        // =====================================
+        // HTTP / API ERROR
+        // =====================================
 
         catchError(error => {
 
@@ -228,6 +295,13 @@ export class CartService {
             error
           );
 
+
+          /*
+           * Re-throw the error.
+           *
+           * The MenuComponent will receive it
+           * inside subscribe({ error: ... }).
+           */
 
           throw error;
 
@@ -296,6 +370,26 @@ export class CartService {
             response
           );
 
+
+          // =====================================
+          // API FAILED
+          // =====================================
+
+          if (
+            response.responseStatus !== 1
+          ) {
+
+            throw new Error(
+              response.message ||
+              'Unable to update cart quantity.'
+            );
+
+          }
+
+
+          // =====================================
+          // UPDATED CART
+          // =====================================
 
           if (
             response.data
@@ -432,8 +526,7 @@ export class CartService {
 
     // =========================================
     // QUANTITY = 1
-    //
-    // Remove item completely
+    // REMOVE ITEM
     // =========================================
 
     if (
@@ -569,9 +662,25 @@ export class CartService {
           );
 
 
-          // ===================================
+          // =====================================
+          // API FAILED
+          // =====================================
+
+          if (
+            response.responseStatus !== 1
+          ) {
+
+            throw new Error(
+              response.message ||
+              'Unable to remove cart item.'
+            );
+
+          }
+
+
+          // =====================================
           // UPDATED CART
-          // ===================================
+          // =====================================
 
           if (
             response.data
@@ -616,71 +725,97 @@ export class CartService {
   }
 
 
+  // =========================================
+  // CLEAR CART
+  // =========================================
 
-// =========================================
-// CLEAR CART
-// =========================================
-
-clearCart(
-  businessLocationId: number
-): Observable<Cart | null> {
-
-  const body = {
-
-    businessLocationId:
-      businessLocationId
-
-  };
+  clearCart(
+    businessLocationId: number
+  ): Observable<Cart | null> {
 
 
-  console.log(
-    'Clearing cart:',
-    body
-  );
+    const body = {
+
+      businessLocationId:
+        businessLocationId
+
+    };
 
 
-  return this.http
-
-    .delete<ApiResponse<Cart>>(
-      `${this.apiUrl}/clear`,
-      {
-        body: body
-      }
-    )
-
-    .pipe(
-
-      map(response => {
-
-        console.log(
-          'Clear Cart Response:',
-          response
-        );
-
-
-        this.cart = null;
-
-
-        return null;
-
-      }),
-
-
-      catchError(error => {
-
-        console.error(
-          'Clear Cart API Error:',
-          error
-        );
-
-
-        throw error;
-
-      })
-
+    console.log(
+      'Clearing cart:',
+      body
     );
 
-}
+
+    return this.http
+
+      .delete<ApiResponse<Cart>>(
+        `${this.apiUrl}/clear`,
+
+        {
+          body:
+            body
+        }
+
+      )
+
+      .pipe(
+
+        map(response => {
+
+          console.log(
+            'Clear Cart Response:',
+            response
+          );
+
+
+          // =====================================
+          // API FAILED
+          // =====================================
+
+          if (
+            response.responseStatus !== 1
+          ) {
+
+            throw new Error(
+              response.message ||
+              'Unable to clear cart.'
+            );
+
+          }
+
+
+          // =====================================
+          // CLEAR LOCAL CART
+          // =====================================
+
+          this.cart =
+            null;
+
+
+          return null;
+
+        }),
+
+
+        catchError(error => {
+
+          console.error(
+            'Clear Cart API Error:',
+            error
+          );
+
+
+          throw error;
+
+        })
+
+      );
+
+  }
+
+
   // =========================================
   // GET SUBTOTAL
   // =========================================

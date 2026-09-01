@@ -2,6 +2,7 @@
 
   <div class="location-card">
 
+
     <!-- =========================================
          ICON
     ========================================== -->
@@ -21,9 +22,329 @@
 
 
     <p>
-      Allow Foodie to use your location
-      to find restaurants that deliver to you.
+      Select a saved address or add a new
+      delivery location.
     </p>
+
+
+    <!-- =========================================
+         LOADING SAVED ADDRESSES
+    ========================================== -->
+
+    @if (isLoadingAddresses) {
+
+      <div class="addresses-loading">
+
+        <div class="loading-spinner"></div>
+
+        <span>
+          Loading your addresses...
+        </span>
+
+      </div>
+
+    }
+
+
+    <!-- =========================================
+         SAVED ADDRESSES
+    ========================================== -->
+
+    @if (
+      !isLoadingAddresses &&
+      savedAddresses.length > 0
+    ) {
+
+      <div class="saved-addresses">
+
+
+        <!-- =====================================
+             SECTION HEADER
+        ====================================== -->
+
+        <div class="section-header">
+
+          <h3>
+            Saved Addresses
+          </h3>
+
+          <span>
+            {{ savedAddresses.length }}
+            {{ savedAddresses.length === 1 ? 'address' : 'addresses' }}
+          </span>
+
+        </div>
+
+
+        <!-- =====================================
+             ADDRESS LIST
+        ====================================== -->
+
+        <div class="address-list">
+
+          @for (
+            address of savedAddresses;
+            track address.id
+          ) {
+
+            <button
+              type="button"
+              class="address-card"
+
+              [class.selected]="
+                selectedAddressId === address.id
+              "
+
+              [disabled]="
+                isLoading ||
+                isSavingAddress
+              "
+
+              (click)="selectSavedAddress(address)"
+            >
+
+
+              <!-- ===============================
+                   ADDRESS ICON
+              ================================= -->
+
+              <div class="address-icon">
+
+                @if (
+                  address.label?.toLowerCase() === 'home'
+                ) {
+
+                  🏠
+
+                }
+
+                @else {
+
+                  📍
+
+                }
+
+              </div>
+
+
+              <!-- ===============================
+                   ADDRESS INFORMATION
+              ================================= -->
+
+              <div class="address-info">
+
+                <div class="address-title-row">
+
+                  <strong>
+                    {{ address.label || 'Address' }}
+                  </strong>
+
+
+                  @if (address.default) {
+
+                    <span class="default-badge">
+                      Default
+                    </span>
+
+                  }
+
+                </div>
+
+
+                <!-- ADDRESS -->
+
+                <p class="address-main">
+
+                  {{ address.address || 'Saved address' }}
+
+                </p>
+
+
+                <!-- HOUSE / FLOOR / APARTMENT -->
+
+                @if (
+                  address.houseNumber ||
+                  address.floor ||
+                  address.apartment
+                ) {
+
+                  <p class="address-details">
+
+                    @if (address.houseNumber) {
+
+                      {{ address.houseNumber }}
+
+                    }
+
+                    @if (address.floor) {
+
+                      , Floor {{ address.floor }}
+
+                    }
+
+                    @if (address.apartment) {
+
+                      , {{ address.apartment }}
+
+                    }
+
+                  </p>
+
+                }
+
+
+                <!-- AREA / CITY -->
+
+                @if (
+                  address.area ||
+                  address.cityName
+                ) {
+
+                  <p class="address-area">
+
+                    @if (address.area) {
+
+                      {{ address.area }}
+
+                    }
+
+                    @if (
+                      address.area &&
+                      address.cityName
+                    ) {
+
+                      ,
+
+                    }
+
+                    @if (address.cityName) {
+
+                      {{ address.cityName }}
+
+                    }
+
+                  </p>
+
+                }
+
+
+                <!-- LANDMARK -->
+
+                @if (address.landmark) {
+
+                  <p class="address-landmark">
+
+                    Near {{ address.landmark }}
+
+                  </p>
+
+                }
+
+              </div>
+
+
+              <!-- ===============================
+                   SELECTION INDICATOR
+              ================================= -->
+
+              <div class="address-selection">
+
+                @if (
+                  selectedAddressId === address.id
+                ) {
+
+                  <span class="selected-check">
+                    ✓
+                  </span>
+
+                }
+
+                @else {
+
+                  <span class="selection-circle"></span>
+
+                }
+
+              </div>
+
+            </button>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- =========================================
+         NO SAVED ADDRESS
+    ========================================== -->
+
+    @if (
+      !isLoadingAddresses &&
+      savedAddresses.length === 0
+    ) {
+
+      <div class="no-address">
+
+        <div class="no-address-icon">
+          📍
+        </div>
+
+        <strong>
+          No saved addresses
+        </strong>
+
+        <span>
+          Add your delivery address to continue.
+        </span>
+
+      </div>
+
+    }
+
+
+    <!-- =========================================
+         CONTINUE WITH SELECTED ADDRESS
+    ========================================== -->
+
+    @if (
+      selectedAddressId &&
+      !showManualLocation
+    ) {
+
+      <button
+        type="button"
+        class="continue-button"
+
+        [disabled]="
+          isLoading ||
+          isSavingAddress
+        "
+
+        (click)="continueAfterLocation()"
+      >
+
+        Continue with this address
+
+      </button>
+
+    }
+
+
+    <!-- =========================================
+         DIVIDER
+    ========================================== -->
+
+    <div class="location-divider">
+
+      <span>
+        OR
+      </span>
+
+    </div>
 
 
     <!-- =========================================
@@ -33,10 +354,12 @@
     <button
       type="button"
       class="location-button"
+
       [disabled]="
         isLoading ||
         isSavingAddress
       "
+
       (click)="useCurrentLocation()"
     >
 
@@ -56,20 +379,22 @@
 
 
     <!-- =========================================
-         MANUAL LOCATION
+         ADD NEW ADDRESS
     ========================================== -->
 
     <button
       type="button"
       class="manual-button"
+
       [disabled]="
         isLoading ||
         isSavingAddress
       "
+
       (click)="openManualLocation()"
     >
 
-      Enter Location Manually
+      + Add New Address
 
     </button>
 
@@ -97,15 +422,40 @@
 
       <div class="manual-location">
 
-        <h3>
-          Select your delivery location
-        </h3>
+
+        <!-- =====================================
+             MANUAL HEADER
+        ====================================== -->
+
+        <div class="manual-header">
+
+          <div>
+
+            <h3>
+              Add New Address
+            </h3>
+
+            <p>
+              Select your city and delivery area.
+            </p>
+
+          </div>
 
 
-        <p>
-          Choose your city and area so we can
-          find restaurants that deliver to you.
-        </p>
+          <button
+            type="button"
+            class="close-manual-button"
+
+            [disabled]="isSavingAddress"
+
+            (click)="closeManualLocation()"
+          >
+
+            ×
+
+          </button>
+
+        </div>
 
 
         <!-- =====================================
@@ -113,7 +463,9 @@
         ====================================== -->
 
         <label for="city">
+
           City
+
         </label>
 
 
@@ -131,8 +483,11 @@
 
           <select
             id="city"
+
             [(ngModel)]="selectedCity"
+
             (change)="onCityChange()"
+
             [disabled]="isSavingAddress"
           >
 
@@ -182,7 +537,9 @@
 
         <select
           id="area"
+
           [(ngModel)]="selectedArea"
+
           [disabled]="
             !selectedCityId ||
             isSavingAddress
@@ -229,17 +586,25 @@
           <div class="selected-location-preview">
 
             <span class="preview-icon">
+
               📍
+
             </span>
+
 
             <div>
 
               <strong>
+
                 {{ selectedArea }}
+
               </strong>
 
+
               <small>
+
                 {{ selectedCity }}
+
               </small>
 
             </div>
@@ -250,7 +615,7 @@
 
 
         <!-- =====================================
-             CONTINUE
+             SAVE ADDRESS
         ====================================== -->
 
         <button
@@ -269,13 +634,13 @@
 
           @if (isSavingAddress) {
 
-            Saving location...
+            Saving address...
 
           }
 
           @else {
 
-            Continue
+            Save Address
 
           }
 
