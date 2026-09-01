@@ -2,34 +2,31 @@
 
   <div class="location-card">
 
-
-    <!-- =========================================
-         ICON
-    ========================================== -->
+    <!-- =====================================================
+         LOCATION ICON
+    ====================================================== -->
 
     <div class="location-icon">
       📍
     </div>
 
 
-    <!-- =========================================
-         TITLE
-    ========================================== -->
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
 
     <h1>
       Where should we deliver?
     </h1>
 
-
-    <p>
-      Select a saved address or add a new
-      delivery location.
+    <p class="location-description">
+      Select a saved address or add a new delivery location.
     </p>
 
 
-    <!-- =========================================
-         LOADING SAVED ADDRESSES
-    ========================================== -->
+    <!-- =====================================================
+         SAVED ADDRESS LOADING
+    ====================================================== -->
 
     @if (isLoadingAddresses) {
 
@@ -46,39 +43,39 @@
     }
 
 
-    <!-- =========================================
+    <!-- =====================================================
          SAVED ADDRESSES
-    ========================================== -->
+    ====================================================== -->
 
     @if (
       !isLoadingAddresses &&
-      savedAddresses.length > 0
+      savedAddresses.length > 0 &&
+      !showManualLocation
     ) {
 
-      <div class="saved-addresses">
+      <section class="saved-addresses">
 
-
-        <!-- =====================================
-             SECTION HEADER
-        ====================================== -->
+        <!-- SECTION HEADER -->
 
         <div class="section-header">
 
-          <h3>
-            Saved Addresses
-          </h3>
+          <div class="section-heading">
 
-          <span>
-            {{ savedAddresses.length }}
-            {{ savedAddresses.length === 1 ? 'address' : 'addresses' }}
-          </span>
+            <h2>
+              Saved Addresses
+            </h2>
+
+            <span class="address-count">
+              {{ savedAddresses.length }}
+              {{ savedAddresses.length === 1 ? 'address' : 'addresses' }}
+            </span>
+
+          </div>
 
         </div>
 
 
-        <!-- =====================================
-             ADDRESS LIST
-        ====================================== -->
+        <!-- ADDRESS LIST -->
 
         <div class="address-list">
 
@@ -103,61 +100,97 @@
               (click)="selectSavedAddress(address)"
             >
 
+              <!-- =================================================
+                   ADDRESS HEADER
+              ================================================== -->
 
-              <!-- ===============================
-                   ADDRESS ICON
-              ================================= -->
+              <div class="address-card-header">
 
-              <div class="address-icon">
+                <!-- ICON -->
 
-                @if (
-                  address.label?.toLowerCase() === 'home'
-                ) {
+                <div class="address-icon">
 
-                  🏠
+                  @if (
+                    address.label?.toLowerCase() === 'home'
+                  ) {
 
-                }
+                    🏠
 
-                @else {
+                  }
 
-                  📍
+                  @else {
 
-                }
-
-              </div>
-
-
-              <!-- ===============================
-                   ADDRESS INFORMATION
-              ================================= -->
-
-              <div class="address-info">
-
-                <div class="address-title-row">
-
-                  <strong>
-                    {{ address.label || 'Address' }}
-                  </strong>
-
-
-                  @if (address.default) {
-
-                    <span class="default-badge">
-                      Default
-                    </span>
+                    📍
 
                   }
 
                 </div>
 
 
-                <!-- ADDRESS -->
+                <!-- TITLE -->
 
-                <p class="address-main">
+                <div class="address-title-wrapper">
 
-                  {{ address.address || 'Saved address' }}
+                  <div class="address-title-row">
 
-                </p>
+                    <strong>
+                      {{ address.label || 'Address' }}
+                    </strong>
+
+
+                    @if (address.default) {
+
+                      <span class="default-badge">
+                        Default
+                      </span>
+
+                    }
+
+                  </div>
+
+                </div>
+
+
+                <!-- SELECTION -->
+
+                <div class="address-selection">
+
+                  @if (
+                    selectedAddressId === address.id
+                  ) {
+
+                    <span class="selected-check">
+                      ✓
+                    </span>
+
+                  }
+
+                  @else {
+
+                    <span class="selection-circle"></span>
+
+                  }
+
+                </div>
+
+              </div>
+
+
+              <!-- =================================================
+                   ADDRESS INFORMATION
+              ================================================== -->
+
+              <div class="address-info">
+
+                <!-- MAIN ADDRESS -->
+
+                @if (address.address) {
+
+                  <p class="address-main">
+                    {{ address.address }}
+                  </p>
+
+                }
 
 
                 <!-- HOUSE / FLOOR / APARTMENT -->
@@ -172,19 +205,25 @@
 
                     @if (address.houseNumber) {
 
-                      {{ address.houseNumber }}
+                      <span>
+                        {{ address.houseNumber }}
+                      </span>
 
                     }
 
                     @if (address.floor) {
 
-                      , Floor {{ address.floor }}
+                      <span>
+                        Floor {{ address.floor }}
+                      </span>
 
                     }
 
                     @if (address.apartment) {
 
-                      , {{ address.apartment }}
+                      <span>
+                        {{ address.apartment }}
+                      </span>
 
                     }
 
@@ -204,7 +243,9 @@
 
                     @if (address.area) {
 
-                      {{ address.area }}
+                      <span>
+                        {{ address.area }}
+                      </span>
 
                     }
 
@@ -213,13 +254,17 @@
                       address.cityName
                     ) {
 
-                      ,
+                      <span class="address-separator">
+                        •
+                      </span>
 
                     }
 
                     @if (address.cityName) {
 
-                      {{ address.cityName }}
+                      <span>
+                        {{ address.cityName }}
+                      </span>
 
                     }
 
@@ -234,6 +279,10 @@
 
                   <p class="address-landmark">
 
+                    <span>
+                      📍
+                    </span>
+
                     Near {{ address.landmark }}
 
                   </p>
@@ -243,29 +292,19 @@
               </div>
 
 
-              <!-- ===============================
-                   SELECTION INDICATOR
-              ================================= -->
+              <!-- =================================================
+                   SELECTED ADDRESS STATUS
+              ================================================== -->
 
-              <div class="address-selection">
+              @if (
+                selectedAddressId === address.id
+              ) {
 
-                @if (
-                  selectedAddressId === address.id
-                ) {
+                <div class="selected-address-status">
+                  Selected
+                </div>
 
-                  <span class="selected-check">
-                    ✓
-                  </span>
-
-                }
-
-                @else {
-
-                  <span class="selection-circle"></span>
-
-                }
-
-              </div>
+              }
 
             </button>
 
@@ -273,18 +312,19 @@
 
         </div>
 
-      </div>
+      </section>
 
     }
 
 
-    <!-- =========================================
+    <!-- =====================================================
          NO SAVED ADDRESS
-    ========================================== -->
+    ====================================================== -->
 
     @if (
       !isLoadingAddresses &&
-      savedAddresses.length === 0
+      savedAddresses.length === 0 &&
+      !showManualLocation
     ) {
 
       <div class="no-address">
@@ -306,9 +346,9 @@
     }
 
 
-    <!-- =========================================
+    <!-- =====================================================
          CONTINUE WITH SELECTED ADDRESS
-    ========================================== -->
+    ====================================================== -->
 
     @if (
       selectedAddressId &&
@@ -327,85 +367,114 @@
         (click)="continueAfterLocation()"
       >
 
-        Continue with this address
+        @if (isLoading) {
+
+          Processing...
+
+        }
+
+        @else {
+
+          Continue with this address
+
+        }
 
       </button>
 
     }
 
 
-    <!-- =========================================
+    <!-- =====================================================
          DIVIDER
-    ========================================== -->
+    ====================================================== -->
 
-    <div class="location-divider">
+    @if (!showManualLocation) {
 
-      <span>
-        OR
-      </span>
+      <div class="location-divider">
 
-    </div>
+        <span class="divider-line"></span>
+
+        <span class="divider-text">
+          OR
+        </span>
+
+        <span class="divider-line"></span>
+
+      </div>
+
+    }
 
 
-    <!-- =========================================
+    <!-- =====================================================
          CURRENT LOCATION
-    ========================================== -->
+    ====================================================== -->
 
-    <button
-      type="button"
-      class="location-button"
+    @if (!showManualLocation) {
 
-      [disabled]="
-        isLoading ||
-        isSavingAddress
-      "
+      <button
+        type="button"
+        class="location-button"
 
-      (click)="useCurrentLocation()"
-    >
+        [disabled]="
+          isLoading ||
+          isSavingAddress
+        "
 
-      @if (isLoading) {
+        (click)="useCurrentLocation()"
+      >
 
-        Getting your location...
+        @if (isLoading) {
 
-      }
+          Getting your location...
 
-      @else {
+        }
 
-        📍 Use My Current Location
+        @else {
 
-      }
+          📍 Use My Current Location
 
-    </button>
+        }
+
+      </button>
+
+    }
 
 
-    <!-- =========================================
+    <!-- =====================================================
          ADD NEW ADDRESS
-    ========================================== -->
+    ====================================================== -->
 
-    <button
-      type="button"
-      class="manual-button"
+    @if (!showManualLocation) {
 
-      [disabled]="
-        isLoading ||
-        isSavingAddress
-      "
+      <button
+        type="button"
+        class="manual-button"
 
-      (click)="openManualLocation()"
-    >
+        [disabled]="
+          isLoading ||
+          isSavingAddress
+        "
 
-      + Add New Address
+        (click)="openManualLocation()"
+      >
 
-    </button>
+        + Add New Address
+
+      </button>
+
+    }
 
 
-    <!-- =========================================
-         ERROR
-    ========================================== -->
+    <!-- =====================================================
+         ERROR MESSAGE
+    ====================================================== -->
 
     @if (errorMessage) {
 
-      <div class="error-message">
+      <div
+        class="error-message"
+        role="alert"
+      >
 
         {{ errorMessage }}
 
@@ -414,22 +483,21 @@
     }
 
 
-    <!-- =========================================
+    <!-- =====================================================
          MANUAL LOCATION FORM
-    ========================================== -->
+    ====================================================== -->
 
     @if (showManualLocation) {
 
-      <div class="manual-location">
+      <section class="manual-location">
 
-
-        <!-- =====================================
+        <!-- =================================================
              MANUAL HEADER
-        ====================================== -->
+        ================================================== -->
 
         <div class="manual-header">
 
-          <div>
+          <div class="manual-heading">
 
             <h3>
               Add New Address
@@ -446,6 +514,8 @@
             type="button"
             class="close-manual-button"
 
+            aria-label="Close add address form"
+
             [disabled]="isSavingAddress"
 
             (click)="closeManualLocation()"
@@ -458,59 +528,115 @@
         </div>
 
 
-        <!-- =====================================
+        <!-- =================================================
              CITY
-        ====================================== -->
+        ================================================== -->
 
-        <label for="city">
+        <div class="form-group">
 
-          City
+          <label for="city">
+            City
+          </label>
 
-        </label>
+
+          @if (isLoadingCities) {
+
+            <div class="location-loading">
+
+              <div class="loading-spinner"></div>
+
+              <span>
+                Loading cities...
+              </span>
+
+            </div>
+
+          }
+
+          @else {
+
+            <select
+              id="city"
+
+              [(ngModel)]="selectedCity"
+
+              (change)="onCityChange()"
+
+              [disabled]="
+                isSavingAddress
+              "
+            >
+
+              <option
+                value=""
+                disabled
+              >
+                Select your city
+              </option>
 
 
-        @if (isLoadingCities) {
+              @for (
+                city of cities;
+                track city.id
+              ) {
 
-          <div class="location-loading">
+                <option
+                  [value]="city.name"
+                >
 
-            Loading cities...
+                  {{ city.name }}
 
-          </div>
+                </option>
 
-        }
+              }
 
-        @else {
+            </select>
+
+          }
+
+        </div>
+
+
+        <!-- =================================================
+             DELIVERY AREA
+        ================================================== -->
+
+        <div class="form-group">
+
+          <label for="area">
+            Delivery Area
+          </label>
+
 
           <select
-            id="city"
+            id="area"
 
-            [(ngModel)]="selectedCity"
+            [(ngModel)]="selectedArea"
 
-            (change)="onCityChange()"
-
-            [disabled]="isSavingAddress"
+            [disabled]="
+              !selectedCityId ||
+              isSavingAddress
+            "
           >
 
             <option
               value=""
               disabled
             >
-
-              Select your city
-
+              Select your area
             </option>
 
 
             @for (
-              city of cities;
-              track city.id
+              area of areas;
+              track area
             ) {
 
               <option
-                [value]="city.name"
+                [value]="area"
               >
 
-                {{ city.name }}
+                {{ area }}
 
               </option>
 
@@ -518,65 +644,12 @@
 
           </select>
 
-        }
+        </div>
 
 
-        <!-- =====================================
-             AREA
-        ====================================== -->
-
-        <label
-          for="area"
-          class="area-label"
-        >
-
-          Delivery Area
-
-        </label>
-
-
-        <select
-          id="area"
-
-          [(ngModel)]="selectedArea"
-
-          [disabled]="
-            !selectedCityId ||
-            isSavingAddress
-          "
-        >
-
-          <option
-            value=""
-            disabled
-          >
-
-            Select your area
-
-          </option>
-
-
-          @for (
-            area of areas;
-            track area
-          ) {
-
-            <option
-              [value]="area"
-            >
-
-              {{ area }}
-
-            </option>
-
-          }
-
-        </select>
-
-
-        <!-- =====================================
-             SELECTED LOCATION PREVIEW
-        ====================================== -->
+        <!-- =================================================
+             LOCATION PREVIEW
+        ================================================== -->
 
         @if (
           selectedCity &&
@@ -585,26 +658,19 @@
 
           <div class="selected-location-preview">
 
-            <span class="preview-icon">
-
+            <div class="preview-icon">
               📍
+            </div>
 
-            </span>
 
-
-            <div>
+            <div class="preview-content">
 
               <strong>
-
                 {{ selectedArea }}
-
               </strong>
 
-
               <small>
-
                 {{ selectedCity }}
-
               </small>
 
             </div>
@@ -614,9 +680,9 @@
         }
 
 
-        <!-- =====================================
+        <!-- =================================================
              SAVE ADDRESS
-        ====================================== -->
+        ================================================== -->
 
         <button
           type="button"
@@ -647,9 +713,9 @@
         </button>
 
 
-        <!-- =====================================
+        <!-- =================================================
              CANCEL
-        ====================================== -->
+        ================================================== -->
 
         <button
           type="button"
@@ -664,7 +730,7 @@
 
         </button>
 
-      </div>
+      </section>
 
     }
 

@@ -35,7 +35,7 @@ export class RestaurantService {
   // =========================================
 
   private readonly apiUrl =
-    `${environment.apiUrl}/BusinessLocation`;
+    `${environment.apiUrl}/BusinessLocation/GetAllLocations`;
 
 
   // =========================================

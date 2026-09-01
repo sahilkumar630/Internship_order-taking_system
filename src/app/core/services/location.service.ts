@@ -14,7 +14,9 @@ import {
 
 import {
   Observable,
-  map
+  of,
+  map,
+  switchMap
 } from 'rxjs';
 
 import {
@@ -22,6 +24,10 @@ import {
   City,
   SavedAddress
 } from '../../shared/models/location.model';
+
+import {
+  AuthService
+} from './auth.service';
 
 import {
   environment
@@ -33,48 +39,47 @@ import {
 })
 export class LocationService {
 
-
-  // =========================================
+  // =========================================================
   // STORAGE
-  // =========================================
+  // =========================================================
 
   private readonly locationKey =
     'foodie_user_location';
 
 
-  // =========================================
+  // =========================================================
   // API URLS
-  // =========================================
+  // =========================================================
 
   private readonly cityApiUrl =
     `${environment.apiUrl}/City`;
 
-
   private readonly addressApiUrl =
     `${environment.apiUrl}/User/address`;
-
 
   private readonly myAddressesApiUrl =
     `${environment.apiUrl}/User/myaddresses`;
 
 
-  // =========================================
+  // =========================================================
   // CONSTRUCTOR
-  // =========================================
+  // =========================================================
 
   constructor(
 
     @Inject(PLATFORM_ID)
-    private platformId: object,
+    private readonly platformId: object,
 
-    private http: HttpClient
+    private readonly http: HttpClient,
+
+    private readonly authService: AuthService
 
   ) {}
 
 
-  // =========================================
-  // CHECK BROWSER
-  // =========================================
+  // =========================================================
+  // BROWSER CHECK
+  // =========================================================
 
   private isBrowser(): boolean {
 
@@ -85,215 +90,265 @@ export class LocationService {
   }
 
 
-  // =========================================
+  // =========================================================
   // GET CITIES
-  // =========================================
+  // =========================================================
 
   getCities(): Observable<City[]> {
 
     return this.http
-
       .get<any>(
         this.cityApiUrl
       )
-
       .pipe(
 
-        map(response => {
+        map(
+          (response: any) => {
 
-          // -----------------------------------
-          // VALIDATE RESPONSE
-          // -----------------------------------
-
-          if (
-            !response ||
-            response.responseStatus !== 1 ||
-            !Array.isArray(response.data)
-          ) {
-
-            throw new Error(
-              response?.message ||
-              'Unable to load cities.'
+            console.log(
+              'City API Response:',
+              response
             );
+
+
+            if (
+              !response ||
+              response.responseStatus !== 1
+            ) {
+
+              throw new Error(
+                response?.message ||
+                'Unable to load cities.'
+              );
+
+            }
+
+
+            if (
+              !Array.isArray(
+                response.data
+              )
+            ) {
+
+              return [];
+
+            }
+
+
+            return response.data
+
+              .map(
+                (city: any): City => ({
+
+                  id:
+                    Number(
+                      city.id
+                    ),
+
+                  name:
+                    String(
+                      city.name ?? ''
+                    ).trim(),
+
+                  provinceId:
+                    city.provinceId
+
+                })
+              )
+
+              .filter(
+                (city: City) =>
+
+                  Number.isFinite(
+                    city.id
+                  ) &&
+
+                  city.id > 0 &&
+
+                  city.name.length > 0
+
+              );
 
           }
-
-
-          // -----------------------------------
-          // MAP CITY DATA
-          // -----------------------------------
-
-          return response.data
-
-            .map(
-              (city: any): City => ({
-
-                id:
-                  Number(
-                    city.id
-                  ),
-
-                name:
-                  String(
-                    city.name ?? ''
-                  ),
-
-                provinceId:
-                  city.provinceId
-
-              })
-            )
-
-            .filter(
-              (city: City) =>
-                city.id > 0 &&
-                city.name.trim().length > 0
-            );
-
-        })
+        )
 
       );
 
   }
 
 
-  // =========================================
+  // =========================================================
   // GET MY SAVED ADDRESSES
-  // =========================================
+  // =========================================================
 
-  getMyAddresses(): Observable<SavedAddress[]> {
+  getMyAddresses():
+    Observable<SavedAddress[]> {
+
+    /*
+     * Guest users do not have backend addresses.
+     *
+     * Therefore:
+     *
+     * Guest -> []
+     * Logged in -> API
+     */
+
+    if (
+      !this.authService.isLoggedIn()
+    ) {
+
+      return of([]);
+
+    }
+
 
     return this.http
-
       .get<any>(
         this.myAddressesApiUrl
       )
-
       .pipe(
 
-        map(response => {
+        map(
+          (response: any) => {
 
-          // -----------------------------------
-          // VALIDATE RESPONSE
-          // -----------------------------------
-
-          if (
-            !response ||
-            response.responseStatus !== 1
-          ) {
-
-            throw new Error(
-              response?.message ||
-              'Unable to load saved addresses.'
+            console.log(
+              'My Addresses API Response:',
+              response
             );
 
-          }
+
+            if (
+              !response ||
+              response.responseStatus !== 1
+            ) {
+
+              throw new Error(
+                response?.message ||
+                'Unable to load saved addresses.'
+              );
+
+            }
 
 
-          // -----------------------------------
-          // VALIDATE DATA
-          // -----------------------------------
+            if (
+              !Array.isArray(
+                response.data
+              )
+            ) {
 
-          if (
-            !Array.isArray(response.data)
-          ) {
+              return [];
 
-            return [];
-
-          }
+            }
 
 
-          // -----------------------------------
-          // MAP ADDRESS DATA
-          // -----------------------------------
+            return response.data
 
-          return response.data
+              .map(
+                (item: any): SavedAddress => ({
 
-            .map(
-              (address: any): SavedAddress => ({
+                  id:
+                    Number(
+                      item.id
+                    ),
 
-                id:
-                  Number(
+                  userFriendlyName:
+                    item.userFriendlyName,
+
+                  userId:
+                    Number(
+                      item.userId
+                    ),
+
+                  cityId:
+                    Number(
+                      item.cityId
+                    ),
+
+                  cityName:
+                    item.cityName,
+
+                  label:
+                    item.label,
+
+                  address:
+                    item.address,
+
+                  area:
+                    item.area,
+
+                  houseNumber:
+                    item.houseNumber,
+
+                  floor:
+                    item.floor,
+
+                  apartment:
+                    item.apartment,
+
+                  landmark:
+                    item.landmark,
+
+                  latitude:
+                    Number(
+                      item.latitude
+                    ),
+
+                  longitude:
+                    Number(
+                      item.longitude
+                    ),
+
+                  default:
+                    item.default === true,
+
+                  name:
+                    item.name,
+
+                  addedOn:
+                    item.addedOn
+
+                })
+              )
+
+              .filter(
+                (address: SavedAddress) =>
+
+                  Number.isFinite(
                     address.id
-                  ),
+                  ) &&
 
-                userFriendlyName:
-                  address.userFriendlyName,
+                  address.id > 0
 
-                userId:
-                  address.userId,
+              );
 
-                cityId:
-                  address.cityId,
-
-                cityName:
-                  address.cityName,
-
-                label:
-                  address.label,
-
-                address:
-                  address.address,
-
-                area:
-                  address.area,
-
-                houseNumber:
-                  address.houseNumber,
-
-                floor:
-                  address.floor,
-
-                apartment:
-                  address.apartment,
-
-                landmark:
-                  address.landmark,
-
-                latitude:
-                  address.latitude,
-
-                longitude:
-                  address.longitude,
-
-                default:
-                  address.default,
-
-                name:
-                  address.name,
-
-                addedOn:
-                  address.addedOn
-
-              })
-            )
-
-            .filter(
-              (address: SavedAddress) =>
-                address.id > 0
-            );
-
-        })
+          }
+        )
 
       );
 
   }
 
 
-  // =========================================
-  // GET CURRENT BROWSER LOCATION
-  // =========================================
+  // =========================================================
+  // GET CURRENT GPS LOCATION
+  // =========================================================
 
-  getCurrentLocation(): Promise<UserLocation> {
+  getCurrentLocation():
+    Promise<UserLocation> {
 
     return new Promise(
-      (resolve, reject) => {
+      (
+        resolve,
+        reject
+      ) => {
 
-        // -----------------------------------------
-        // CHECK BROWSER
-        // -----------------------------------------
+        // -----------------------------------------------------
+        // SSR PROTECTION
+        // -----------------------------------------------------
 
-        if (!this.isBrowser()) {
+        if (
+          !this.isBrowser()
+        ) {
 
           reject(
             new Error(
@@ -306,11 +361,13 @@ export class LocationService {
         }
 
 
-        // -----------------------------------------
-        // CHECK GEOLOCATION SUPPORT
-        // -----------------------------------------
+        // -----------------------------------------------------
+        // BROWSER GEOLOCATION CHECK
+        // -----------------------------------------------------
 
-        if (!navigator.geolocation) {
+        if (
+          !navigator.geolocation
+        ) {
 
           reject(
             new Error(
@@ -323,15 +380,11 @@ export class LocationService {
         }
 
 
-        // -----------------------------------------
-        // GET GPS LOCATION
-        // -----------------------------------------
+        // -----------------------------------------------------
+        // GET GPS POSITION
+        // -----------------------------------------------------
 
         navigator.geolocation.getCurrentPosition(
-
-          // =======================================
-          // SUCCESS
-          // =======================================
 
           position => {
 
@@ -353,11 +406,23 @@ export class LocationService {
               };
 
 
-            // -------------------------------------
-            // SAVE LOCAL LOCATION
-            // -------------------------------------
+            /*
+             * IMPORTANT:
+             *
+             * GPS location is stored locally.
+             *
+             * We do NOT send GPS directly to
+             * /api/User/address because that API
+             * requires CityId and Address.
+             */
 
             this.saveLocation(
+              location
+            );
+
+
+            console.log(
+              'Current GPS location saved locally:',
               location
             );
 
@@ -368,10 +433,6 @@ export class LocationService {
 
           },
 
-
-          // =======================================
-          // ERROR
-          // =======================================
 
           error => {
 
@@ -418,10 +479,6 @@ export class LocationService {
           },
 
 
-          // =======================================
-          // OPTIONS
-          // =======================================
-
           {
 
             enableHighAccuracy:
@@ -443,21 +500,92 @@ export class LocationService {
   }
 
 
-  // =========================================
-  // SAVE USER ADDRESS TO API
-  // =========================================
+  // =========================================================
+  // SMART LOCATION SAVE
+  // =========================================================
 
-  saveUserAddress(
+  saveLocationWithAddress(
     location: UserLocation
-  ): Observable<number> {
+  ): Observable<UserLocation> {
 
-    // -----------------------------------------
-    // VALIDATE CITY ID
-    // -----------------------------------------
+    if (
+      !location
+    ) {
+
+      throw new Error(
+        'Location is required.'
+      );
+
+    }
+
+
+    // =======================================================
+    // GUEST
+    // =======================================================
+
+    if (
+      !this.authService.isLoggedIn()
+    ) {
+
+      console.log(
+        'Guest user: saving location to browser only.'
+      );
+
+
+      const guestLocation:
+        UserLocation = {
+
+          ...location,
+
+          userAddressId:
+            undefined
+
+        };
+
+
+      this.saveLocation(
+        guestLocation
+      );
+
+
+      return of(
+        guestLocation
+      );
+
+    }
+
+
+    // =======================================================
+    // LOGGED-IN USER
+    // =======================================================
+
+    console.log(
+      'Logged-in user: saving location to backend.'
+    );
+
+
+    return this.saveAuthenticatedLocation(
+      location
+    );
+
+  }
+
+
+  // =========================================================
+  // SAVE AUTHENTICATED LOCATION
+  // =========================================================
+
+  private saveAuthenticatedLocation(
+    location: UserLocation
+  ): Observable<UserLocation> {
+
+    // -------------------------------------------------------
+    // CITY VALIDATION
+    // -------------------------------------------------------
 
     if (
       !location.cityId ||
-      location.cityId <= 0
+      Number(location.cityId) <= 0
     ) {
 
       throw new Error(
@@ -467,17 +595,204 @@ export class LocationService {
     }
 
 
-    // -----------------------------------------
-    // CREATE FORM DATA
-    // -----------------------------------------
+    // -------------------------------------------------------
+    // ADDRESS VALIDATION
+    // -------------------------------------------------------
+
+    const address =
+      String(
+        location.address ?? ''
+      ).trim();
+
+
+    if (
+      !address
+    ) {
+
+      throw new Error(
+        'A delivery address is required.'
+      );
+
+    }
+
+
+    // -------------------------------------------------------
+    // GET EXISTING ADDRESSES
+    // -------------------------------------------------------
+
+    return this.getMyAddresses()
+
+      .pipe(
+
+        switchMap(
+          (
+            addresses: SavedAddress[]
+          ) => {
+
+            const existingAddresses =
+              addresses ?? [];
+
+
+            // -----------------------------------------------
+            // GENERATE UNIQUE LABEL
+            // -----------------------------------------------
+
+            const uniqueLabel =
+              this.generateUniqueAddressLabel(
+                existingAddresses,
+                location.label
+              );
+
+
+            /*
+             * Only the first address becomes default.
+             *
+             * This avoids replacing the existing default
+             * address every time the user adds a location.
+             */
+
+            const isDefault =
+              existingAddresses.length === 0;
+
+
+            const locationToSave:
+              UserLocation = {
+
+                ...location,
+
+                label:
+                  uniqueLabel,
+
+                isDefault
+
+              };
+
+
+            console.log(
+              'Final authenticated location:',
+              locationToSave
+            );
+
+
+            // -----------------------------------------------
+            // POST TO BACKEND
+            // -----------------------------------------------
+
+            return this.saveUserAddress(
+              locationToSave
+            )
+
+              .pipe(
+
+                map(
+                  (
+                    userAddressId: number
+                  ) => {
+
+                    const savedLocation:
+                      UserLocation = {
+
+                        ...locationToSave,
+
+                        userAddressId
+
+                      };
+
+
+                    // ---------------------------------------
+                    // ALWAYS KEEP LOCAL COPY
+                    // ---------------------------------------
+
+                    this.saveLocation(
+                      savedLocation
+                    );
+
+
+                    console.log(
+                      'Authenticated location saved:',
+                      savedLocation
+                    );
+
+
+                    return savedLocation;
+
+                  }
+                )
+
+              );
+
+          }
+        )
+
+      );
+
+  }
+
+
+  // =========================================================
+  // POST /api/User/address
+  // =========================================================
+
+  saveUserAddress(
+    location: UserLocation
+  ): Observable<number> {
+
+    // -------------------------------------------------------
+    // VALIDATE CITY
+    // -------------------------------------------------------
+
+    if (
+      !location.cityId ||
+      Number(location.cityId) <= 0
+    ) {
+
+      throw new Error(
+        'A valid city ID is required.'
+      );
+
+    }
+
+
+    // -------------------------------------------------------
+    // VALIDATE LABEL
+    // -------------------------------------------------------
+
+    const label =
+      String(
+        location.label ?? 'Home'
+      ).trim() || 'Home';
+
+
+    // -------------------------------------------------------
+    // VALIDATE ADDRESS
+    // -------------------------------------------------------
+
+    const address =
+      String(
+        location.address ?? ''
+      ).trim();
+
+
+    if (
+      !address
+    ) {
+
+      throw new Error(
+        'A delivery address is required.'
+      );
+
+    }
+
+
+    // =======================================================
+    // CREATE MULTIPART FORM DATA
+    // =======================================================
 
     const formData =
       new FormData();
 
 
-    // -----------------------------------------
-    // REQUIRED FIELDS
-    // -----------------------------------------
+    // Required fields
 
     formData.append(
       'CityId',
@@ -489,81 +804,171 @@ export class LocationService {
 
     formData.append(
       'Label',
-      location.label ||
-      'Home'
+      label
     );
 
 
     formData.append(
       'Address',
-      location.address
+      address
     );
 
 
-    // -----------------------------------------
-    // OPTIONAL FIELDS
-    // -----------------------------------------
+    // Optional fields
 
     formData.append(
       'Area',
-      location.area || ''
+      String(
+        location.area ?? ''
+      ).trim()
     );
 
 
     formData.append(
       'HouseNumber',
-      location.houseNumber || ''
+      String(
+        location.houseNumber ?? ''
+      ).trim()
     );
 
 
     formData.append(
       'Floor',
-      location.floor || ''
+      String(
+        location.floor ?? ''
+      ).trim()
     );
 
 
     formData.append(
       'Apartment',
-      location.apartment || ''
+      String(
+        location.apartment ?? ''
+      ).trim()
     );
 
 
     formData.append(
       'Landmark',
-      location.landmark || ''
-    );
-
-
-    formData.append(
-      'Latitude',
       String(
-        location.latitude
-      )
+        location.landmark ?? ''
+      ).trim()
     );
 
 
-    formData.append(
-      'Longitude',
-      String(
-        location.longitude
-      )
-    );
+    // Latitude
 
+    if (
+      Number.isFinite(
+        Number(
+          location.latitude
+        )
+      )
+    ) {
+
+      formData.append(
+        'Latitude',
+        String(
+          location.latitude
+        )
+      );
+
+    }
+    else {
+
+      formData.append(
+        'Latitude',
+        ''
+      );
+
+    }
+
+
+    // Longitude
+
+    if (
+      Number.isFinite(
+        Number(
+          location.longitude
+        )
+      )
+    ) {
+
+      formData.append(
+        'Longitude',
+        String(
+          location.longitude
+        )
+      );
+
+    }
+    else {
+
+      formData.append(
+        'Longitude',
+        ''
+      );
+
+    }
+
+
+    // Default
 
     formData.append(
       'Default',
-      String(
-        location.isDefault ?? true
-      )
+      location.isDefault === true
+        ? 'true'
+        : 'false'
     );
 
 
-    // -----------------------------------------
-    // SEND ADDRESS TO API
-    // -----------------------------------------
+    // =======================================================
+    // DEBUG
+    // =======================================================
+
+    console.log(
+      '========================================'
+    );
+
+    console.log(
+      'POST /api/User/address'
+    );
+
+    console.log(
+      '========================================'
+    );
+
+
+    formData.forEach(
+      (
+        value,
+        key
+      ) => {
+
+        console.log(
+          `${key}:`,
+          value
+        );
+
+      }
+    );
+
+
+    // =======================================================
+    // IMPORTANT
+    // =======================================================
+    //
+    // DO NOT SET:
+    //
+    // Content-Type: multipart/form-data
+    //
+    // Angular/browser automatically adds:
+    //
+    // multipart/form-data; boundary=...
+    //
+    // =======================================================
 
     return this.http
-
       .post<any>(
         this.addressApiUrl,
         formData
@@ -571,94 +976,50 @@ export class LocationService {
 
       .pipe(
 
-        map(response => {
+        map(
+          (
+            response: any
+          ) => {
 
-          // -----------------------------------
-          // VALIDATE RESPONSE
-          // -----------------------------------
+            console.log(
+              'Address API response:',
+              response
+            );
 
-          if (
-            !response ||
-            response.responseStatus !== 1
-          ) {
+
+            if (
+              response?.responseStatus === 1
+            ) {
+
+              const addressId =
+                Number(
+                  response.data
+                );
+
+
+              if (
+                Number.isFinite(
+                  addressId
+                ) &&
+                addressId > 0
+              ) {
+
+                return addressId;
+
+              }
+
+
+              throw new Error(
+                'Address was saved but no valid address ID was returned.'
+              );
+
+            }
+
 
             throw new Error(
               response?.message ||
               'Unable to save address.'
             );
-
-          }
-
-
-          // -----------------------------------
-          // GET USER ADDRESS ID
-          // -----------------------------------
-
-          const userAddressId =
-            Number(
-              response.data
-            );
-
-
-          if (
-            !userAddressId
-          ) {
-
-            throw new Error(
-              'Address was saved but no address ID was returned.'
-            );
-
-          }
-
-
-          return userAddressId;
-
-        })
-
-      );
-
-  }
-
-
-  // =========================================
-  // SAVE LOCATION + ADDRESS
-  // =========================================
-
-  saveLocationWithAddress(
-    location: UserLocation
-  ): Observable<UserLocation> {
-
-    return this
-
-      .saveUserAddress(
-        location
-      )
-
-      .pipe(
-
-        map(
-          (userAddressId: number) => {
-
-            const updatedLocation:
-              UserLocation = {
-
-                ...location,
-
-                userAddressId
-
-              };
-
-
-            // ---------------------------------
-            // SAVE COMPLETE LOCATION
-            // ---------------------------------
-
-            this.saveLocation(
-              updatedLocation
-            );
-
-
-            return updatedLocation;
 
           }
         )
@@ -668,17 +1029,194 @@ export class LocationService {
   }
 
 
-  // =========================================
-  // SAVE LOCATION
-  // =========================================
+  // =========================================================
+  // SYNC GUEST LOCATION AFTER LOGIN
+  // =========================================================
+
+  syncGuestLocationToBackend():
+    Observable<UserLocation | null> {
+
+    // -------------------------------------------------------
+    // MUST BE LOGGED IN
+    // -------------------------------------------------------
+
+    if (
+      !this.authService.isLoggedIn()
+    ) {
+
+      return of(null);
+
+    }
+
+
+    // -------------------------------------------------------
+    // GET LOCAL LOCATION
+    // -------------------------------------------------------
+
+    const localLocation =
+      this.getLocation();
+
+
+    if (
+      !localLocation
+    ) {
+
+      return of(null);
+
+    }
+
+
+    // -------------------------------------------------------
+    // ALREADY SYNCED
+    // -------------------------------------------------------
+
+    if (
+      localLocation.userAddressId &&
+      Number(
+        localLocation.userAddressId
+      ) > 0
+    ) {
+
+      return of(
+        localLocation
+      );
+
+    }
+
+
+    /*
+     * A GPS-only location does not contain
+     * CityId and Address.
+     *
+     * We cannot safely invent these values.
+     */
+
+    if (
+      !localLocation.cityId ||
+      Number(
+        localLocation.cityId
+      ) <= 0 ||
+      !localLocation.address ||
+      !localLocation.address.trim()
+    ) {
+
+      console.log(
+        'Guest location cannot be synced yet because CityId/address is missing.'
+      );
+
+
+      return of(
+        localLocation
+      );
+
+    }
+
+
+    // -------------------------------------------------------
+    // SYNC
+    // -------------------------------------------------------
+
+    console.log(
+      'Syncing guest location to backend...'
+    );
+
+
+    return this.saveAuthenticatedLocation(
+      localLocation
+    );
+
+  }
+
+
+  // =========================================================
+  // UNIQUE ADDRESS LABEL
+  // =========================================================
+
+  private generateUniqueAddressLabel(
+
+    addresses: SavedAddress[],
+
+    requestedLabel?: string
+
+  ): string {
+
+    const baseLabel =
+      String(
+        requestedLabel ?? 'Home'
+      ).trim() || 'Home';
+
+
+    const existingLabels =
+      addresses
+
+        .map(
+          (
+            address: SavedAddress
+          ) =>
+
+            String(
+              address.label ?? ''
+            )
+              .trim()
+              .toLowerCase()
+
+        )
+
+        .filter(
+          (
+            label: string
+          ) =>
+            label.length > 0
+        );
+
+
+    // -------------------------------------------------------
+    // LABEL AVAILABLE
+    // -------------------------------------------------------
+
+    if (
+      !existingLabels.includes(
+        baseLabel.toLowerCase()
+      )
+    ) {
+
+      return baseLabel;
+
+    }
+
+
+    // -------------------------------------------------------
+    // GENERATE Home 2, Home 3, ...
+    // -------------------------------------------------------
+
+    let counter =
+      2;
+
+
+    while (
+      existingLabels.includes(
+        `${baseLabel} ${counter}`
+          .toLowerCase()
+      )
+    ) {
+
+      counter++;
+
+    }
+
+
+    return `${baseLabel} ${counter}`;
+
+  }
+
+
+  // =========================================================
+  // SAVE LOCATION TO BROWSER
+  // =========================================================
 
   saveLocation(
     location: UserLocation
   ): void {
-
-    // -----------------------------------------
-    // SSR PROTECTION
-    // -----------------------------------------
 
     if (
       !this.isBrowser()
@@ -689,29 +1227,51 @@ export class LocationService {
     }
 
 
-    localStorage.setItem(
+    if (
+      !location
+    ) {
 
-      this.locationKey,
+      return;
 
-      JSON.stringify(
+    }
+
+
+    try {
+
+      localStorage.setItem(
+        this.locationKey,
+        JSON.stringify(
+          location
+        )
+      );
+
+
+      console.log(
+        'Location saved to browser:',
         location
-      )
+      );
 
-    );
+    }
+    catch (
+      error
+    ) {
+
+      console.error(
+        'Unable to save location:',
+        error
+      );
+
+    }
 
   }
 
 
-  // =========================================
-  // GET SAVED LOCATION
-  // =========================================
+  // =========================================================
+  // GET BROWSER LOCATION
+  // =========================================================
 
   getLocation():
     UserLocation | null {
-
-    // -----------------------------------------
-    // SSR PROTECTION
-    // -----------------------------------------
 
     if (
       !this.isBrowser()
@@ -744,12 +1304,20 @@ export class LocationService {
       ) as UserLocation;
 
     }
-
-    catch {
+    catch (
+      error
+    ) {
 
       console.error(
-        'Invalid saved location.'
+        'Invalid stored location:',
+        error
       );
+
+
+      localStorage.removeItem(
+        this.locationKey
+      );
+
 
       return null;
 
@@ -758,9 +1326,9 @@ export class LocationService {
   }
 
 
-  // =========================================
+  // =========================================================
   // GET USER ADDRESS ID
-  // =========================================
+  // =========================================================
 
   getUserAddressId():
     number | null {
@@ -770,7 +1338,8 @@ export class LocationService {
 
 
     if (
-      !location?.userAddressId
+      !location ||
+      !location.userAddressId
     ) {
 
       return null;
@@ -778,16 +1347,83 @@ export class LocationService {
     }
 
 
-    return Number(
-      location.userAddressId
+    const id =
+      Number(
+        location.userAddressId
+      );
+
+
+    return (
+      Number.isFinite(id) &&
+      id > 0
+    )
+      ? id
+      : null;
+
+  }
+
+
+  // =========================================================
+  // GET CITY ID
+  // =========================================================
+
+  getCityId():
+    number | null {
+
+    const location =
+      this.getLocation();
+
+
+    if (
+      !location ||
+      !location.cityId
+    ) {
+
+      return null;
+
+    }
+
+
+    const id =
+      Number(
+        location.cityId
+      );
+
+
+    return (
+      Number.isFinite(id) &&
+      id > 0
+    )
+      ? id
+      : null;
+
+  }
+
+
+  // =========================================================
+  // GET LOCATION SOURCE
+  // =========================================================
+
+  getLocationSource():
+    'current' |
+    'manual' |
+    null {
+
+    const location =
+      this.getLocation();
+
+
+    return (
+      location?.source ??
+      null
     );
 
   }
 
 
-  // =========================================
-  // CHECK LOCATION
-  // =========================================
+  // =========================================================
+  // HAS LOCATION
+  // =========================================================
 
   hasLocation(): boolean {
 
@@ -798,15 +1434,61 @@ export class LocationService {
   }
 
 
-  // =========================================
+  // =========================================================
+  // HAS BACKEND ADDRESS
+  // =========================================================
+
+  hasSavedAddress(): boolean {
+
+    const location =
+      this.getLocation();
+
+
+    return !!(
+      location &&
+      location.userAddressId &&
+      Number(
+        location.userAddressId
+      ) > 0
+    );
+
+  }
+
+
+  // =========================================================
+  // HAS GUEST LOCATION
+  // =========================================================
+
+  hasGuestLocation(): boolean {
+
+    const location =
+      this.getLocation();
+
+
+    if (
+      !location
+    ) {
+
+      return false;
+
+    }
+
+
+    return !(
+      location.userAddressId &&
+      Number(
+        location.userAddressId
+      ) > 0
+    );
+
+  }
+
+
+  // =========================================================
   // CLEAR LOCATION
-  // =========================================
+  // =========================================================
 
   clearLocation(): void {
-
-    // -----------------------------------------
-    // SSR PROTECTION
-    // -----------------------------------------
 
     if (
       !this.isBrowser()
@@ -819,6 +1501,11 @@ export class LocationService {
 
     localStorage.removeItem(
       this.locationKey
+    );
+
+
+    console.log(
+      'Browser location cleared.'
     );
 
   }

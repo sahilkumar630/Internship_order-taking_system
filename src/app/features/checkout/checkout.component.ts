@@ -1,10 +1,13 @@
 import {
   Component,
-  OnInit
+  OnInit,
+  Inject,
+  PLATFORM_ID
 } from '@angular/core';
 
 import {
-  CommonModule
+  CommonModule,
+  isPlatformBrowser
 } from '@angular/common';
 
 import {
@@ -27,6 +30,10 @@ import {
   OrderService,
   CreateOrderRequest
 } from '../../core/services/order.service';
+
+import {
+  AuthService
+} from '../../core/services/auth.service';
 
 import {
   CartItem
@@ -61,10 +68,11 @@ export class CheckoutComponent
 
 
   // =========================================
-  // CART ITEMS
+  // CART
   // =========================================
 
-  cartItems: CartItem[] = [];
+  cartItems:
+    CartItem[] = [];
 
 
   // =========================================
@@ -87,13 +95,15 @@ export class CheckoutComponent
   // TOTALS
   // =========================================
 
-  subtotal = 0;
+  subtotal =
+    0;
 
-  itemCount = 0;
+  itemCount =
+    0;
 
 
   // =========================================
-  // PAYMENT METHOD
+  // PAYMENT
   // =========================================
 
   paymentMethod:
@@ -104,26 +114,42 @@ export class CheckoutComponent
   // WALLET
   // =========================================
 
-  walletBalance = 0;
+  walletBalance =
+    0;
 
-  walletAvailable = false;
+  walletAvailable =
+    false;
 
-  isLoadingWallet = false;
+  isLoadingWallet =
+    false;
 
 
   // =========================================
   // CHECKOUT STATE
   // =========================================
 
-  isLoading = false;
+  isLoading =
+    false;
 
-  isLoadingAddress = false;
+  isLoadingAddress =
+    false;
 
-  isPlacingOrder = false;
+  isSyncingLocation =
+    false;
 
-  errorMessage = '';
+  isPlacingOrder =
+    false;
 
-  successMessage = '';
+
+  // =========================================
+  // MESSAGES
+  // =========================================
+
+  errorMessage =
+    '';
+
+  successMessage =
+    '';
 
 
   // =========================================
@@ -133,14 +159,16 @@ export class CheckoutComponent
   orderId:
     number | null = null;
 
-  orderNumber = '';
+  orderNumber =
+    '';
 
 
   // =========================================
   // ORDER NOTES
   // =========================================
 
-  notes = '';
+  notes =
+    '';
 
 
   // =========================================
@@ -158,8 +186,15 @@ export class CheckoutComponent
     private orderService:
       OrderService,
 
+    private authService:
+      AuthService,
+
     private router:
-      Router
+      Router,
+
+    @Inject(PLATFORM_ID)
+    private platformId:
+      object
 
   ) {}
 
@@ -169,6 +204,66 @@ export class CheckoutComponent
   // =========================================
 
   ngOnInit(): void {
+
+    // =======================================
+    // SSR / PRERENDER PROTECTION
+    // =======================================
+
+    if (
+      !isPlatformBrowser(
+        this.platformId
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    // =======================================
+    // AUTHENTICATION CHECK
+    // =======================================
+
+    if (
+      !this.authService.isLoggedIn()
+    ) {
+
+      console.log(
+        'Guest user attempted to open checkout.'
+      );
+
+
+      /*
+       * IMPORTANT:
+       *
+       * Do not delete the guest location.
+       *
+       * It is already stored in browser
+       * localStorage by LocationService.
+       *
+       * After login we return to checkout
+       * and can sync it to the backend.
+       */
+
+      this.router.navigate(
+        ['/login'],
+        {
+          queryParams: {
+            returnUrl:
+              '/checkout'
+          }
+        }
+      );
+
+
+      return;
+
+    }
+
+
+    // =======================================
+    // USER IS AUTHENTICATED
+    // =======================================
 
     this.loadCheckout();
 
@@ -181,16 +276,62 @@ export class CheckoutComponent
 
   loadCheckout(): void {
 
-    this.isLoading = true;
+    // =======================================
+    // BROWSER CHECK
+    // =======================================
 
-    this.errorMessage = '';
+    if (
+      !isPlatformBrowser(
+        this.platformId
+      )
+    ) {
 
-    this.successMessage = '';
+      return;
+
+    }
 
 
-    // =========================================
+    // =======================================
+    // AUTH CHECK
+    // =======================================
+
+    if (
+      !this.authService.isLoggedIn()
+    ) {
+
+      this.redirectToLogin();
+
+      return;
+
+    }
+
+
+    // =======================================
+    // PREVENT DUPLICATE REQUEST
+    // =======================================
+
+    if (
+      this.isLoading
+    ) {
+
+      return;
+
+    }
+
+
+    this.isLoading =
+      true;
+
+    this.errorMessage =
+      '';
+
+    this.successMessage =
+      '';
+
+
+    // =======================================
     // LOAD LOCAL LOCATION
-    // =========================================
+    // =======================================
 
     this.userLocation =
       this.locationService.getLocation();
@@ -202,9 +343,9 @@ export class CheckoutComponent
     );
 
 
-    // =========================================
+    // =======================================
     // LOAD CART
-    // =========================================
+    // =======================================
 
     this.cartService
 
@@ -212,11 +353,13 @@ export class CheckoutComponent
 
       .subscribe({
 
-        // =====================================
+        // ===================================
         // SUCCESS
-        // =====================================
+        // ===================================
 
-        next: cart => {
+        next: (
+          cart
+        ) => {
 
           console.log(
             'Checkout Cart:',
@@ -224,17 +367,17 @@ export class CheckoutComponent
           );
 
 
-          // -----------------------------------
+          // ---------------------------------
           // CART ITEMS
-          // -----------------------------------
+          // ---------------------------------
 
           this.cartItems =
             cart?.cartItems ?? [];
 
 
-          // -----------------------------------
+          // ---------------------------------
           // BUSINESS LOCATION
-          // -----------------------------------
+          // ---------------------------------
 
           this.businessLocationId =
             cart?.businessLocationId ??
@@ -242,20 +385,24 @@ export class CheckoutComponent
               .getBusinessLocationId();
 
 
-          // -----------------------------------
+          // ---------------------------------
           // TOTALS
-          // -----------------------------------
+          // ---------------------------------
 
           this.updateTotals();
 
+
+          // ---------------------------------
+          // STOP CART LOADING
+          // ---------------------------------
 
           this.isLoading =
             false;
 
 
-          // -----------------------------------
+          // ---------------------------------
           // EMPTY CART
-          // -----------------------------------
+          // ---------------------------------
 
           if (
             this.cartItems.length === 0
@@ -269,20 +416,22 @@ export class CheckoutComponent
           }
 
 
-          // -----------------------------------
-          // ENSURE ADDRESS
-          // -----------------------------------
+          // ---------------------------------
+          // ADDRESS
+          // ---------------------------------
 
           this.ensureDeliveryAddress();
 
         },
 
 
-        // =====================================
+        // ===================================
         // ERROR
-        // =====================================
+        // ===================================
 
-        error: error => {
+        error: (
+          error: unknown
+        ) => {
 
           this.isLoading =
             false;
@@ -295,9 +444,10 @@ export class CheckoutComponent
 
 
           this.errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            'Unable to load your cart.';
+            this.getErrorMessage(
+              error,
+              'Unable to load your cart.'
+            );
 
         }
 
@@ -312,29 +462,187 @@ export class CheckoutComponent
 
   private ensureDeliveryAddress(): void {
 
-    // -----------------------------------------
-    // LOCAL ADDRESS ALREADY EXISTS
-    // -----------------------------------------
+    // =======================================
+    // AUTH CHECK
+    // =======================================
 
     if (
-      this.userLocation?.userAddressId
+      !this.authService.isLoggedIn()
     ) {
 
-      console.log(
-        'Saved userAddressId found:',
-        this.userLocation.userAddressId
-      );
+      this.redirectToLogin();
 
       return;
 
     }
 
 
-    // -----------------------------------------
-    // LOAD BACKEND ADDRESSES
-    // -----------------------------------------
+    // =======================================
+    // ADDRESS ALREADY EXISTS
+    // =======================================
+
+    if (
+      this.userLocation?.userAddressId &&
+      Number(
+        this.userLocation.userAddressId
+      ) > 0
+    ) {
+
+      console.log(
+        'Existing backend address ID:',
+        this.userLocation.userAddressId
+      );
+
+
+      return;
+
+    }
+
+
+    // =======================================
+    // GUEST LOCATION EXISTS
+    // =======================================
+    //
+    // The user is now logged in but the
+    // location may have originally been
+    // created as a guest.
+    //
+    // Convert it into a backend address.
+    //
+    // =======================================
+
+    if (
+      this.userLocation &&
+      this.userLocation.cityId &&
+      this.userLocation.address
+    ) {
+
+      this.syncGuestLocation();
+
+      return;
+
+    }
+
+
+    // =======================================
+    // NO USABLE LOCAL LOCATION
+    // =======================================
+    //
+    // Load user's saved addresses from API.
+    //
+    // =======================================
 
     this.loadDefaultAddress();
+
+  }
+
+
+  // =========================================
+  // SYNC GUEST LOCATION
+  // =========================================
+
+  private syncGuestLocation(): void {
+
+    if (
+      this.isSyncingLocation
+    ) {
+
+      return;
+
+    }
+
+
+    this.isSyncingLocation =
+      true;
+
+
+    this.errorMessage =
+      '';
+
+
+    console.log(
+      'Converting guest location into user address...'
+    );
+
+
+    this.locationService
+
+      .syncGuestLocationToBackend()
+
+      .subscribe({
+
+        // ===================================
+        // SUCCESS
+        // ===================================
+
+        next: (
+          syncedLocation
+        ) => {
+
+          this.isSyncingLocation =
+            false;
+
+
+          if (
+            syncedLocation
+          ) {
+
+            this.userLocation =
+              syncedLocation;
+
+
+            console.log(
+              'Guest location successfully synced:',
+              syncedLocation
+            );
+
+
+            return;
+
+          }
+
+
+          /*
+           * If the location could not be
+           * converted, load the user's saved
+           * backend address instead.
+           */
+
+          this.loadDefaultAddress();
+
+        },
+
+
+        // ===================================
+        // ERROR
+        // ===================================
+
+        error: (
+          error: unknown
+        ) => {
+
+          this.isSyncingLocation =
+            false;
+
+
+          console.error(
+            'Guest Location Sync Error:',
+            error
+          );
+
+
+          /*
+           * Do not crash checkout.
+           *
+           * Try the user's existing backend
+           * addresses as fallback.
+           */
+
+          this.loadDefaultAddress();
+
+        }
+
+      });
 
   }
 
@@ -345,9 +653,44 @@ export class CheckoutComponent
 
   private loadDefaultAddress(): void {
 
+    if (
+      this.isLoadingAddress
+    ) {
+
+      return;
+
+    }
+
+
+    if (
+      !isPlatformBrowser(
+        this.platformId
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    if (
+      !this.authService.isLoggedIn()
+    ) {
+
+      this.redirectToLogin();
+
+      return;
+
+    }
+
+
     this.isLoadingAddress =
       true;
 
+
+    // =======================================
+    // GET USER ADDRESSES
+    // =======================================
 
     this.locationService
 
@@ -355,12 +698,13 @@ export class CheckoutComponent
 
       .subscribe({
 
-        // =====================================
+        // ===================================
         // SUCCESS
-        // =====================================
+        // ===================================
 
         next: (
-          addresses: SavedAddress[]
+          addresses:
+            SavedAddress[]
         ) => {
 
           this.isLoadingAddress =
@@ -373,30 +717,35 @@ export class CheckoutComponent
           );
 
 
-          // -----------------------------------
+          // ---------------------------------
           // NO ADDRESSES
-          // -----------------------------------
+          // ---------------------------------
 
           if (
             !addresses ||
             addresses.length === 0
           ) {
 
-            console.warn(
-              'No saved addresses found.'
-            );
+            this.userLocation =
+              null;
+
+
+            this.errorMessage =
+              'Please select a delivery address before placing your order.';
+
 
             return;
 
           }
 
 
-          // -----------------------------------
+          // ---------------------------------
           // FIND DEFAULT
-          // -----------------------------------
+          // ---------------------------------
 
           let selectedAddress:
-            SavedAddress | undefined;
+            SavedAddress |
+            undefined;
 
 
           selectedAddress =
@@ -406,9 +755,9 @@ export class CheckoutComponent
             );
 
 
-          // -----------------------------------
-          // FALLBACK
-          // -----------------------------------
+          // ---------------------------------
+          // FALLBACK FIRST
+          // ---------------------------------
 
           if (
             !selectedAddress
@@ -420,27 +769,26 @@ export class CheckoutComponent
           }
 
 
-          // -----------------------------------
-          // VALIDATE ADDRESS
-          // -----------------------------------
+          // ---------------------------------
+          // VALIDATE
+          // ---------------------------------
 
           if (
             !selectedAddress ||
             !selectedAddress.id
           ) {
 
-            console.warn(
-              'No valid saved address found.'
-            );
+            this.errorMessage =
+              'No valid delivery address found.';
 
             return;
 
           }
 
 
-          // -----------------------------------
-          // CONVERT TO USER LOCATION
-          // -----------------------------------
+          // ---------------------------------
+          // CONVERT
+          // ---------------------------------
 
           const location:
             UserLocation = {
@@ -463,10 +811,14 @@ export class CheckoutComponent
               'manual',
 
             cityId:
-              selectedAddress.cityId,
+              Number(
+                selectedAddress.cityId
+              ),
 
             userAddressId:
-              selectedAddress.id,
+              Number(
+                selectedAddress.id
+              ),
 
             label:
               selectedAddress.label,
@@ -487,26 +839,27 @@ export class CheckoutComponent
               selectedAddress.landmark,
 
             isDefault:
-              selectedAddress.default
+              selectedAddress.default === true
 
           };
 
 
-          // -----------------------------------
-          // UPDATE CHECKOUT LOCATION
-          // -----------------------------------
+          // ---------------------------------
+          // SET
+          // ---------------------------------
 
           this.userLocation =
             location;
 
 
-          // -----------------------------------
+          // ---------------------------------
           // SAVE LOCALLY
-          // -----------------------------------
+          // ---------------------------------
 
-          this.locationService.saveLocation(
-            location
-          );
+          this.locationService
+            .saveLocation(
+              location
+            );
 
 
           console.log(
@@ -523,11 +876,13 @@ export class CheckoutComponent
         },
 
 
-        // =====================================
+        // ===================================
         // ERROR
-        // =====================================
+        // ===================================
 
-        error: error => {
+        error: (
+          error: unknown
+        ) => {
 
           this.isLoadingAddress =
             false;
@@ -537,6 +892,13 @@ export class CheckoutComponent
             'Checkout Address API Error:',
             error
           );
+
+
+          this.errorMessage =
+            this.getErrorMessage(
+              error,
+              'Unable to load your delivery address.'
+            );
 
         }
 
@@ -552,11 +914,15 @@ export class CheckoutComponent
   private updateTotals(): void {
 
     this.subtotal =
-      this.cartService.getSubtotal();
+      Number(
+        this.cartService.getSubtotal()
+      );
 
 
     this.itemCount =
-      this.cartService.getItemCount();
+      Number(
+        this.cartService.getItemCount()
+      );
 
   }
 
@@ -566,7 +932,9 @@ export class CheckoutComponent
   // =========================================
 
   selectPaymentMethod(
-    method: 'cash' | 'wallet'
+    method:
+      'cash' |
+      'wallet'
   ): void {
 
     this.paymentMethod =
@@ -589,7 +957,10 @@ export class CheckoutComponent
 
     return !!(
       this.userLocation &&
-      this.userLocation.userAddressId
+      this.userLocation.userAddressId &&
+      Number(
+        this.userLocation.userAddressId
+      ) > 0
     );
 
   }
@@ -661,7 +1032,7 @@ export class CheckoutComponent
   ): number {
 
     return Number(
-      item.price ?? 0
+      item?.price ?? 0
     );
 
   }
@@ -675,27 +1046,31 @@ export class CheckoutComponent
     item: CartItem
   ): number {
 
+    const price =
+      Number(
+        item?.price ?? 0
+      );
+
+
+    const quantity =
+      Number(
+        item?.quantity ?? 0
+      );
+
+
     return Number(
-
-      item.totalPrice ??
-
+      item?.totalPrice ??
       (
-        Number(
-          item.price ?? 0
-        ) *
-
-        Number(
-          item.quantity ?? 0
-        )
+        price *
+        quantity
       )
-
     );
 
   }
 
 
   // =========================================
-  // GET ITEM COUNT LABEL
+  // ITEM COUNT LABEL
   // =========================================
 
   getItemCountLabel(): string {
@@ -713,18 +1088,35 @@ export class CheckoutComponent
 
   placeOrder(): void {
 
-    // =========================================
+    // =======================================
     // RESET MESSAGES
-    // =========================================
+    // =======================================
 
-    this.errorMessage = '';
+    this.errorMessage =
+      '';
 
-    this.successMessage = '';
+    this.successMessage =
+      '';
 
 
-    // =========================================
+    // =======================================
+    // AUTH CHECK
+    // =======================================
+
+    if (
+      !this.authService.isLoggedIn()
+    ) {
+
+      this.redirectToLogin();
+
+      return;
+
+    }
+
+
+    // =======================================
     // PREVENT DOUBLE SUBMISSION
-    // =========================================
+    // =======================================
 
     if (
       this.isPlacingOrder
@@ -735,9 +1127,25 @@ export class CheckoutComponent
     }
 
 
-    // =========================================
+    // =======================================
+    // LOCATION SYNC IN PROGRESS
+    // =======================================
+
+    if (
+      this.isSyncingLocation
+    ) {
+
+      this.errorMessage =
+        'Please wait while we save your delivery address.';
+
+      return;
+
+    }
+
+
+    // =======================================
     // CART VALIDATION
-    // =========================================
+    // =======================================
 
     if (
       this.cartItems.length === 0
@@ -751,9 +1159,9 @@ export class CheckoutComponent
     }
 
 
-    // =========================================
-    // BUSINESS LOCATION VALIDATION
-    // =========================================
+    // =======================================
+    // BUSINESS LOCATION
+    // =======================================
 
     if (
       !this.businessLocationId
@@ -761,7 +1169,6 @@ export class CheckoutComponent
 
       this.errorMessage =
         'Unable to identify the restaurant.';
-
 
       console.error(
         'Checkout businessLocationId is missing.'
@@ -773,12 +1180,17 @@ export class CheckoutComponent
     }
 
 
-    // =========================================
-    // ADDRESS VALIDATION
-    // =========================================
+    // =======================================
+    // ADDRESS
+    // =======================================
+
+    const userAddressId =
+      this.locationService
+        .getUserAddressId();
+
 
     if (
-      !this.userLocation?.userAddressId
+      !userAddressId
     ) {
 
       this.errorMessage =
@@ -786,7 +1198,7 @@ export class CheckoutComponent
 
 
       console.warn(
-        'No saved user address ID found.'
+        'No backend userAddressId available.'
       );
 
 
@@ -795,9 +1207,9 @@ export class CheckoutComponent
     }
 
 
-    // =========================================
-    // WALLET VALIDATION
-    // =========================================
+    // =======================================
+    // WALLET
+    // =======================================
 
     if (
       this.paymentMethod === 'wallet'
@@ -807,27 +1219,30 @@ export class CheckoutComponent
         'Wallet payment is not available yet.';
 
 
-      console.warn(
-        'Wallet payment API is still pending.'
-      );
-
-
       return;
 
     }
 
 
-    // =========================================
+    // =======================================
+    // UPDATE LOCAL LOCATION
+    // =======================================
+
+    this.userLocation =
+      this.locationService.getLocation();
+
+
+    // =======================================
     // START ORDER
-    // =========================================
+    // =======================================
 
     this.isPlacingOrder =
       true;
 
 
-    // =========================================
-    // CREATE REQUEST
-    // =========================================
+    // =======================================
+    // ORDER REQUEST
+    // =======================================
 
     const orderRequest:
       CreateOrderRequest = {
@@ -836,7 +1251,7 @@ export class CheckoutComponent
         this.businessLocationId,
 
       userAddressId:
-        this.userLocation.userAddressId,
+        userAddressId,
 
       orderType:
         1,
@@ -850,25 +1265,26 @@ export class CheckoutComponent
     };
 
 
-    // =========================================
-    // DEBUG
-    // =========================================
+    console.log(
+      '========================================'
+    );
 
     console.log(
-      'Order Request:',
+      'ORDER REQUEST'
+    );
+
+    console.log(
+      '========================================'
+    );
+
+    console.log(
       orderRequest
     );
 
 
-    console.log(
-      'Payment Method:',
-      this.paymentMethod
-    );
-
-
-    // =========================================
-    // CALL ORDER API
-    // =========================================
+    // =======================================
+    // CREATE ORDER
+    // =======================================
 
     this.orderService
 
@@ -878,11 +1294,13 @@ export class CheckoutComponent
 
       .subscribe({
 
-        // =====================================
+        // ===================================
         // SUCCESS
-        // =====================================
+        // ===================================
 
-        next: response => {
+        next: (
+          response
+        ) => {
 
           console.log(
             'Order Created Successfully:',
@@ -894,26 +1312,26 @@ export class CheckoutComponent
             false;
 
 
-          // -----------------------------------
-          // SAVE ORDER ID
-          // -----------------------------------
+          // ---------------------------------
+          // ORDER ID
+          // ---------------------------------
 
           this.orderId =
             response.data;
 
 
-          // -----------------------------------
-          // SAVE SUCCESS MESSAGE
-          // -----------------------------------
+          // ---------------------------------
+          // SUCCESS MESSAGE
+          // ---------------------------------
 
           this.successMessage =
             response.message ||
             'Your order has been placed successfully.';
 
 
-          // -----------------------------------
-          // EXTRACT ORDER NUMBER
-          // -----------------------------------
+          // ---------------------------------
+          // ORDER NUMBER
+          // ---------------------------------
 
           this.orderNumber =
             this.extractOrderNumber(
@@ -933,9 +1351,9 @@ export class CheckoutComponent
           );
 
 
-          // -----------------------------------
+          // ---------------------------------
           // GO TO ORDERS
-          // -----------------------------------
+          // ---------------------------------
 
           this.router.navigate([
             '/orders'
@@ -944,11 +1362,13 @@ export class CheckoutComponent
         },
 
 
-        // =====================================
+        // ===================================
         // ERROR
-        // =====================================
+        // ===================================
 
-        error: error => {
+        error: (
+          error: unknown
+        ) => {
 
           this.isPlacingOrder =
             false;
@@ -961,9 +1381,10 @@ export class CheckoutComponent
 
 
           this.errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            'Unable to place your order. Please try again.';
+            this.getErrorMessage(
+              error,
+              'Unable to place your order. Please try again.'
+            );
 
         }
 
@@ -977,7 +1398,9 @@ export class CheckoutComponent
   // =========================================
 
   private extractOrderNumber(
-    message: string | undefined
+    message:
+      string |
+      undefined
   ): string {
 
     if (
@@ -1015,8 +1438,12 @@ export class CheckoutComponent
 
       {
         queryParams: {
-          returnUrl: '/checkout'
+
+          returnUrl:
+            '/checkout'
+
         }
+
       }
 
     );
@@ -1033,6 +1460,102 @@ export class CheckoutComponent
     this.router.navigate([
       '/cart'
     ]);
+
+  }
+
+
+  // =========================================
+  // REDIRECT TO LOGIN
+  // =========================================
+
+  private redirectToLogin(): void {
+
+    this.router.navigate(
+
+      ['/login'],
+
+      {
+        queryParams: {
+
+          returnUrl:
+            '/checkout'
+
+        }
+
+      }
+
+    );
+
+  }
+
+
+  // =========================================
+  // ERROR MESSAGE
+  // =========================================
+
+  private getErrorMessage(
+
+    error:
+      unknown,
+
+    fallback:
+      string
+
+  ): string {
+
+    // =======================================
+    // STANDARD ERROR
+    // =======================================
+
+    if (
+      error instanceof Error &&
+      error.message
+    ) {
+
+      return error.message;
+
+    }
+
+
+    // =======================================
+    // HTTP ERROR
+    // =======================================
+
+    if (
+      typeof error === 'object' &&
+      error !== null
+    ) {
+
+      const httpError =
+        error as {
+
+          error?: {
+
+            message?:
+              string;
+
+          };
+
+          message?:
+            string;
+
+        };
+
+
+      return (
+
+        httpError.error?.message ||
+
+        httpError.message ||
+
+        fallback
+
+      );
+
+    }
+
+
+    return fallback;
 
   }
 
