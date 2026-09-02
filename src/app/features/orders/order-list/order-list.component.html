@@ -1,1 +1,218 @@
-<p>order-list works!</p>
+<div class="orders-page">
+
+  <div class="orders-container">
+
+    <!-- Header -->
+    <div class="orders-header">
+      <h1>My Orders</h1>
+      <p>Track and view your recent orders</p>
+    </div>
+
+
+    <!-- Loading -->
+    @if (isLoading) {
+
+      <div class="orders-message">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading your orders...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- Error -->
+    @if (!isLoading && errorMessage) {
+
+      <div class="orders-message error">
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <button
+          type="button"
+          (click)="loadOrders()"
+        >
+          Try Again
+        </button>
+
+      </div>
+
+    }
+
+
+    <!-- Empty -->
+    @if (!isLoading && !errorMessage && orders.length === 0) {
+
+      <div class="orders-message empty">
+
+        <div class="empty-icon">
+          📦
+        </div>
+
+        <h2>
+          No orders yet
+        </h2>
+
+        <p>
+          Your orders will appear here once you place your first order.
+        </p>
+
+        <a
+          routerLink="/"
+          class="browse-button"
+        >
+          Browse Restaurants
+        </a>
+
+      </div>
+
+    }
+
+
+    <!-- Orders -->
+    @if (!isLoading && !errorMessage && orders.length > 0) {
+
+      <div class="orders-list">
+
+        @for (order of orders; track order.id) {
+
+          <div class="order-card">
+
+
+            <!-- Restaurant / Order Header -->
+            <div class="order-top">
+
+              <div>
+
+                <h2>
+                  {{ order.businessLocationName }}
+                </h2>
+
+                <p class="order-number">
+                  {{ order.orderNumber }}
+                </p>
+
+              </div>
+
+
+              <!-- Status -->
+              <span
+                class="status"
+                [class]="getStatusClass(order.status)"
+              >
+                {{ order.status }}
+              </span>
+
+            </div>
+
+
+            <!-- Items -->
+            <div class="order-items">
+
+              @if (order.cart.cartItems.length) {
+
+                @for (
+                  item of order.cart.cartItems;
+                  track item.itemId
+                ) {
+
+                  <div class="order-item">
+
+                    <div class="item-info">
+
+                      <span class="item-name">
+                        {{ item.name }}
+                      </span>
+
+                      <span class="item-quantity">
+                        × {{ item.quantity }}
+                      </span>
+
+                    </div>
+
+                    <span class="item-price">
+                      {{ formatAmount(item.price * item.quantity) }}
+                    </span>
+
+                  </div>
+
+                }
+
+              } @else {
+
+                <p class="no-items">
+                  No item details available.
+                </p>
+
+              }
+
+            </div>
+
+
+            <!-- Footer -->
+            <div class="order-bottom">
+
+              <!-- Order Date -->
+              <div class="order-date">
+                {{ order.addedOn }}
+              </div>
+
+
+              <!-- Order Total -->
+              <div class="order-total">
+
+                <span>
+                  Total
+                </span>
+
+                <strong>
+                  {{ formatAmount(order.totalAmount) }}
+                </strong>
+
+              </div>
+
+
+              <!-- Action Buttons -->
+              <div class="order-actions">
+
+                <!-- View Details -->
+                <a
+                  [routerLink]="['/orders', order.id]"
+                  class="details-button"
+                >
+                  View Details
+                  <span>→</span>
+                </a>
+
+
+                <!-- Track Order -->
+                <a
+                  [routerLink]="['/orders', order.id, 'tracking']"
+                  class="track-button"
+                >
+                  Track Order
+                  <span>🚴</span>
+                </a>
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </div>
+
+</div>

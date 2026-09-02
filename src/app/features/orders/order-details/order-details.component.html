@@ -1,1 +1,445 @@
-<p>order-details works!</p>
+<div class="order-details-page">
+
+  <div class="order-details-container">
+
+    <!-- Back -->
+    <a routerLink="/orders" class="back-link">
+      ← Back to My Orders
+    </a>
+
+
+    <!-- Loading -->
+    @if (isLoading) {
+
+      <div class="details-message">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading order details...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- Error -->
+    @if (!isLoading && errorMessage) {
+
+      <div class="details-message error">
+
+        <h2>
+          Unable to load order
+        </h2>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <button
+          type="button"
+          (click)="loadOrder()"
+        >
+          Try Again
+        </button>
+
+      </div>
+
+    }
+
+
+    <!-- Order Details -->
+    @if (!isLoading && !errorMessage && order) {
+
+
+      <!-- ==========================
+           Header
+           ========================== -->
+
+      <div class="details-header">
+
+        <div class="order-header-info">
+
+          <p class="eyebrow">
+            Order Details
+          </p>
+
+          <h1>
+            {{ order.businessLocationName }}
+          </h1>
+
+          <p class="order-number">
+            {{ order.orderNumber }}
+          </p>
+
+        </div>
+
+
+        <div class="header-actions">
+
+          <!-- Status -->
+          <span
+            class="status"
+            [class]="order.status.toLowerCase().replace(' ', '-')"
+          >
+            {{ order.status }}
+          </span>
+
+
+          <!-- Track Order -->
+          <a
+            [routerLink]="['/orders', order.id, 'tracking']"
+            class="track-button"
+          >
+            🚴 Track Order
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==========================
+           Order Information
+           ========================== -->
+
+      <div class="info-grid">
+
+        <div class="info-card">
+
+          <span class="info-label">
+            Order Date
+          </span>
+
+          <strong>
+            {{ order.addedOn }}
+          </strong>
+
+        </div>
+
+
+        <div class="info-card">
+
+          <span class="info-label">
+            Order Type
+          </span>
+
+          <strong>
+            {{ order.orderType }}
+          </strong>
+
+        </div>
+
+
+        <div class="info-card">
+
+          <span class="info-label">
+            Order Number
+          </span>
+
+          <strong>
+            {{ order.orderNumber }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==========================
+           Order Items
+           ========================== -->
+
+      <section class="details-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <h2>
+              Order Items
+            </h2>
+
+            <p class="section-subtitle">
+              Items included in this order
+            </p>
+
+          </div>
+
+
+          <span class="item-count">
+
+            {{ order.cart.cartItems.length }}
+
+            {{ order.cart.cartItems.length === 1 ? 'item' : 'items' }}
+
+          </span>
+
+        </div>
+
+
+        <div class="items-list">
+
+          @for (
+            item of order.cart.cartItems;
+            track item.itemId
+          ) {
+
+            <div class="detail-item">
+
+
+              <div class="item-left">
+
+                <div class="item-quantity">
+                  {{ item.quantity }}×
+                </div>
+
+
+                <div class="item-info">
+
+                  <h3>
+                    {{ item.name }}
+                  </h3>
+
+
+                  @if (item.category) {
+
+                    <p class="item-category">
+                      {{ item.category }}
+                    </p>
+
+                  }
+
+
+                  @if (item.description) {
+
+                    <small>
+                      {{ item.description }}
+                    </small>
+
+                  }
+
+                </div>
+
+              </div>
+
+
+              <div class="item-right">
+
+                <span class="item-unit-price">
+                  {{ formatAmount(item.price) }} each
+                </span>
+
+                <strong>
+                  {{ formatAmount(
+                    getItemTotal(item.price, item.quantity)
+                  ) }}
+                </strong>
+
+              </div>
+
+
+            </div>
+
+          }
+
+        </div>
+
+      </section>
+
+
+      <!-- ==========================
+           Delivery Address
+           ========================== -->
+
+      @if (order.userAddress) {
+
+        <section class="details-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <h2>
+                Delivery Address
+              </h2>
+
+              <p class="section-subtitle">
+                Your selected delivery location
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="address-card">
+
+            <div class="address-icon">
+              📍
+            </div>
+
+
+            <div class="address-content">
+
+              <strong>
+                {{ order.userAddress.label }}
+              </strong>
+
+
+              @if (order.userAddress.address) {
+
+                <p>
+                  {{ order.userAddress.address }}
+                </p>
+
+              }
+
+
+              @if (order.userAddress.area) {
+
+                <p>
+                  {{ order.userAddress.area }}
+                </p>
+
+              }
+
+
+              @if (order.userAddress.houseNumber) {
+
+                <p>
+                  House {{ order.userAddress.houseNumber }}
+                </p>
+
+              }
+
+
+              @if (order.userAddress.floor) {
+
+                <p>
+                  Floor {{ order.userAddress.floor }}
+                </p>
+
+              }
+
+
+              @if (order.userAddress.apartment) {
+
+                <p>
+                  Apartment {{ order.userAddress.apartment }}
+                </p>
+
+              }
+
+
+              @if (order.userAddress.landmark) {
+
+                <p>
+                  Near {{ order.userAddress.landmark }}
+                </p>
+
+              }
+
+
+              @if (order.userAddress.cityName) {
+
+                <p>
+                  {{ order.userAddress.cityName }}
+                </p>
+
+              }
+
+            </div>
+
+          </div>
+
+        </section>
+
+      }
+
+
+      <!-- ==========================
+           Notes
+           ========================== -->
+
+      @if (order.notes) {
+
+        <section class="details-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <h2>
+                Order Notes
+              </h2>
+
+              <p class="section-subtitle">
+                Special instructions for this order
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="notes-card">
+            {{ order.notes }}
+          </div>
+
+        </section>
+
+      }
+
+
+      <!-- ==========================
+           Order Summary
+           ========================== -->
+
+      <section class="total-section">
+
+        <div class="summary-heading">
+
+          <h2>
+            Order Summary
+          </h2>
+
+        </div>
+
+
+        <div class="total-row">
+
+          <span>
+            Subtotal
+          </span>
+
+          <strong>
+            {{ formatAmount(order.totalAmount) }}
+          </strong>
+
+        </div>
+
+
+        <div class="total-divider"></div>
+
+
+        <div class="grand-total">
+
+          <span>
+            Total
+          </span>
+
+          <strong>
+            {{ formatAmount(order.totalAmount) }}
+          </strong>
+
+        </div>
+
+      </section>
+
+    }
+
+  </div>
+
+</div>

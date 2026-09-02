@@ -1,0 +1,826 @@
+/* =========================================
+   TRACKING PAGE
+   ========================================= */
+
+.tracking-page {
+  min-height: calc(100vh - 70px);
+  background: #f7f7f7;
+  padding: 35px 20px 60px;
+}
+
+.tracking-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+
+/* =========================================
+   BACK LINK
+   ========================================= */
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: #6f2dbd;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   TRACKING HEADER
+   ========================================= */
+
+.tracking-header {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 28px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 20px;
+
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.07);
+}
+
+.tracking-header-info {
+  flex: 1;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+
+  color: #6f2dbd;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tracking-header h1 {
+  margin: 0;
+
+  color: #222;
+
+  font-size: 28px;
+}
+
+.order-number {
+  margin: 7px 0 0;
+
+  color: #888;
+
+  font-size: 14px;
+}
+
+
+/* =========================================
+   HEADER ACTIONS
+   ========================================= */
+
+.tracking-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+
+/* =========================================
+   STATUS
+   ========================================= */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 15px;
+
+  border-radius: 20px;
+
+  background: #eee5ff;
+  color: #6f2dbd;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status.delivered {
+  background: #e7f8ed;
+  color: #18864b;
+}
+
+.status.cancelled {
+  background: #ffe8e8;
+  color: #d33;
+}
+
+
+/* =========================================
+   CANCEL BUTTON
+   ========================================= */
+
+.cancel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 9px 16px;
+
+  border: 1px solid #e04a4a;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #d33;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.cancel-button:hover {
+  background: #d33;
+  border-color: #d33;
+  color: #ffffff;
+
+  transform: translateY(-1px);
+}
+
+.cancel-button:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================
+   CURRENT STATUS
+   ========================================= */
+
+.current-status-card {
+  margin-top: 18px;
+
+  padding: 25px;
+
+  background: #6f2dbd;
+
+  border-radius: 14px;
+
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+
+  box-shadow: 0 5px 18px rgba(111, 45, 189, 0.22);
+}
+
+.current-status-icon {
+  width: 60px;
+  height: 60px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.18);
+
+  border-radius: 50%;
+
+  font-size: 28px;
+}
+
+.status-label {
+  margin: 0 0 4px;
+
+  font-size: 12px;
+
+  opacity: 0.8;
+
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.current-status-card h2 {
+  margin: 0;
+
+  font-size: 22px;
+}
+
+.current-status-card p:last-child {
+  margin: 5px 0 0;
+
+  font-size: 14px;
+
+  opacity: 0.9;
+}
+
+
+/* =========================================
+   TRACKING SECTION
+   ========================================= */
+
+.tracking-section {
+  margin-top: 18px;
+
+  padding: 28px;
+
+  background: #ffffff;
+
+  border-radius: 14px;
+
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: #222;
+
+  font-size: 20px;
+}
+
+.section-heading p {
+  margin: 6px 0 0;
+
+  color: #888;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   TIMELINE
+   ========================================= */
+
+.tracking-timeline {
+  position: relative;
+
+  margin-top: 30px;
+
+  padding-left: 12px;
+}
+
+.tracking-step {
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 18px;
+
+  min-height: 90px;
+}
+
+
+/* =========================================
+   CONNECTING LINE
+   ========================================= */
+
+.tracking-step::before {
+  content: '';
+
+  position: absolute;
+
+  left: 19px;
+  top: 42px;
+  bottom: -10px;
+
+  width: 2px;
+
+  background: #e5e5e5;
+}
+
+.tracking-step:last-child {
+  min-height: auto;
+}
+
+.tracking-step:last-child::before {
+  display: none;
+}
+
+
+/* =========================================
+   TIMELINE MARKER
+   ========================================= */
+
+.timeline-marker {
+  position: relative;
+
+  z-index: 2;
+
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eeeeee;
+  color: #999;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* =========================================
+   COMPLETED STEP
+   ========================================= */
+
+.tracking-step.completed .timeline-marker {
+  background: #6f2dbd;
+  color: #ffffff;
+}
+
+.tracking-step.completed::before {
+  background: #6f2dbd;
+}
+
+
+/* =========================================
+   CURRENT STEP
+   ========================================= */
+
+.tracking-step.current .timeline-marker {
+  background: #6f2dbd;
+  color: #ffffff;
+
+  box-shadow: 0 0 0 6px #eee5ff;
+}
+
+.tracking-step.current .timeline-content h3 {
+  color: #6f2dbd;
+}
+
+
+/* =========================================
+   PENDING STEP
+   ========================================= */
+
+.tracking-step.pending .timeline-content {
+  opacity: 0.5;
+}
+
+
+/* =========================================
+   TIMELINE CONTENT
+   ========================================= */
+
+.timeline-content {
+  padding-top: 2px;
+}
+
+.timeline-content h3 {
+  margin: 0;
+
+  color: #333;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.timeline-content p {
+  margin: 5px 0 0;
+
+  color: #888;
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+/* =========================================
+   SUMMARY
+   ========================================= */
+
+.summary-section {
+  margin-top: 18px;
+
+  padding: 25px;
+
+  background: #ffffff;
+
+  border-radius: 14px;
+
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
+}
+
+.summary-row {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 20px;
+}
+
+.summary-row > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.summary-label {
+  color: #888;
+
+  font-size: 12px;
+}
+
+.summary-row strong {
+  color: #333;
+
+  font-size: 14px;
+}
+
+.summary-row strong.total {
+  color: #6f2dbd;
+
+  font-size: 18px;
+}
+
+
+/* =========================================
+   LOADING / ERROR
+   ========================================= */
+
+.tracking-message {
+  padding: 50px 25px;
+
+  background: #ffffff;
+
+  border-radius: 14px;
+
+  text-align: center;
+
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
+}
+
+.tracking-message p {
+  color: #777;
+}
+
+.tracking-message.error h2 {
+  margin: 0 0 8px;
+
+  color: #333;
+}
+
+.tracking-message.error p {
+  color: #c62828;
+}
+
+.tracking-message button {
+  border: none;
+
+  padding: 10px 18px;
+
+  border-radius: 8px;
+
+  background: #6f2dbd;
+  color: #ffffff;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+.tracking-message button:hover {
+  background: #5b219f;
+}
+
+
+/* =========================================
+   SPINNER
+   ========================================= */
+
+.spinner {
+  width: 32px;
+  height: 32px;
+
+  margin: 0 auto 15px;
+
+  border: 4px solid #eeeeee;
+  border-top-color: #6f2dbd;
+
+  border-radius: 50%;
+
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================
+   CANCEL OVERLAY
+   ========================================= */
+
+.cancel-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  backdrop-filter: blur(3px);
+}
+
+
+/* =========================================
+   CANCEL POPUP
+   ========================================= */
+
+.cancel-popup {
+  width: 100%;
+  max-width: 430px;
+
+  padding: 30px;
+
+  background: #ffffff;
+
+  border-radius: 16px;
+
+  text-align: center;
+
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.22);
+
+  animation: popupIn 0.2s ease-out;
+}
+
+@keyframes popupIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+/* =========================================
+   CANCEL POPUP ICON
+   ========================================= */
+
+.cancel-popup-icon {
+  width: 58px;
+  height: 58px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #fff0f0;
+
+  font-size: 27px;
+}
+
+
+/* =========================================
+   CANCEL POPUP TEXT
+   ========================================= */
+
+.cancel-popup h2 {
+  margin: 0;
+
+  color: #222;
+
+  font-size: 22px;
+}
+
+.cancel-popup p {
+  margin: 10px 0 0;
+
+  color: #666;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+.cancel-popup .cancel-warning {
+  margin-top: 5px;
+
+  color: #d33;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================
+   CANCEL POPUP ACTIONS
+   ========================================= */
+
+.cancel-popup-actions {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-top: 25px;
+}
+
+
+/* Keep Order */
+
+.keep-order-button {
+  min-width: 120px;
+
+  padding: 11px 18px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #555;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.keep-order-button:hover {
+  background: #f5f5f5;
+
+  border-color: #ccc;
+}
+
+
+/* Confirm Cancel */
+
+.confirm-cancel-button {
+  min-width: 120px;
+
+  padding: 11px 18px;
+
+  border: 1px solid #d33;
+
+  border-radius: 8px;
+
+  background: #d33;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.confirm-cancel-button:hover {
+  background: #b92525;
+
+  border-color: #b92525;
+}
+
+
+/* Disabled Buttons */
+
+.keep-order-button:disabled,
+.confirm-cancel-button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+  .tracking-page {
+    padding: 25px 15px 45px;
+  }
+
+
+  /* Header */
+
+  .tracking-header {
+    flex-direction: column;
+
+    padding: 22px;
+  }
+
+  .tracking-header h1 {
+    font-size: 23px;
+  }
+
+
+  /* Header Actions */
+
+  .tracking-header-actions {
+    width: 100%;
+
+    justify-content: flex-start;
+  }
+
+  .cancel-button {
+    padding: 9px 14px;
+  }
+
+
+  /* Current Status */
+
+  .current-status-card {
+    padding: 20px;
+  }
+
+
+  /* Sections */
+
+  .tracking-section,
+  .summary-section {
+    padding: 20px;
+  }
+
+
+  /* Summary */
+
+  .summary-row {
+    grid-template-columns: 1fr;
+
+    gap: 15px;
+  }
+
+
+  /* Timeline */
+
+  .tracking-step {
+    gap: 13px;
+  }
+
+
+  /* Cancel Popup */
+
+  .cancel-popup {
+    padding: 25px 20px;
+  }
+
+  .cancel-popup-actions {
+    flex-direction: column-reverse;
+  }
+
+  .keep-order-button,
+  .confirm-cancel-button {
+    width: 100%;
+  }
+
+}

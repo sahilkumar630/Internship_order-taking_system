@@ -1,0 +1,411 @@
+.orders-page {
+  min-height: calc(100vh - 70px);
+  background: #f7f7f7;
+  padding: 40px 20px;
+}
+
+.orders-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+
+/* ==========================
+   Header
+   ========================== */
+
+.orders-header {
+  margin-bottom: 30px;
+}
+
+.orders-header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #222;
+}
+
+.orders-header p {
+  margin: 8px 0 0;
+  color: #777;
+  font-size: 15px;
+}
+
+
+/* ==========================
+   Order List
+   ========================== */
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+/* ==========================
+   Order Card
+   ========================== */
+
+.order-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ==========================
+   Top
+   ========================== */
+
+.order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.order-top h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+.order-number {
+  margin: 6px 0 0;
+  color: #888;
+  font-size: 13px;
+}
+
+
+/* ==========================
+   Status
+   ========================== */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #eee;
+  color: #555;
+}
+
+
+/* Common status variations */
+
+.status.placed {
+  background: #eee5ff;
+  color: #6f2dbd;
+}
+
+.status.delivered {
+  background: #e7f8ed;
+  color: #18864b;
+}
+
+.status.cancelled {
+  background: #ffe8e8;
+  color: #d33;
+}
+
+
+/* ==========================
+   Items
+   ========================== */
+
+.order-items {
+  padding: 18px 0;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 0;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+.item-quantity {
+  color: #777;
+  font-size: 14px;
+}
+
+.item-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.no-items {
+  margin: 0;
+  color: #888;
+  font-size: 14px;
+}
+
+
+/* ==========================
+   Bottom
+   ========================== */
+
+.order-bottom {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding-top: 18px;
+  border-top: 1px solid #eeeeee;
+}
+
+.order-date {
+  flex: 1;
+  color: #888;
+  font-size: 13px;
+}
+
+.order-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.order-total span {
+  font-size: 12px;
+  color: #888;
+}
+
+.order-total strong {
+  font-size: 18px;
+  color: #222;
+}
+
+
+/* ==========================
+   Order Actions
+   ========================== */
+
+.order-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+/* ==========================
+   View Details Button
+   ========================== */
+
+.details-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #6f2dbd;
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.details-button:hover {
+  background: #5b219f;
+  transform: translateY(-1px);
+}
+
+.details-button span {
+  font-size: 17px;
+}
+
+
+/* ==========================
+   Track Order Button
+   ========================== */
+
+.track-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #eee5ff;
+  color: #6f2dbd;
+  border: 1px solid #d9c2ff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.track-button:hover {
+  background: #6f2dbd;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.track-button span {
+  font-size: 16px;
+}
+
+
+/* ==========================
+   Loading / Error / Empty
+   ========================== */
+
+.orders-message {
+  background: white;
+  border-radius: 14px;
+  padding: 50px 25px;
+  text-align: center;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
+}
+
+.orders-message p {
+  color: #777;
+}
+
+.orders-message.error {
+  border: 1px solid #ffd5d5;
+}
+
+.orders-message.error p {
+  color: #c62828;
+}
+
+.orders-message button {
+  border: none;
+  background: #6f2dbd;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.orders-message button:hover {
+  background: #5b219f;
+}
+
+.empty-icon {
+  font-size: 45px;
+  margin-bottom: 10px;
+}
+
+.orders-message.empty h2 {
+  margin: 0;
+  color: #333;
+}
+
+.browse-button {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 11px 20px;
+  border-radius: 8px;
+  background: #6f2dbd;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.browse-button:hover {
+  background: #5b219f;
+}
+
+
+/* ==========================
+   Loading Spinner
+   ========================== */
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 15px;
+  border: 4px solid #eeeeee;
+  border-top-color: #6f2dbd;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ==========================
+   Mobile
+   ========================== */
+
+@media (max-width: 700px) {
+
+  .orders-page {
+    padding: 25px 15px;
+  }
+
+  .orders-header h1 {
+    font-size: 27px;
+  }
+
+  .order-card {
+    padding: 18px;
+  }
+
+  .order-top {
+    flex-direction: column;
+  }
+
+  .order-bottom {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .order-date {
+    flex-basis: 100%;
+  }
+
+  .order-total {
+    align-items: flex-start;
+  }
+
+  .order-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .details-button,
+  .track-button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+}

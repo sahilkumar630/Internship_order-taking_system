@@ -1,1 +1,511 @@
-<p>order-tracking works!</p>
+<div class="tracking-page">
+
+  <div class="tracking-container">
+
+    <!-- Back to Orders -->
+    <a
+      routerLink="/orders"
+      class="back-link"
+    >
+      ← Back to My Orders
+    </a>
+
+
+    <!-- Loading State -->
+    @if (isLoading) {
+
+      <div class="tracking-message">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading order tracking...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- Error State -->
+    @if (!isLoading && errorMessage) {
+
+      <div class="tracking-message error">
+
+        <h2>
+          Unable to Load Tracking
+        </h2>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <button
+          type="button"
+          (click)="loadOrder()"
+        >
+          Try Again
+        </button>
+
+      </div>
+
+    }
+
+
+    <!-- Tracking Content -->
+    @if (!isLoading && !errorMessage && order) {
+
+      <!-- ==========================
+           Order Header
+           ========================== -->
+
+      <div class="tracking-header">
+
+        <div class="tracking-header-info">
+
+          <p class="eyebrow">
+            Order Tracking
+          </p>
+
+          <h1>
+            {{ order.businessLocationName }}
+          </h1>
+
+          <p class="order-number">
+            {{ order.orderNumber }}
+          </p>
+
+        </div>
+
+
+        <!-- Status + Cancel -->
+        <div class="tracking-header-actions">
+
+          <!-- Current Status -->
+          <span
+            class="status"
+            [class]="order.status.toLowerCase().replace(' ', '-')"
+          >
+            {{ order.status }}
+          </span>
+
+
+          <!-- Cancel Order -->
+          @if (
+            order.status !== 'CANCELLED' &&
+            order.status !== 'DELIVERED'
+          ) {
+
+            <button
+              type="button"
+              class="cancel-button"
+              (click)="openCancelPopup()"
+            >
+              ✕ Cancel Order
+            </button>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- ==========================
+           Current Status Card
+           ========================== -->
+
+      <div class="current-status-card">
+
+        <div class="current-status-icon">
+          🚴
+        </div>
+
+
+        <div class="current-status-content">
+
+          <p class="status-label">
+            Current Status
+          </p>
+
+          <h2>
+            {{ order.status }}
+          </h2>
+
+          <p>
+            Your order is currently
+            <strong>
+              {{ order.status.toLowerCase() }}
+            </strong>.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==========================
+           Order Progress
+           ========================== -->
+
+      <section class="tracking-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <h2>
+              Order Progress
+            </h2>
+
+            <p>
+              Follow your order from placement to delivery.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="tracking-timeline">
+
+
+          <!-- Order Placed -->
+          <div
+            class="tracking-step"
+            [class]="getStatusClass(10)"
+          >
+
+            <div class="timeline-marker">
+
+              @if (isStatusCompleted(10)) {
+                ✓
+              } @else {
+                1
+              }
+
+            </div>
+
+
+            <div class="timeline-content">
+
+              <h3>
+                Order Placed
+              </h3>
+
+              <p>
+                Your order has been placed successfully.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- Processing -->
+          <div
+            class="tracking-step"
+            [class]="getStatusClass(20)"
+          >
+
+            <div class="timeline-marker">
+
+              @if (isStatusCompleted(20)) {
+                ✓
+              } @else {
+                2
+              }
+
+            </div>
+
+
+            <div class="timeline-content">
+
+              <h3>
+                Processing
+              </h3>
+
+              <p>
+                The restaurant is processing your order.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- Preparing -->
+          <div
+            class="tracking-step"
+            [class]="getStatusClass(30)"
+          >
+
+            <div class="timeline-marker">
+
+              @if (isStatusCompleted(30)) {
+                ✓
+              } @else {
+                3
+              }
+
+            </div>
+
+
+            <div class="timeline-content">
+
+              <h3>
+                Preparing
+              </h3>
+
+              <p>
+                Your food is being prepared.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- Ready for Delivery -->
+          <div
+            class="tracking-step"
+            [class]="getStatusClass(40)"
+          >
+
+            <div class="timeline-marker">
+
+              @if (isStatusCompleted(40)) {
+                ✓
+              } @else {
+                4
+              }
+
+            </div>
+
+
+            <div class="timeline-content">
+
+              <h3>
+                Ready for Delivery
+              </h3>
+
+              <p>
+                Your order is ready to be picked up.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- Out for Delivery -->
+          <div
+            class="tracking-step"
+            [class]="getStatusClass(50)"
+          >
+
+            <div class="timeline-marker">
+
+              @if (isStatusCompleted(50)) {
+                ✓
+              } @else {
+                5
+              }
+
+            </div>
+
+
+            <div class="timeline-content">
+
+              <h3>
+                Out for Delivery
+              </h3>
+
+              <p>
+                Your order is on its way.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- Delivered -->
+          <div
+            class="tracking-step"
+            [class]="getStatusClass(80)"
+          >
+
+            <div class="timeline-marker">
+
+              @if (isStatusCompleted(80)) {
+                ✓
+              } @else {
+                6
+              }
+
+            </div>
+
+
+            <div class="timeline-content">
+
+              <h3>
+                Delivered
+              </h3>
+
+              <p>
+                Your order has been delivered.
+              </p>
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </section>
+
+
+      <!-- ==========================
+           Order Summary
+           ========================== -->
+
+      <section class="summary-section">
+
+        <div class="summary-row">
+
+
+          <!-- Order Number -->
+          <div>
+
+            <span class="summary-label">
+              Order Number
+            </span>
+
+            <strong>
+              {{ order.orderNumber }}
+            </strong>
+
+          </div>
+
+
+          <!-- Order Type -->
+          <div>
+
+            <span class="summary-label">
+              Order Type
+            </span>
+
+            <strong>
+              {{ order.orderType }}
+            </strong>
+
+          </div>
+
+
+          <!-- Total -->
+          <div>
+
+            <span class="summary-label">
+              Total
+            </span>
+
+            <strong class="total">
+              {{ formatAmount(order.totalAmount) }}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+      </section>
+
+    }
+
+
+    <!-- ==========================
+         Cancel Confirmation Popup
+         ========================== -->
+
+    @if (showCancelPopup) {
+
+      <div
+        class="cancel-overlay"
+        (click)="closeCancelPopup()"
+      >
+
+        <div
+          class="cancel-popup"
+          (click)="$event.stopPropagation()"
+        >
+
+          <div class="cancel-popup-icon">
+            ⚠️
+          </div>
+
+
+          <h2>
+            Cancel Order?
+          </h2>
+
+
+          <p>
+            Are you sure you want to cancel this order?
+          </p>
+
+
+          <p class="cancel-warning">
+            This action cannot be undone.
+          </p>
+
+
+          <div class="cancel-popup-actions">
+
+            <!-- Keep Order -->
+            <button
+              type="button"
+              class="keep-order-button"
+              (click)="closeCancelPopup()"
+              [disabled]="isCancelling"
+            >
+              Keep Order
+            </button>
+
+
+            <!-- Confirm Cancel -->
+            <button
+              type="button"
+              class="confirm-cancel-button"
+              (click)="cancelOrder()"
+              [disabled]="isCancelling"
+            >
+
+              @if (isCancelling) {
+
+                <span>
+                  Cancelling...
+                </span>
+
+              } @else {
+
+                <span>
+                  Cancel Order
+                </span>
+
+              }
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+  </div>
+
+</div>
