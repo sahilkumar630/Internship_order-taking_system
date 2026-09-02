@@ -1,16 +1,13 @@
-import {
-  Injectable
-} from '@angular/core';
-
-import {
-  HttpClient
-} from '@angular/common/http';
-
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import {
   Observable,
   of,
   map,
-  catchError
+  catchError,
+  switchMap,
+  from,
+  throwError
 } from 'rxjs';
 
 import {
@@ -27,53 +24,131 @@ import {
 } from '../../shared/models/api-response.model';
 
 import {
+  AuthService
+} from './auth.service';
+
+import {
   environment
 } from '../../../environments/environment';
 
+
+/*
+ * =========================================
+ * GUEST CART MODELS
+ * =========================================
+ */
+
+interface GuestCartItem {
+  itemId: number;
+  quantity: number;
+
+  // Keep the actual menu information
+  // so the cart can work without login.
+  name: string;
+  category: string;
+  description: string;
+  price: number;
+  image: string;
+}
+
+interface GuestCart {
+  businessLocationId: number;
+  items: GuestCartItem[];
+}
+
+
+/*
+ * =========================================
+ * CART SERVICE
+ * =========================================
+ */
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
 
-
-  // =========================================
-  // CART API
-  // =========================================
+  /*
+   * =========================================
+   * API
+   * =========================================
+   */
 
   private readonly apiUrl =
     `${environment.apiUrl}/Cart`;
 
 
-  // =========================================
-  // CURRENT CART
-  // =========================================
+  /*
+   * =========================================
+   * LOCAL STORAGE
+   * =========================================
+   */
+
+  private readonly guestCartKey =
+    'foodie_guest_cart';
+
+
+  /*
+   * =========================================
+   * CURRENT SERVER CART
+   * =========================================
+   */
 
   private cart:
     Cart | null = null;
 
 
-  // =========================================
-  // CONSTRUCTOR
-  // =========================================
+  /*
+   * =========================================
+   * CONSTRUCTOR
+   * =========================================
+   */
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
 
-  // =========================================
-  // GET CART
-  // =========================================
+  /*
+   * =========================================
+   * GET CART
+   * =========================================
+   *
+   * Guest:
+   *   Read cart from LocalStorage.
+   *
+   * Logged in:
+   *   Read cart from backend.
+   */
 
   getCart(): Observable<Cart | null> {
 
-    return this.http
+    /*
+     * =======================================
+     * GUEST
+     * =======================================
+     */
 
+    if (!this.authService.isLoggedIn()) {
+
+      return of(
+        this.getGuestCartAsCart()
+      );
+
+    }
+
+
+    /*
+     * =======================================
+     * LOGGED-IN USER
+     * =======================================
+     */
+
+    return this.http
       .get<ApiResponse<Cart>>(
         this.apiUrl
       )
-
       .pipe(
 
         map(response => {
@@ -84,26 +159,16 @@ export class CartService {
           );
 
 
-          // =====================================
-          // CART NOT FOUND / EMPTY
-          // =====================================
-
           if (
             !response.data ||
             response.message === 'Cart not found.'
           ) {
 
-            this.cart =
-              null;
+            this.cart = null;
 
             return null;
-
           }
 
-
-          // =====================================
-          // SAVE CART
-          // =====================================
 
           this.cart =
             response.data;
@@ -113,11 +178,6 @@ export class CartService {
 
         }),
 
-
-        // =====================================
-        // ERROR
-        // =====================================
-
         catchError(error => {
 
           console.error(
@@ -126,9 +186,7 @@ export class CartService {
           );
 
 
-          this.cart =
-            null;
-
+          this.cart = null;
 
           return of(null);
 
@@ -139,27 +197,39 @@ export class CartService {
   }
 
 
-  // =========================================
-  // GET CURRENT CART ITEMS
-  // =========================================
+  /*
+   * =========================================
+   * GET ITEMS
+   * =========================================
+   */
 
   getItems(): CartItem[] {
 
-    if (!this.cart) {
+    /*
+     * Logged-in user
+     */
 
-      return [];
+    if (this.authService.isLoggedIn()) {
+
+      return this.cart?.cartItems || [];
 
     }
 
 
-    return this.cart.cartItems || [];
+    /*
+     * Guest user
+     */
+
+    return this.getGuestCartItems();
 
   }
 
 
-  // =========================================
-  // ADD ITEM TO CART
-  // =========================================
+  /*
+   * =========================================
+   * ADD ITEM
+   * =========================================
+   */
 
   addItem(
     menuItem: MenuItem,
@@ -167,9 +237,29 @@ export class CartService {
   ): Observable<Cart | null> {
 
 
-    // =========================================
-    // REQUEST BODY
-    // =========================================
+    /*
+     * =======================================
+     * GUEST USER
+     * =======================================
+     */
+
+    if (!this.authService.isLoggedIn()) {
+
+      return of(
+        this.addGuestItem(
+          menuItem,
+          businessLocationId
+        )
+      );
+
+    }
+
+
+    /*
+     * =======================================
+     * LOGGED-IN USER
+     * =======================================
+     */
 
     const body = {
 
@@ -186,22 +276,16 @@ export class CartService {
 
 
     console.log(
-      'Adding item to cart:',
+      'Adding item to API cart:',
       body
     );
 
 
-    // =========================================
-    // API REQUEST
-    // =========================================
-
     return this.http
-
       .post<ApiResponse<Cart>>(
         `${this.apiUrl}/add`,
         body
       )
-
       .pipe(
 
         map(response => {
@@ -212,51 +296,19 @@ export class CartService {
           );
 
 
-          // =====================================
-          // API FAILED
-          // =====================================
-
           if (
             response.responseStatus !== 1
           ) {
 
-            const message =
-              response.message ||
-              'Unable to add item to cart.';
-
-
-            console.error(
-              'Cart Add Failed:',
-              message
-            );
-
-
-            /*
-             * IMPORTANT:
-             *
-             * Do NOT return the existing cart here.
-             *
-             * Throwing the error sends execution
-             * to the component's error handler.
-             *
-             * Therefore the success popup will NOT
-             * be shown when the API rejects the item.
-             */
-
             throw new Error(
-              message
+              response.message ||
+              'Unable to add item to cart.'
             );
 
           }
 
 
-          // =====================================
-          // API SUCCESS BUT NO DATA
-          // =====================================
-
-          if (
-            !response.data
-          ) {
+          if (!response.data) {
 
             throw new Error(
               'Item was accepted but no cart data was returned.'
@@ -265,28 +317,13 @@ export class CartService {
           }
 
 
-          // =====================================
-          // SAVE UPDATED CART
-          // =====================================
-
           this.cart =
             response.data;
-
-
-          console.log(
-            'Item successfully added to cart:',
-            this.cart
-          );
 
 
           return this.cart;
 
         }),
-
-
-        // =====================================
-        // HTTP / API ERROR
-        // =====================================
 
         catchError(error => {
 
@@ -296,14 +333,9 @@ export class CartService {
           );
 
 
-          /*
-           * Re-throw the error.
-           *
-           * The MenuComponent will receive it
-           * inside subscribe({ error: ... }).
-           */
-
-          throw error;
+          return throwError(
+            () => error
+          );
 
         })
 
@@ -312,9 +344,195 @@ export class CartService {
   }
 
 
-  // =========================================
-  // UPDATE QUANTITY
-  // =========================================
+  /*
+   * =========================================
+   * ADD GUEST ITEM
+   * =========================================
+   */
+
+  private addGuestItem(
+    menuItem: MenuItem,
+    businessLocationId: number
+  ): Cart | null {
+
+
+    let guestCart =
+      this.getGuestCart();
+
+
+    /*
+     * =======================================
+     * NEW CART
+     * =======================================
+     */
+
+    if (!guestCart) {
+
+      guestCart = {
+
+        businessLocationId:
+          businessLocationId,
+
+        items: []
+
+      };
+
+    }
+
+
+    /*
+     * =======================================
+     * DIFFERENT RESTAURANT
+     * =======================================
+     *
+     * MenuComponent already handles the
+     * restaurant-switch confirmation.
+     *
+     * This extra protection prevents adding
+     * items from another restaurant accidentally.
+     */
+
+    if (
+      Number(
+        guestCart.businessLocationId
+      ) !== Number(
+        businessLocationId
+      )
+    ) {
+
+      console.warn(
+        'Cannot add guest item from another restaurant.'
+      );
+
+      return this.getGuestCartAsCart();
+
+    }
+
+
+    /*
+     * =======================================
+     * FIND EXISTING ITEM
+     * =======================================
+     */
+
+    const existingItem =
+      guestCart.items.find(
+        item =>
+          Number(item.itemId) ===
+          Number(menuItem.id)
+      );
+
+
+    /*
+     * =======================================
+     * INCREASE EXISTING ITEM
+     * =======================================
+     */
+
+    if (existingItem) {
+
+      existingItem.quantity += 1;
+
+
+      /*
+       * Update item information as well.
+       * This helps if menu information changed
+       * while the user was browsing.
+       */
+
+      existingItem.name =
+        menuItem.name;
+
+      existingItem.category =
+        menuItem.category ||
+        menuItem.itemCategory ||
+        '';
+
+      existingItem.description =
+        menuItem.description || '';
+
+      existingItem.price =
+        Number(
+          menuItem.discountPrice ||
+          menuItem.price ||
+          0
+        );
+
+      existingItem.image =
+        menuItem.image || '';
+
+    }
+
+
+    /*
+     * =======================================
+     * NEW ITEM
+     * =======================================
+     */
+
+    else {
+
+      guestCart.items.push({
+
+        itemId:
+          Number(menuItem.id),
+
+        quantity:
+          1,
+
+        name:
+          menuItem.name,
+
+        category:
+          menuItem.category ||
+          menuItem.itemCategory ||
+          '',
+
+        description:
+          menuItem.description || '',
+
+        price:
+          Number(
+            menuItem.discountPrice ||
+            menuItem.price ||
+            0
+          ),
+
+        image:
+          menuItem.image || ''
+
+      });
+
+    }
+
+
+    /*
+     * =======================================
+     * SAVE
+     * =======================================
+     */
+
+    this.saveGuestCart(
+      guestCart
+    );
+
+
+    console.log(
+      'Guest cart saved:',
+      guestCart
+    );
+
+
+    return this.getGuestCartAsCart();
+
+  }
+
+
+  /*
+   * =========================================
+   * UPDATE QUANTITY
+   * =========================================
+   */
 
   updateQuantity(
     businessLocationId: number,
@@ -323,16 +541,45 @@ export class CartService {
   ): Observable<Cart | null> {
 
 
-    if (
-      quantity < 1
-    ) {
+    /*
+     * =======================================
+     * INVALID QUANTITY
+     * =======================================
+     */
+
+    if (quantity < 1) {
 
       return of(
-        this.cart
+        this.getCurrentCart()
       );
 
     }
 
+
+    /*
+     * =======================================
+     * GUEST
+     * =======================================
+     */
+
+    if (!this.authService.isLoggedIn()) {
+
+      return of(
+        this.updateGuestQuantity(
+          businessLocationId,
+          itemId,
+          quantity
+        )
+      );
+
+    }
+
+
+    /*
+     * =======================================
+     * LOGGED-IN
+     * =======================================
+     */
 
     const body = {
 
@@ -348,32 +595,14 @@ export class CartService {
     };
 
 
-    console.log(
-      'Updating cart quantity:',
-      body
-    );
-
-
     return this.http
-
       .put<ApiResponse<Cart>>(
         `${this.apiUrl}/quantity`,
         body
       )
-
       .pipe(
 
         map(response => {
-
-          console.log(
-            'Cart Quantity Response:',
-            response
-          );
-
-
-          // =====================================
-          // API FAILED
-          // =====================================
 
           if (
             response.responseStatus !== 1
@@ -387,13 +616,7 @@ export class CartService {
           }
 
 
-          // =====================================
-          // UPDATED CART
-          // =====================================
-
-          if (
-            response.data
-          ) {
+          if (response.data) {
 
             this.cart =
               response.data;
@@ -405,7 +628,6 @@ export class CartService {
 
         }),
 
-
         catchError(error => {
 
           console.error(
@@ -414,7 +636,9 @@ export class CartService {
           );
 
 
-          throw error;
+          return throwError(
+            () => error
+          );
 
         })
 
@@ -423,9 +647,93 @@ export class CartService {
   }
 
 
-  // =========================================
-  // INCREASE QUANTITY
-  // =========================================
+  /*
+   * =========================================
+   * UPDATE GUEST QUANTITY
+   * =========================================
+   */
+
+  private updateGuestQuantity(
+    businessLocationId: number,
+    itemId: number,
+    quantity: number
+  ): Cart | null {
+
+
+    const guestCart =
+      this.getGuestCart();
+
+
+    if (!guestCart) {
+
+      return null;
+
+    }
+
+
+    /*
+     * Make sure restaurant matches.
+     */
+
+    if (
+      Number(
+        guestCart.businessLocationId
+      ) !== Number(
+        businessLocationId
+      )
+    ) {
+
+      return this.getGuestCartAsCart();
+
+    }
+
+
+    /*
+     * Find item.
+     */
+
+    const item =
+      guestCart.items.find(
+        cartItem =>
+          Number(cartItem.itemId) ===
+          Number(itemId)
+      );
+
+
+    if (!item) {
+
+      return this.getGuestCartAsCart();
+
+    }
+
+
+    /*
+     * Update quantity.
+     */
+
+    item.quantity =
+      quantity;
+
+
+    /*
+     * Save.
+     */
+
+    this.saveGuestCart(
+      guestCart
+    );
+
+
+    return this.getGuestCartAsCart();
+
+  }
+
+
+  /*
+   * =========================================
+   * INCREASE QUANTITY
+   * =========================================
+   */
 
   increaseQuantity(
     itemId: number
@@ -434,44 +742,29 @@ export class CartService {
 
     const item =
       this.getItems().find(
-
         cartItem =>
           Number(cartItem.itemId) ===
           Number(itemId)
-
       );
 
 
     if (!item) {
 
-      console.warn(
-        'Cart item not found:',
-        itemId
-      );
-
-
       return of(
-        this.cart
+        this.getCurrentCart()
       );
 
     }
 
 
     const businessLocationId =
-      this.cart?.businessLocationId;
+      this.getBusinessLocationId();
 
 
-    if (
-      !businessLocationId
-    ) {
-
-      console.warn(
-        'Business location ID not found.'
-      );
-
+    if (!businessLocationId) {
 
       return of(
-        this.cart
+        this.getCurrentCart()
       );
 
     }
@@ -483,16 +776,18 @@ export class CartService {
 
       item.itemId,
 
-      item.quantity + 1
+      Number(item.quantity) + 1
 
     );
 
   }
 
 
-  // =========================================
-  // DECREASE QUANTITY
-  // =========================================
+  /*
+   * =========================================
+   * DECREASE QUANTITY
+   * =========================================
+   */
 
   decreaseQuantity(
     itemId: number
@@ -501,36 +796,28 @@ export class CartService {
 
     const item =
       this.getItems().find(
-
         cartItem =>
           Number(cartItem.itemId) ===
           Number(itemId)
-
       );
 
 
     if (!item) {
 
-      console.warn(
-        'Cart item not found:',
-        itemId
-      );
-
-
       return of(
-        this.cart
+        this.getCurrentCart()
       );
 
     }
 
 
-    // =========================================
-    // QUANTITY = 1
-    // REMOVE ITEM
-    // =========================================
+    /*
+     * If quantity is already 1,
+     * remove the item.
+     */
 
     if (
-      item.quantity <= 1
+      Number(item.quantity) <= 1
     ) {
 
       return this.removeItem(
@@ -541,20 +828,13 @@ export class CartService {
 
 
     const businessLocationId =
-      this.cart?.businessLocationId;
+      this.getBusinessLocationId();
 
 
-    if (
-      !businessLocationId
-    ) {
-
-      console.warn(
-        'Business location ID not found.'
-      );
-
+    if (!businessLocationId) {
 
       return of(
-        this.cart
+        this.getCurrentCart()
       );
 
     }
@@ -566,51 +846,89 @@ export class CartService {
 
       item.itemId,
 
-      item.quantity - 1
+      Number(item.quantity) - 1
 
     );
 
   }
 
 
-  // =========================================
-  // REMOVE ITEM
-  // =========================================
-  //
-  // API:
-  //
-  // DELETE /api/Cart/item/{itemId}
-  //
-  // Body:
-  //
-  // {
-  //   businessLocationId: 228,
-  //   itemId: 2
-  // }
-  //
-  // =========================================
+  /*
+   * =========================================
+   * REMOVE ITEM
+   * =========================================
+   */
 
   removeItem(
     itemId: number
   ): Observable<Cart | null> {
 
 
+    /*
+     * =======================================
+     * GUEST
+     * =======================================
+     */
+
+    if (!this.authService.isLoggedIn()) {
+
+      const guestCart =
+        this.getGuestCart();
+
+
+      if (!guestCart) {
+
+        return of(null);
+
+      }
+
+
+      guestCart.items =
+        guestCart.items.filter(
+          item =>
+            Number(item.itemId) !==
+            Number(itemId)
+        );
+
+
+      /*
+       * Cart became empty.
+       */
+
+      if (
+        guestCart.items.length === 0
+      ) {
+
+        this.clearGuestCart();
+
+        return of(null);
+
+      }
+
+
+      this.saveGuestCart(
+        guestCart
+      );
+
+
+      return of(
+        this.getGuestCartAsCart()
+      );
+
+    }
+
+
+    /*
+     * =======================================
+     * LOGGED-IN
+     * =======================================
+     */
+
     const businessLocationId =
       this.cart?.businessLocationId;
 
 
-    // =========================================
-    // BUSINESS LOCATION REQUIRED
-    // =========================================
-
-    if (
-      !businessLocationId
-    ) {
-
-      console.error(
-        'Cannot remove item. Business location ID is missing.'
-      );
-
+    if (!businessLocationId) {
 
       return of(
         this.cart
@@ -630,41 +948,16 @@ export class CartService {
     };
 
 
-    console.log(
-      'Removing cart item:',
-      body
-    );
-
-
-    // =========================================
-    // DELETE REQUEST
-    // =========================================
-
     return this.http
-
       .delete<ApiResponse<Cart>>(
         `${this.apiUrl}/item/${itemId}`,
-
         {
-          body:
-            body
+          body
         }
-
       )
-
       .pipe(
 
         map(response => {
-
-          console.log(
-            'Remove Cart Item Response:',
-            response
-          );
-
-
-          // =====================================
-          // API FAILED
-          // =====================================
 
           if (
             response.responseStatus !== 1
@@ -678,13 +971,7 @@ export class CartService {
           }
 
 
-          // =====================================
-          // UPDATED CART
-          // =====================================
-
-          if (
-            response.data
-          ) {
+          if (response.data) {
 
             this.cart =
               response.data;
@@ -692,10 +979,6 @@ export class CartService {
           }
 
           else {
-
-            // =================================
-            // CART IS NOW EMPTY
-            // =================================
 
             this.cart =
               null;
@@ -707,7 +990,6 @@ export class CartService {
 
         }),
 
-
         catchError(error => {
 
           console.error(
@@ -716,7 +998,9 @@ export class CartService {
           );
 
 
-          throw error;
+          return throwError(
+            () => error
+          );
 
         })
 
@@ -725,14 +1009,53 @@ export class CartService {
   }
 
 
-  // =========================================
-  // CLEAR CART
-  // =========================================
+  /*
+   * =========================================
+   * CLEAR CART
+   * =========================================
+   */
 
   clearCart(
     businessLocationId: number
   ): Observable<Cart | null> {
 
+
+    /*
+     * =======================================
+     * GUEST
+     * =======================================
+     */
+
+    if (!this.authService.isLoggedIn()) {
+
+      const guestCart =
+        this.getGuestCart();
+
+
+      if (
+        guestCart &&
+        Number(
+          guestCart.businessLocationId
+        ) === Number(
+          businessLocationId
+        )
+      ) {
+
+        this.clearGuestCart();
+
+      }
+
+
+      return of(null);
+
+    }
+
+
+    /*
+     * =======================================
+     * LOGGED-IN
+     * =======================================
+     */
 
     const body = {
 
@@ -742,37 +1065,16 @@ export class CartService {
     };
 
 
-    console.log(
-      'Clearing cart:',
-      body
-    );
-
-
     return this.http
-
       .delete<ApiResponse<Cart>>(
         `${this.apiUrl}/clear`,
-
         {
-          body:
-            body
+          body
         }
-
       )
-
       .pipe(
 
         map(response => {
-
-          console.log(
-            'Clear Cart Response:',
-            response
-          );
-
-
-          // =====================================
-          // API FAILED
-          // =====================================
 
           if (
             response.responseStatus !== 1
@@ -786,10 +1088,6 @@ export class CartService {
           }
 
 
-          // =====================================
-          // CLEAR LOCAL CART
-          // =====================================
-
           this.cart =
             null;
 
@@ -797,7 +1095,6 @@ export class CartService {
           return null;
 
         }),
-
 
         catchError(error => {
 
@@ -807,7 +1104,9 @@ export class CartService {
           );
 
 
-          throw error;
+          return throwError(
+            () => error
+          );
 
         })
 
@@ -816,11 +1115,424 @@ export class CartService {
   }
 
 
-  // =========================================
-  // GET SUBTOTAL
-  // =========================================
+  /*
+   * =========================================
+   * SYNC GUEST CART
+   * =========================================
+   *
+   * Called after successful login.
+   *
+   * Example:
+   *
+   * Guest LocalStorage:
+   *
+   * {
+   *   businessLocationId: 228,
+   *   items: [
+   *     {
+   *       itemId: 1,
+   *       quantity: 2
+   *     }
+   *   ]
+   * }
+   *
+   * Becomes:
+   *
+   * POST /Cart/add
+   *
+   * {
+   *   businessLocationId: 228,
+   *   itemId: 1,
+   *   quantity: 2
+   * }
+   */
+
+  syncGuestCart(): Observable<Cart | null> {
+
+
+    /*
+     * =======================================
+     * NOT LOGGED IN
+     * =======================================
+     */
+
+    if (!this.authService.isLoggedIn()) {
+
+      return of(null);
+
+    }
+
+
+    const guestCart =
+      this.getGuestCart();
+
+
+    /*
+     * =======================================
+     * NOTHING TO SYNC
+     * =======================================
+     */
+
+    if (
+      !guestCart ||
+      guestCart.items.length === 0
+    ) {
+
+      return this.getCart();
+
+    }
+
+
+    console.log(
+      'Syncing guest cart:',
+      guestCart
+    );
+
+
+    /*
+     * =======================================
+     * SEND ITEMS ONE BY ONE
+     * =======================================
+     *
+     * We intentionally send the exact
+     * backend-required payload.
+     */
+
+    return from(
+      guestCart.items
+    )
+      .pipe(
+
+        switchMap(item => {
+
+          const body = {
+
+            businessLocationId:
+              guestCart.businessLocationId,
+
+            itemId:
+              item.itemId,
+
+            quantity:
+              item.quantity
+
+          };
+
+
+          console.log(
+            'Syncing guest cart item:',
+            body
+          );
+
+
+          return this.http
+            .post<ApiResponse<Cart>>(
+              `${this.apiUrl}/add`,
+              body
+            )
+            .pipe(
+
+              map(response => {
+
+                if (
+                  response.responseStatus !== 1
+                ) {
+
+                  throw new Error(
+                    response.message ||
+                    'Unable to sync guest cart item.'
+                  );
+
+                }
+
+
+                if (response.data) {
+
+                  this.cart =
+                    response.data;
+
+                }
+
+
+                return this.cart;
+
+              })
+
+            );
+
+        }),
+
+        /*
+         * IMPORTANT:
+         *
+         * Only clear LocalStorage after
+         * ALL guest items were successfully
+         * sent to the backend.
+         */
+
+        map(() => {
+
+          this.clearGuestCart();
+
+
+          console.log(
+            'Guest cart synced successfully.'
+          );
+
+
+          return this.cart;
+
+        })
+
+      );
+
+  }
+
+
+  /*
+   * =========================================
+   * GUEST CART STORAGE
+   * =========================================
+   */
+
+  private getGuestCart():
+    GuestCart | null {
+
+
+    /*
+     * SSR protection.
+     */
+
+    if (
+      typeof localStorage ===
+      'undefined'
+    ) {
+
+      return null;
+
+    }
+
+
+    const stored =
+      localStorage.getItem(
+        this.guestCartKey
+      );
+
+
+    if (!stored) {
+
+      return null;
+
+    }
+
+
+    try {
+
+      return JSON.parse(
+        stored
+      ) as GuestCart;
+
+    }
+
+    catch {
+
+      localStorage.removeItem(
+        this.guestCartKey
+      );
+
+      return null;
+
+    }
+
+  }
+
+
+  /*
+   * =========================================
+   * SAVE GUEST CART
+   * =========================================
+   */
+
+  private saveGuestCart(
+    cart: GuestCart
+  ): void {
+
+
+    /*
+     * SSR protection.
+     */
+
+    if (
+      typeof localStorage ===
+      'undefined'
+    ) {
+
+      return;
+
+    }
+
+
+    localStorage.setItem(
+
+      this.guestCartKey,
+
+      JSON.stringify(
+        cart
+      )
+
+    );
+
+  }
+
+
+  /*
+   * =========================================
+   * CLEAR GUEST CART
+   * =========================================
+   */
+
+  private clearGuestCart(): void {
+
+
+    if (
+      typeof localStorage ===
+      'undefined'
+    ) {
+
+      return;
+
+    }
+
+
+    localStorage.removeItem(
+      this.guestCartKey
+    );
+
+  }
+
+
+  /*
+   * =========================================
+   * GET GUEST ITEMS
+   * =========================================
+   */
+
+  private getGuestCartItems():
+    CartItem[] {
+
+
+    const guestCart =
+      this.getGuestCart();
+
+
+    if (!guestCart) {
+
+      return [];
+
+    }
+
+
+    /*
+     * Convert our LocalStorage model
+     * into the application's CartItem model.
+     */
+
+    return guestCart.items.map(
+      item => {
+
+        const totalPrice =
+          Number(item.price || 0) *
+          Number(item.quantity || 0);
+
+
+        return {
+
+          itemId:
+            item.itemId,
+
+          name:
+            item.name,
+
+          category:
+            item.category,
+
+          description:
+            item.description,
+
+          price:
+            Number(item.price || 0),
+
+          totalPrice:
+            totalPrice,
+
+          quantity:
+            item.quantity,
+
+          images:
+            item.image
+              ? [item.image]
+              : []
+
+        } as CartItem;
+
+      }
+    );
+
+  }
+
+
+  /*
+   * =========================================
+   * CONVERT GUEST CART TO CART
+   * =========================================
+   */
+
+  private getGuestCartAsCart():
+    Cart | null {
+
+
+    const guestCart =
+      this.getGuestCart();
+
+
+    if (
+      !guestCart ||
+      guestCart.items.length === 0
+    ) {
+
+      return null;
+
+    }
+
+
+    const cartItems =
+      this.getGuestCartItems();
+
+
+    const guestCartResult = {
+
+      businessLocationId:
+        guestCart.businessLocationId,
+
+      cartItems:
+        cartItems
+
+    };
+
+
+    return guestCartResult as Cart;
+
+  }
+
+
+  /*
+   * =========================================
+   * SUBTOTAL
+   * =========================================
+   */
 
   getSubtotal(): number {
+
 
     return this.getItems().reduce(
 
@@ -830,6 +1542,7 @@ export class CartService {
       ) => {
 
         return total +
+
           Number(
             item.totalPrice || 0
           );
@@ -843,11 +1556,14 @@ export class CartService {
   }
 
 
-  // =========================================
-  // GET TOTAL ITEMS
-  // =========================================
+  /*
+   * =========================================
+   * ITEM COUNT
+   * =========================================
+   */
 
   getItemCount(): number {
+
 
     return this.getItems().reduce(
 
@@ -857,6 +1573,7 @@ export class CartService {
       ) => {
 
         return total +
+
           Number(
             item.quantity || 0
           );
@@ -870,29 +1587,73 @@ export class CartService {
   }
 
 
-  // =========================================
-  // GET BUSINESS LOCATION ID
-  // =========================================
+  /*
+   * =========================================
+   * BUSINESS LOCATION
+   * =========================================
+   */
 
   getBusinessLocationId():
     number | null {
 
+
+    /*
+     * Logged-in user
+     */
+
+    if (
+      this.authService.isLoggedIn()
+    ) {
+
+      return (
+        this.cart?.businessLocationId ??
+        null
+      );
+
+    }
+
+
+    /*
+     * Guest user
+     */
+
     return (
-      this.cart?.businessLocationId ??
+      this.getGuestCart()
+        ?.businessLocationId ??
       null
     );
 
   }
 
 
-  // =========================================
-  // GET CURRENT CART
-  // =========================================
+  /*
+   * =========================================
+   * CURRENT CART
+   * =========================================
+   */
 
   getCurrentCart():
     Cart | null {
 
-    return this.cart;
+
+    /*
+     * Logged-in user
+     */
+
+    if (
+      this.authService.isLoggedIn()
+    ) {
+
+      return this.cart;
+
+    }
+
+
+    /*
+     * Guest user
+     */
+
+    return this.getGuestCartAsCart();
 
   }
 

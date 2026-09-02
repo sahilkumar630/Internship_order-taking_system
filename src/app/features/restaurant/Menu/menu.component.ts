@@ -810,18 +810,19 @@ export class MenuComponent
     this.isAddingToCart =
       true;
 
+    this.cartMessage =
+      '';  
 
     console.log(
       'Adding item to API cart:',
       {
-        businessLocationId:
-          businessLocationId,
+        businessLocationId,
 
-        itemId:
-          item.id,
 
-        quantity:
-          1
+        itemId: item.id,
+          
+
+        quantity: 1
       }
     );
 
@@ -851,7 +852,7 @@ export class MenuComponent
 
 
             console.log(
-              'Item added to API cart:',
+              'Cart Updated: ',
               cart
             );
 
@@ -870,7 +871,7 @@ export class MenuComponent
 
 
             console.error(
-              'Add to Cart API Error:',
+              'Add to Cart Error:',
               error
             );
 

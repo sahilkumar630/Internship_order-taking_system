@@ -20,6 +20,10 @@ import {
   AuthService
 } from '../../../core/services/auth.service';
 
+import {
+  CartService
+} from '../../../core/services/cart.service';
+
 
 @Component({
 
@@ -81,6 +85,9 @@ export class LoginComponent
 
     private authService:
       AuthService,
+
+    private cartService:
+      CartService,
 
     private router:
       Router,
@@ -151,6 +158,7 @@ export class LoginComponent
         requestedReturnUrl;
 
     }
+
     else {
 
       this.returnUrl =
@@ -257,10 +265,6 @@ export class LoginComponent
           response
         ) => {
 
-          this.isLoading =
-            false;
-
-
           console.log(
             'Login Response:',
             response
@@ -280,35 +284,107 @@ export class LoginComponent
             );
 
 
-            console.log(
-              'Redirecting to:',
-              this.returnUrl
-            );
-
-
             /*
-             * IMPORTANT:
+             * =================================
+             * SYNC GUEST CART
+             * =================================
              *
-             * Do NOT redirect to /location
-             * automatically anymore.
+             * The user may have added items
+             * before logging in.
              *
-             * If the user came from checkout:
+             * Those items are currently stored
+             * in LocalStorage.
              *
-             *     /login?returnUrl=/checkout
-             *
-             * they will go back to:
-             *
-             *     /checkout
-             *
-             * Checkout will then detect that
-             * the user is authenticated and
-             * synchronize the browser location
-             * with the backend address API.
+             * After successful login we send
+             * them to the backend Cart API.
              */
 
-            this.router.navigateByUrl(
-              this.returnUrl
-            );
+            this.cartService
+              .syncGuestCart()
+
+              .subscribe({
+
+                // =============================
+                // CART SYNC SUCCESS
+                // =============================
+
+                next: () => {
+
+                  this.isLoading =
+                    false;
+
+
+                  console.log(
+                    'Guest cart synchronization completed.'
+                  );
+
+
+                  console.log(
+                    'Redirecting to:',
+                    this.returnUrl
+                  );
+
+
+                  /*
+                   * Navigate to the page the user
+                   * originally requested.
+                   *
+                   * Example:
+                   *
+                   * /login?returnUrl=/checkout
+                   *
+                   * becomes:
+                   *
+                   * /checkout
+                   */
+
+                  this.router.navigateByUrl(
+                    this.returnUrl
+                  );
+
+                },
+
+
+                // =============================
+                // CART SYNC ERROR
+                // =============================
+
+                error: (
+                  error: unknown
+                ) => {
+
+                  this.isLoading =
+                    false;
+
+
+                  console.error(
+                    'Guest cart synchronization failed:',
+                    error
+                  );
+
+
+                  /*
+                   * Login itself succeeded,
+                   * but the cart could not be
+                   * synchronized.
+                   *
+                   * We show the actual error
+                   * instead of pretending that
+                   * synchronization succeeded.
+                   */
+
+                  this.errorMessage =
+                    this.getErrorMessage(
+
+                      error,
+
+                      'Login successful, but we could not synchronize your cart. Please try again.'
+
+                    );
+
+                }
+
+              });
 
 
             return;
@@ -320,15 +396,20 @@ export class LoginComponent
           // LOGIN FAILED
           // ---------------------------------
 
+          this.isLoading =
+            false;
+
+
           this.errorMessage =
             response.message ||
+
             'Login failed. Please check your credentials.';
 
         },
 
 
         // ===================================
-        // ERROR
+        // LOGIN API ERROR
         // ===================================
 
         error: (
@@ -347,8 +428,11 @@ export class LoginComponent
 
           this.errorMessage =
             this.getErrorMessage(
+
               error,
+
               'Unable to login. Please check your username and password.'
+
             );
 
         }
@@ -371,6 +455,7 @@ export class LoginComponent
       string
 
   ): string {
+
 
     // =======================================
     // STANDARD ERROR
@@ -423,6 +508,10 @@ export class LoginComponent
 
     }
 
+
+    // =======================================
+    // FALLBACK
+    // =======================================
 
     return fallback;
 
