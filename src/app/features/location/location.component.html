@@ -557,6 +557,7 @@
 
             <select
               id="city"
+              name="city"
 
               [(ngModel)]="selectedCity"
 
@@ -610,6 +611,7 @@
 
           <select
             id="area"
+            name="area"
 
             [(ngModel)]="selectedArea"
 
@@ -643,6 +645,106 @@
             }
 
           </select>
+
+        </div>
+
+
+        <!-- =================================================
+             HOUSE / BUILDING NUMBER
+        ================================================== -->
+
+        <div class="form-group">
+
+          <label for="houseNumber">
+            House / Building Number
+          </label>
+
+          <input
+            type="text"
+            id="houseNumber"
+            name="houseNumber"
+
+            [(ngModel)]="houseNumber"
+
+            placeholder="Enter house or building number"
+
+            [disabled]="isSavingAddress"
+          />
+
+        </div>
+
+
+        <!-- =================================================
+             FLOOR
+        ================================================== -->
+
+        <div class="form-group">
+
+          <label for="floor">
+            Floor
+          </label>
+
+          <input
+            type="text"
+            id="floor"
+            name="floor"
+
+            [(ngModel)]="floor"
+
+            placeholder="Enter floor"
+
+            [disabled]="isSavingAddress"
+          />
+
+        </div>
+
+
+        <!-- =================================================
+             APARTMENT
+        ================================================== -->
+
+        <div class="form-group">
+
+          <label for="apartment">
+            Apartment
+          </label>
+
+          <input
+            type="text"
+            id="apartment"
+            name="apartment"
+
+            [(ngModel)]="apartment"
+
+            placeholder="Enter apartment number"
+
+            [disabled]="isSavingAddress"
+          />
+
+        </div>
+
+
+        <!-- =================================================
+             LANDMARK
+        ================================================== -->
+
+        <div class="form-group">
+
+          <label for="landmark">
+            Landmark
+          </label>
+
+          <input
+            type="text"
+            id="landmark"
+            name="landmark"
+
+            [(ngModel)]="landmark"
+
+            placeholder="Enter nearby landmark"
+
+            [disabled]="isSavingAddress"
+          />
 
         </div>
 
@@ -691,6 +793,10 @@
           [disabled]="
             !selectedCityId ||
             !selectedArea ||
+            !houseNumber.trim() ||
+            !floor.trim() ||
+            !apartment.trim() ||
+            !landmark.trim() ||
             isSavingAddress ||
             isLoadingCities
           "

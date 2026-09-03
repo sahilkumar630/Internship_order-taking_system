@@ -1113,6 +1113,69 @@
 
 
 /* =========================================================
+   INPUT FIELDS
+========================================================= */
+
+.manual-location input {
+  width: 100%;
+
+  height: 50px;
+
+  padding: 0 14px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #e1d4e9;
+
+  border-radius: 12px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #33243d;
+
+  font-family: inherit;
+
+  font-size: 13px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.manual-location input::placeholder {
+  color: #a89caf;
+
+  opacity: 1;
+}
+
+.manual-location input:hover:not(:disabled) {
+  border-color: #c7a5d9;
+}
+
+.manual-location input:focus {
+  border-color: #9d4edd;
+
+  box-shadow:
+    0 0 0 4px rgba(157, 78, 221, 0.1);
+
+  background: #ffffff;
+}
+
+.manual-location input:disabled {
+  background: #f4f1f5;
+
+  color: #aaa;
+
+  opacity: 0.7;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
    SELECTED LOCATION PREVIEW
 ========================================================= */
 
@@ -1236,7 +1299,8 @@
 ========================================================= */
 
 .location-card button:focus-visible,
-.location-card select:focus-visible {
+.location-card select:focus-visible,
+.location-card input:focus-visible {
   outline: 3px solid rgba(157, 78, 221, 0.25);
 
   outline-offset: 2px;
@@ -1282,7 +1346,6 @@
     align-items: flex-start;
   }
 
-
   .location-card {
     width: 100%;
 
@@ -1290,7 +1353,6 @@
 
     border-radius: 22px;
   }
-
 
   .location-icon {
     width: 65px;
@@ -1303,11 +1365,9 @@
     font-size: 32px;
   }
 
-
   .location-card h1 {
     font-size: 24px;
   }
-
 
   .location-description {
     margin-bottom: 25px;
@@ -1315,28 +1375,23 @@
     font-size: 12px;
   }
 
-
   .section-heading h2 {
     font-size: 18px;
   }
-
 
   .address-card {
     padding: 14px;
   }
 
-
   .address-card.selected {
     padding: 13px;
   }
-
 
   .address-info {
     padding-left: 0;
 
     margin-top: 12px;
   }
-
 
   .address-icon {
     width: 38px;
@@ -1347,16 +1402,13 @@
     font-size: 18px;
   }
 
-
   .address-title-row strong {
     font-size: 14px;
   }
 
-
   .selected-address-status {
     margin-left: 0;
   }
-
 
   .manual-location {
     padding: 18px;
@@ -1364,18 +1416,16 @@
     border-radius: 16px;
   }
 
-
   .manual-heading h3 {
     font-size: 17px;
   }
 
-
   .manual-location select,
+  .manual-location input,
   .location-button,
   .manual-button {
     height: 50px;
   }
-
 
   .continue-button {
     min-height: 50px;
@@ -1394,23 +1444,19 @@
     padding: 10px 8px;
   }
 
-
   .location-card {
     padding: 25px 14px;
 
     border-radius: 18px;
   }
 
-
   .location-card h1 {
     font-size: 21px;
   }
 
-
   .location-description {
     font-size: 11px;
   }
-
 
   .section-heading {
     align-items: flex-start;
@@ -1420,11 +1466,9 @@
     gap: 7px;
   }
 
-
   .address-card-header {
     gap: 8px;
   }
-
 
   .address-selection {
     width: 20px;
@@ -1433,9 +1477,13 @@
     flex-basis: 20px;
   }
 
-
   .manual-location {
     padding: 15px;
+  }
+
+  .manual-location input,
+  .manual-location select {
+    font-size: 12px;
   }
 
 }

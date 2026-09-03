@@ -31,26 +31,16 @@ import {
 
 
 @Component({
-
   selector: 'app-location',
-
   standalone: true,
-
   imports: [
     CommonModule,
     FormsModule
   ],
-
-  templateUrl:
-    './location.component.html',
-
-  styleUrl:
-    './location.component.css'
-
+  templateUrl: './location.component.html',
+  styleUrl: './location.component.css'
 })
-export class LocationComponent
-  implements OnInit {
-
+export class LocationComponent implements OnInit {
 
   // =========================================
   // CITIES
@@ -63,16 +53,14 @@ export class LocationComponent
   // SAVED ADDRESSES
   // =========================================
 
-  savedAddresses:
-    SavedAddress[] = [];
+  savedAddresses: SavedAddress[] = [];
 
 
   // =========================================
   // SELECTED SAVED ADDRESS
   // =========================================
 
-  selectedAddressId:
-    number | null = null;
+  selectedAddressId: number | null = null;
 
 
   // =========================================
@@ -80,23 +68,14 @@ export class LocationComponent
   // =========================================
 
   areas: string[] = [
-
     'PECHS',
-
     'DHA',
-
     'Gulshan',
-
     'North Nazimabad',
-
     'Clifton',
-
     'Johar',
-
     'Gulistan-e-Johar',
-
     'Saddar'
-
   ];
 
 
@@ -106,8 +85,7 @@ export class LocationComponent
 
   selectedCity = '';
 
-  selectedCityId:
-    number | null = null;
+  selectedCityId: number | null = null;
 
 
   // =========================================
@@ -115,6 +93,19 @@ export class LocationComponent
   // =========================================
 
   selectedArea = '';
+
+
+  // =========================================
+  // ADDRESS DETAILS
+  // =========================================
+
+  houseNumber = '';
+
+  floor = '';
+
+  apartment = '';
+
+  landmark = '';
 
 
   // =========================================
@@ -138,8 +129,7 @@ export class LocationComponent
   // RETURN URL
   // =========================================
 
-  private returnUrl =
-    '/home';
+  private returnUrl = '/home';
 
 
   // =========================================
@@ -147,19 +137,12 @@ export class LocationComponent
   // =========================================
 
   constructor(
-
-    private locationService:
-      LocationService,
-
-    private router:
-      Router,
-
-    private route:
-      ActivatedRoute,
+    private locationService: LocationService,
+    private router: Router,
+    private route: ActivatedRoute,
 
     @Inject(PLATFORM_ID)
     private platformId: object
-
   ) {}
 
 
@@ -170,8 +153,7 @@ export class LocationComponent
   ngOnInit(): void {
 
     this.returnUrl =
-      this.route.snapshot.queryParamMap
-        .get('returnUrl')
+      this.route.snapshot.queryParamMap.get('returnUrl')
       || '/home';
 
 
@@ -179,23 +161,8 @@ export class LocationComponent
     // SSR / PRERENDER PROTECTION
     // =======================================
 
-    /*
-     * Do not execute authenticated API calls
-     * while Angular is prerendering on the
-     * server.
-     *
-     * /api/User/myaddresses requires the
-     * logged-in user's authorization token.
-     */
-
-    if (
-      !isPlatformBrowser(
-        this.platformId
-      )
-    ) {
-
+    if (!isPlatformBrowser(this.platformId)) {
       return;
-
     }
 
 
@@ -206,7 +173,6 @@ export class LocationComponent
     this.loadCities();
 
     this.loadSavedAddresses();
-
   }
 
 
@@ -216,51 +182,35 @@ export class LocationComponent
 
   private loadCities(): void {
 
-    if (
-      this.isLoadingCities
-    ) {
-
+    if (this.isLoadingCities) {
       return;
-
     }
 
 
-    this.isLoadingCities =
-      true;
+    this.isLoadingCities = true;
 
 
     this.locationService
-
       .getCities()
-
       .subscribe({
 
-        next: (
-          cities: City[]
-        ) => {
+        next: (cities: City[]) => {
 
-          this.cities =
-            cities ?? [];
+          this.cities = cities ?? [];
 
-
-          this.isLoadingCities =
-            false;
+          this.isLoadingCities = false;
 
 
           console.log(
             'Cities loaded:',
             this.cities
           );
-
         },
 
 
-        error: (
-          error: unknown
-        ) => {
+        error: (error: unknown) => {
 
-          this.isLoadingCities =
-            false;
+          this.isLoadingCities = false;
 
 
           console.error(
@@ -274,11 +224,9 @@ export class LocationComponent
               error,
               'Unable to load cities.'
             );
-
         }
 
       });
-
   }
 
 
@@ -288,35 +236,24 @@ export class LocationComponent
 
   private loadSavedAddresses(): void {
 
-    if (
-      this.isLoadingAddresses
-    ) {
-
+    if (this.isLoadingAddresses) {
       return;
-
     }
 
 
-    this.isLoadingAddresses =
-      true;
+    this.isLoadingAddresses = true;
 
 
     this.locationService
-
       .getMyAddresses()
-
       .subscribe({
 
-        next: (
-          addresses: SavedAddress[]
-        ) => {
+        next: (addresses: SavedAddress[]) => {
 
           this.savedAddresses =
             addresses ?? [];
 
-
-          this.isLoadingAddresses =
-            false;
+          this.isLoadingAddresses = false;
 
 
           console.log(
@@ -340,25 +277,43 @@ export class LocationComponent
           // SELECT DEFAULT ADDRESS
           // =================================
 
-          if (
-            defaultAddress
-          ) {
+          if (defaultAddress) {
 
-            this.selectSavedAddress(
-              defaultAddress
-            );
+            /*
+             * Do not automatically select
+             * corrupted placeholder coordinates.
+             *
+             * Example:
+             * latitude = 90
+             * longitude = 180
+             */
 
+            if (
+              this.hasValidLocationCoordinates(
+                defaultAddress.latitude,
+                defaultAddress.longitude
+              )
+            ) {
+
+              this.selectSavedAddress(
+                defaultAddress
+              );
+
+            } else {
+
+              console.warn(
+                'Default saved address has invalid coordinates. It will not be selected:',
+                defaultAddress
+              );
+            }
           }
 
         },
 
 
-        error: (
-          error: unknown
-        ) => {
+        error: (error: unknown) => {
 
-          this.isLoadingAddresses =
-            false;
+          this.isLoadingAddresses = false;
 
 
           console.error(
@@ -366,17 +321,13 @@ export class LocationComponent
             error
           );
 
-
           /*
-           * Do not block manual address
-           * creation if saved addresses
-           * cannot be loaded.
+           * Manual address creation should
+           * still be available.
            */
-
         }
 
       });
-
   }
 
 
@@ -392,27 +343,42 @@ export class LocationComponent
       !address ||
       !address.id
     ) {
-
       return;
-
     }
 
 
     const addressId =
-      Number(
-        address.id
-      );
+      Number(address.id);
 
 
     if (
-      !Number.isFinite(
-        addressId
-      ) ||
+      !Number.isFinite(addressId) ||
       addressId <= 0
     ) {
+      return;
+    }
+
+
+    // =======================================
+    // VALIDATE COORDINATES
+    // =======================================
+
+    if (
+      !this.hasValidLocationCoordinates(
+        address.latitude,
+        address.longitude
+      )
+    ) {
+
+      console.warn(
+        'Saved address skipped because coordinates are invalid:',
+        address
+      );
+
+      this.errorMessage =
+        'This saved address does not have a valid location. Please select another address or choose a location manually.';
 
       return;
-
     }
 
 
@@ -428,30 +394,22 @@ export class LocationComponent
     // BUILD USER LOCATION
     // =======================================
 
-    const location:
-      UserLocation = {
+    const location: UserLocation = {
 
       latitude:
-        Number(
-          address.latitude ?? 0
-        ),
+        Number(address.latitude),
 
       longitude:
-        Number(
-          address.longitude ?? 0
-        ),
+        Number(address.longitude),
 
       address:
-        address.address ??
-        '',
+        address.address ?? '',
 
       source:
         'manual',
 
       cityId:
-        Number(
-          address.cityId
-        ),
+        Number(address.cityId),
 
       userAddressId:
         addressId,
@@ -476,7 +434,6 @@ export class LocationComponent
 
       isDefault:
         address.default === true
-
     };
 
 
@@ -494,6 +451,8 @@ export class LocationComponent
       location
     );
 
+
+    this.errorMessage = '';
   }
 
 
@@ -507,9 +466,7 @@ export class LocationComponent
       this.isLoading ||
       this.isSavingAddress
     ) {
-
       return;
-
     }
 
 
@@ -522,17 +479,13 @@ export class LocationComponent
         this.platformId
       )
     ) {
-
       return;
-
     }
 
 
-    this.isLoading =
-      true;
+    this.isLoading = true;
 
-    this.errorMessage =
-      '';
+    this.errorMessage = '';
 
 
     // =======================================
@@ -540,13 +493,9 @@ export class LocationComponent
     // =======================================
 
     this.locationService
-
       .getCurrentLocation()
-
       .then(
-        (
-          location: UserLocation
-        ) => {
+        (location: UserLocation) => {
 
           console.log(
             'Current GPS location:',
@@ -555,11 +504,35 @@ export class LocationComponent
 
 
           // =================================
+          // VALIDATE GPS COORDINATES
+          // =================================
+
+          if (
+            !this.hasValidLocationCoordinates(
+              location.latitude,
+              location.longitude
+            )
+          ) {
+
+            this.isLoading = false;
+
+            this.errorMessage =
+              'The device returned an invalid location. Please choose your location manually.';
+
+            console.error(
+              'Invalid GPS coordinates:',
+              location
+            );
+
+            return;
+          }
+
+
+          // =================================
           // STOP LOADING
           // =================================
 
-          this.isLoading =
-            false;
+          this.isLoading = false;
 
 
           // =================================
@@ -571,29 +544,13 @@ export class LocationComponent
           );
 
 
-          /*
-           * GPS location normally does not
-           * contain a backend userAddressId.
-           *
-           * Therefore we save the location
-           * locally and continue.
-           *
-           * Checkout can determine whether
-           * a backend address is required.
-           */
-
           this.continueAfterLocation();
-
         }
       )
-
       .catch(
-        (
-          error: unknown
-        ) => {
+        (error: unknown) => {
 
-          this.isLoading =
-            false;
+          this.isLoading = false;
 
 
           this.errorMessage =
@@ -607,10 +564,8 @@ export class LocationComponent
             'Current Location Error:',
             error
           );
-
         }
       );
-
   }
 
 
@@ -624,9 +579,7 @@ export class LocationComponent
       this.isLoading ||
       this.isSavingAddress
     ) {
-
       return;
-
     }
 
 
@@ -634,30 +587,30 @@ export class LocationComponent
     // CLEAR PREVIOUS SELECTION
     // =======================================
 
-    this.selectedAddressId =
-      null;
+    this.selectedAddressId = null;
 
+    this.selectedCity = '';
 
-    this.selectedCity =
-      '';
+    this.selectedCityId = null;
 
-    this.selectedCityId =
-      null;
+    this.selectedArea = '';
 
-    this.selectedArea =
-      '';
+    this.houseNumber = '';
+
+    this.floor = '';
+
+    this.apartment = '';
+
+    this.landmark = '';
 
 
     // =======================================
     // OPEN FORM
     // =======================================
 
-    this.showManualLocation =
-      true;
+    this.showManualLocation = true;
 
-    this.errorMessage =
-      '';
-
+    this.errorMessage = '';
   }
 
 
@@ -667,32 +620,28 @@ export class LocationComponent
 
   closeManualLocation(): void {
 
-    if (
-      this.isSavingAddress
-    ) {
-
+    if (this.isSavingAddress) {
       return;
-
     }
 
 
-    this.showManualLocation =
-      false;
+    this.showManualLocation = false;
 
+    this.selectedCity = '';
 
-    this.selectedCity =
-      '';
+    this.selectedCityId = null;
 
-    this.selectedCityId =
-      null;
+    this.selectedArea = '';
 
-    this.selectedArea =
-      '';
+    this.houseNumber = '';
 
+    this.floor = '';
 
-    this.errorMessage =
-      '';
+    this.apartment = '';
 
+    this.landmark = '';
+
+    this.errorMessage = '';
   }
 
 
@@ -702,51 +651,32 @@ export class LocationComponent
 
   onCityChange(): void {
 
-    this.selectedCityId =
-      null;
+    this.selectedCityId = null;
 
+    this.selectedArea = '';
 
-    this.selectedArea =
-      '';
-
-
-    // =======================================
-    // FIND CITY
-    // =======================================
 
     const city =
       this.cities.find(
         item =>
-          item.name ===
-          this.selectedCity
+          item.name === this.selectedCity
       );
 
 
-    if (
-      !city
-    ) {
+    if (!city) {
 
       this.errorMessage =
         'Please select a valid city.';
 
       return;
-
     }
 
 
-    // =======================================
-    // SAVE CITY ID
-    // =======================================
-
     this.selectedCityId =
-      Number(
-        city.id
-      );
+      Number(city.id);
 
 
-    this.errorMessage =
-      '';
-
+    this.errorMessage = '';
   }
 
 
@@ -760,12 +690,8 @@ export class LocationComponent
     // PREVENT DOUBLE SUBMISSION
     // =======================================
 
-    if (
-      this.isSavingAddress
-    ) {
-
+    if (this.isSavingAddress) {
       return;
-
     }
 
 
@@ -782,7 +708,6 @@ export class LocationComponent
         'Please select a valid city.';
 
       return;
-
     }
 
 
@@ -790,15 +715,64 @@ export class LocationComponent
     // VALIDATE AREA
     // =======================================
 
-    if (
-      !this.selectedArea
-    ) {
+    if (!this.selectedArea) {
 
       this.errorMessage =
         'Please select your delivery area.';
 
       return;
+    }
 
+
+    // =======================================
+    // VALIDATE HOUSE NUMBER
+    // =======================================
+
+    if (!this.houseNumber.trim()) {
+
+      this.errorMessage =
+        'Please enter your house or building number.';
+
+      return;
+    }
+
+
+    // =======================================
+    // VALIDATE FLOOR
+    // =======================================
+
+    if (!this.floor.trim()) {
+
+      this.errorMessage =
+        'Please enter your floor.';
+
+      return;
+    }
+
+
+    // =======================================
+    // VALIDATE APARTMENT
+    // =======================================
+
+    if (!this.apartment.trim()) {
+
+      this.errorMessage =
+        'Please enter your apartment number.';
+
+      return;
+    }
+
+
+    // =======================================
+    // VALIDATE LANDMARK
+    // =======================================
+
+    if (!this.landmark.trim()) {
+
+      this.errorMessage =
+        'Please enter a nearby landmark.';
+
+      return;
     }
 
 
@@ -806,11 +780,9 @@ export class LocationComponent
     // START SAVING
     // =======================================
 
-    this.isSavingAddress =
-      true;
+    this.isSavingAddress = true;
 
-    this.errorMessage =
-      '';
+    this.errorMessage = '';
 
 
     // =======================================
@@ -819,12 +791,34 @@ export class LocationComponent
 
     const coordinates =
       this.getAreaCoordinates(
-
         this.selectedCity,
-
         this.selectedArea
-
       );
+
+
+    // =======================================
+    // VALIDATE GENERATED COORDINATES
+    // =======================================
+
+    if (
+      !this.hasValidLocationCoordinates(
+        coordinates.latitude,
+        coordinates.longitude
+      )
+    ) {
+
+      this.isSavingAddress = false;
+
+      this.errorMessage =
+        'Unable to determine coordinates for the selected area.';
+
+      console.error(
+        'Invalid manual coordinates:',
+        coordinates
+      );
+
+      return;
+    }
 
 
     // =======================================
@@ -839,8 +833,7 @@ export class LocationComponent
     // BUILD USER LOCATION
     // =======================================
 
-    const location:
-      UserLocation = {
+    const location: UserLocation = {
 
       latitude:
         coordinates.latitude,
@@ -862,11 +855,26 @@ export class LocationComponent
       area:
         this.selectedArea,
 
+      houseNumber:
+        this.houseNumber.trim(),
+
+      floor:
+        this.floor.trim(),
+
+      apartment:
+        this.apartment.trim(),
+
+      landmark:
+        this.landmark.trim(),
+
       isDefault:
         false
-
     };
 
+
+    // =======================================
+    // LOG REQUEST
+    // =======================================
 
     console.log(
       'Manual address request:',
@@ -879,11 +887,9 @@ export class LocationComponent
     // =======================================
 
     this.locationService
-
       .saveLocationWithAddress(
         location
       )
-
       .subscribe({
 
         // ===================================
@@ -900,12 +906,7 @@ export class LocationComponent
           );
 
 
-          // =================================
-          // STOP LOADING
-          // =================================
-
-          this.isSavingAddress =
-            false;
+          this.isSavingAddress = false;
 
 
           // =================================
@@ -929,7 +930,6 @@ export class LocationComponent
               Number(
                 savedLocation.userAddressId
               );
-
           }
 
 
@@ -937,8 +937,14 @@ export class LocationComponent
           // CLOSE FORM
           // =================================
 
-          this.showManualLocation =
-            false;
+          this.showManualLocation = false;
+
+
+          // =================================
+          // CLEAR ERROR
+          // =================================
+
+          this.errorMessage = '';
 
 
           // =================================
@@ -946,7 +952,6 @@ export class LocationComponent
           // =================================
 
           this.continueAfterLocation();
-
         },
 
 
@@ -958,8 +963,7 @@ export class LocationComponent
           error: unknown
         ) => {
 
-          this.isSavingAddress =
-            false;
+          this.isSavingAddress = false;
 
 
           this.errorMessage =
@@ -974,10 +978,51 @@ export class LocationComponent
             error
           );
 
+
+          // =================================
+          // DETAILED API ERROR
+          // =================================
+
+          if (
+            error &&
+            typeof error === 'object'
+          ) {
+
+            const httpError =
+              error as {
+                error?: {
+                  errors?: unknown;
+                  title?: string;
+                  status?: number;
+                  message?: string;
+                };
+              };
+
+
+            console.error(
+              'Backend Validation Errors:',
+              httpError.error?.errors
+            );
+
+
+            console.error(
+              'Backend Validation Errors JSON:',
+              JSON.stringify(
+                httpError.error?.errors,
+                null,
+                2
+              )
+            );
+
+
+            console.error(
+              'Backend Error Response:',
+              httpError.error
+            );
+          }
         }
 
       });
-
   }
 
 
@@ -990,7 +1035,76 @@ export class LocationComponent
     this.router.navigateByUrl(
       this.returnUrl
     );
+  }
 
+
+  // =========================================
+  // VALIDATE LOCATION COORDINATES
+  // =========================================
+
+  private hasValidLocationCoordinates(
+    latitude: unknown,
+    longitude: unknown
+  ): boolean {
+
+    const lat =
+      Number(latitude);
+
+    const lng =
+      Number(longitude);
+
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
+      return false;
+    }
+
+
+    if (
+      lat < -90 ||
+      lat > 90
+    ) {
+      return false;
+    }
+
+
+    if (
+      lng < -180 ||
+      lng > 180
+    ) {
+      return false;
+    }
+
+
+    /*
+     * 90 / 180 was found in an existing
+     * saved address and is not useful for
+     * the Karachi delivery application.
+     */
+
+    if (
+      lat === 90 &&
+      lng === 180
+    ) {
+      return false;
+    }
+
+
+    /*
+     * Common placeholder coordinates.
+     */
+
+    if (
+      lat === 0 &&
+      lng === 0
+    ) {
+      return false;
+    }
+
+
+    return true;
   }
 
 
@@ -999,11 +1113,8 @@ export class LocationComponent
   // =========================================
 
   private getAreaCoordinates(
-
     city: string,
-
     area: string
-
   ): {
     latitude: number;
     longitude: number;
@@ -1027,106 +1138,54 @@ export class LocationComponent
         > = {
 
         'PECHS': {
-
-          latitude:
-            24.8742,
-
-          longitude:
-            67.0608
-
+          latitude: 24.8742,
+          longitude: 67.0608
         },
-
 
         'DHA': {
-
-          latitude:
-            24.8138,
-
-          longitude:
-            67.0304
-
+          latitude: 24.8138,
+          longitude: 67.0304
         },
-
 
         'Gulshan': {
-
-          latitude:
-            24.9263,
-
-          longitude:
-            67.0997
-
+          latitude: 24.9263,
+          longitude: 67.0997
         },
-
 
         'North Nazimabad': {
-
-          latitude:
-            24.9441,
-
-          longitude:
-            67.0347
-
+          latitude: 24.9441,
+          longitude: 67.0347
         },
-
 
         'Clifton': {
-
-          latitude:
-            24.8138,
-
-          longitude:
-            67.0287
-
+          latitude: 24.8138,
+          longitude: 67.0287
         },
-
 
         'Johar': {
-
-          latitude:
-            24.9167,
-
-          longitude:
-            67.1333
-
+          latitude: 24.9167,
+          longitude: 67.1333
         },
-
 
         'Gulistan-e-Johar': {
-
-          latitude:
-            24.9180,
-
-          longitude:
-            67.1330
-
+          latitude: 24.9180,
+          longitude: 67.1330
         },
 
-
         'Saddar': {
-
-          latitude:
-            24.8607,
-
-          longitude:
-            67.0011
-
+          latitude: 24.8607,
+          longitude: 67.0011
         }
-
       };
 
 
       return (
         coordinates[area] ||
         {
-          latitude:
-            24.8607,
-
-          longitude:
-            67.0011
+          latitude: 24.8607,
+          longitude: 67.0011
         }
       );
-
     }
 
 
@@ -1135,15 +1194,9 @@ export class LocationComponent
     // =======================================
 
     return {
-
-      latitude:
-        24.8607,
-
-      longitude:
-        67.0011
-
+      latitude: 24.8607,
+      longitude: 67.0011
     };
-
   }
 
 
@@ -1152,30 +1205,17 @@ export class LocationComponent
   // =========================================
 
   private getErrorMessage(
-
     error: unknown,
-
     fallback: string
-
   ): string {
-
-    // =======================================
-    // ERROR OBJECT
-    // =======================================
 
     if (
       error instanceof Error &&
       error.message
     ) {
-
       return error.message;
-
     }
 
-
-    // =======================================
-    // HTTP / API ERROR
-    // =======================================
 
     if (
       typeof error === 'object' &&
@@ -1184,29 +1224,66 @@ export class LocationComponent
 
       const apiError =
         error as {
-
           error?: {
-
             message?: string;
-
+            title?: string;
+            errors?: Record<
+              string,
+              string[]
+            >;
           };
 
           message?: string;
 
+          status?: number;
         };
 
 
+      // =====================================
+      // ASP.NET VALIDATION ERROR
+      // =====================================
+
+      const validationErrors =
+        apiError.error?.errors;
+
+
+      if (
+        validationErrors &&
+        typeof validationErrors === 'object'
+      ) {
+
+        const messages =
+          Object.values(
+            validationErrors
+          )
+          .flat()
+          .filter(
+            message =>
+              typeof message === 'string'
+          );
+
+
+        if (messages.length > 0) {
+
+          return messages.join(' ');
+        }
+      }
+
+
+      // =====================================
+      // API MESSAGE
+      // =====================================
+
       return (
         apiError.error?.message ||
+        apiError.error?.title ||
         apiError.message ||
         fallback
       );
-
     }
 
 
     return fallback;
-
   }
 
 }
