@@ -50,7 +50,7 @@ import {
 
   imports: [
     RouterLink,
-    HeaderComponent,
+    // HeaderComponent,
     SearchBarComponent,
     CategoryListComponent,
     RestaurantCardComponent

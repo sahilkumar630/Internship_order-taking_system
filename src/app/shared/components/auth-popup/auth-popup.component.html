@@ -1,0 +1,710 @@
+```html
+@if (visible) {
+
+  <div
+    class="login-overlay"
+    (click)="closePopup()"
+  >
+
+    <div
+      class="login-popup"
+      [class.signup-popup]="authMode === 'signup'"
+      [class.forgot-popup]="authMode === 'forgot'"
+      (click)="$event.stopPropagation()"
+    >
+
+
+        <!-- ===================================
+             POPUP HEADER
+        ==================================== -->
+
+        <div class="login-popup-header">
+
+          <div class="auth-brand">
+
+            <div class="auth-logo">
+              🍔
+            </div>
+
+            <div>
+
+              @if (authMode === 'login') {
+
+                <h2>
+                  Welcome back! 👋
+                </h2>
+
+                <p>
+                  Login to continue your order
+                </p>
+
+              }
+
+              @else if (authMode === 'signup') {
+
+                <h2>
+                  Join Foodie 🎉
+                </h2>
+
+                <p>
+                  Create your account and start ordering
+                </p>
+
+              }
+
+              @else {
+
+                <h2>
+                  Forgot password?
+                </h2>
+
+                <p>
+                  We’ll help you get back into your account
+                </p>
+
+              }
+
+            </div>
+
+          </div>
+
+          <button
+            type="button"
+            class="login-close-button"
+            aria-label="Close"
+            (click)="closePopup()"
+            [disabled]="isSubmittingAuth || isLoggingIn"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <!-- ===================================
+             AUTH SUCCESS
+        ==================================== -->
+
+        @if (authSuccessMessage) {
+
+          <div class="auth-success">
+
+            <span>✓</span>
+
+            <span>
+              {{ authSuccessMessage }}
+            </span>
+
+          </div>
+
+        }
+
+
+        <!-- ===================================
+             AUTH ERROR
+        ==================================== -->
+
+        @if (loginErrorMessage) {
+
+          <div class="login-error">
+
+            <span>
+              ⚠️
+            </span>
+
+            <span>
+              {{ loginErrorMessage }}
+            </span>
+
+          </div>
+
+        }
+
+
+        <!-- ===================================
+             LOGIN
+        ==================================== -->
+
+        @if (authMode === 'login') {
+
+          <div class="login-form">
+
+            <div class="login-field">
+
+              <label for="checkoutUsername">
+                Username
+              </label>
+
+              <input
+                id="checkoutUsername"
+                type="text"
+                [(ngModel)]="loginUserName"
+                placeholder="Enter your username"
+                autocomplete="username"
+                [disabled]="isSubmittingAuth || isLoggingIn"
+                (keyup.enter)="loginFromPopup()"
+              />
+
+            </div>
+
+
+            <div class="login-field">
+
+              <div class="field-label-row">
+
+                <label for="checkoutPassword">
+                  Password
+                </label>
+
+                <button
+                  type="button"
+                  class="text-link"
+                  (click)="switchAuthMode('forgot')"
+                  [disabled]="isSubmittingAuth || isLoggingIn"
+                >
+                  Forgot Password?
+                </button>
+
+              </div>
+
+              <div class="password-wrapper">
+
+                <input
+                  id="checkoutPassword"
+                  [type]="showLoginPassword ? 'text' : 'password'"
+                  [(ngModel)]="loginPassword"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  [disabled]="isSubmittingAuth || isLoggingIn"
+                  (keyup.enter)="loginFromPopup()"
+                />
+
+                <button
+                  type="button"
+                  class="password-toggle"
+                  (click)="toggleLoginPassword()"
+                  [disabled]="isSubmittingAuth || isLoggingIn"
+                  [attr.aria-label]="showLoginPassword ? 'Hide password' : 'Show password'"
+                >
+                  {{ showLoginPassword ? '🙈' : '👁️' }}
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="login-button"
+              (click)="loginFromPopup()"
+              [disabled]="isSubmittingAuth || isLoggingIn"
+            >
+
+              @if (isLoggingIn) {
+
+                <span class="button-spinner"></span>
+
+                Logging in...
+
+              }
+
+              @else {
+
+                Login
+
+              }
+
+            </button>
+
+
+            <div class="auth-divider">
+              <span></span>
+              <strong>OR</strong>
+              <span></span>
+            </div>
+
+
+            <button
+              type="button"
+              class="secondary-auth-button"
+              (click)="switchAuthMode('signup')"
+              [disabled]="isSubmittingAuth || isLoggingIn"
+            >
+              Create an account
+            </button>
+
+
+            <p class="auth-bottom-text">
+              New to Foodie?
+              <button
+                type="button"
+                class="inline-auth-link"
+                (click)="switchAuthMode('signup')"
+                [disabled]="isSubmittingAuth || isLoggingIn"
+              >
+                Sign up
+              </button>
+            </p>
+
+          </div>
+
+        }
+
+
+        <!-- ===================================
+             SIGN UP
+        ==================================== -->
+
+        @else if (authMode === 'signup') {
+
+          @if (signupStep === 'mobile') {
+
+            <div class="login-form signup-form">
+
+              <div class="login-field">
+
+                <label for="authSignupPhone">
+                  Mobile Number
+                </label>
+
+                <input
+                  id="authSignupPhone"
+                  type="tel"
+                  [(ngModel)]="signupPhone"
+                  placeholder="e.g. 923218050961"
+                  autocomplete="tel"
+                  [disabled]="isSubmittingAuth"
+                  (keyup.enter)="requestSignupOtp()"
+                />
+
+              </div>
+
+              @if (devOtpOne) {
+
+                <div class="auth-success">
+                  <span>✓</span>
+                  <span>
+                    DEV OTP #1:
+                    <strong>{{ devOtpOne }}</strong>
+                  </span>
+                </div>
+
+              }
+
+              <button
+                type="button"
+                class="login-button"
+                (click)="requestSignupOtp()"
+                [disabled]="isSubmittingAuth"
+              >
+
+                @if (isSubmittingAuth) {
+                  <span class="button-spinner"></span>
+                  Sending OTP...
+                }
+
+                @else {
+                  Send OTP
+                }
+
+              </button>
+
+              <p class="auth-bottom-text">
+                Already have an account?
+                <button
+                  type="button"
+                  class="inline-auth-link"
+                  (click)="switchAuthMode('login')"
+                  [disabled]="isSubmittingAuth"
+                >
+                  Login
+                </button>
+              </p>
+
+            </div>
+
+          }
+
+          @else if (signupStep === 'otp1') {
+
+            <div class="login-form signup-form">
+
+              <div class="login-field">
+
+                <label for="authSignupOtp1">
+                  OTP #1
+                </label>
+
+                <input
+                  id="authSignupOtp1"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="8"
+                  [(ngModel)]="signupOtpOne"
+                  placeholder="Enter OTP #1"
+                  [disabled]="isSubmittingAuth"
+                  (keyup.enter)="validateSignupOtp()"
+                />
+
+              </div>
+
+              @if (devOtpOne) {
+
+                <div class="auth-success">
+                  <span>✓</span>
+                  <span>
+                    DEV OTP #1:
+                    <strong>{{ devOtpOne }}</strong>
+                  </span>
+                </div>
+
+              }
+
+              <button
+                type="button"
+                class="login-button"
+                (click)="validateSignupOtp()"
+                [disabled]="isSubmittingAuth"
+              >
+
+                @if (isSubmittingAuth) {
+                  <span class="button-spinner"></span>
+                  Verifying OTP...
+                }
+
+                @else {
+                  Verify OTP #1
+                }
+
+              </button>
+
+              <button
+                type="button"
+                class="back-auth-button"
+                (click)="signupStep='mobile'"
+                [disabled]="isSubmittingAuth"
+              >
+                ← Change Mobile Number
+              </button>
+
+            </div>
+
+          }
+
+          @else {
+
+            <div class="login-form signup-form">
+
+              @if (devOtpTwo) {
+
+                <div class="auth-success">
+                  <span>✓</span>
+                  <span>
+                    DEV OTP #2:
+                    <strong>{{ devOtpTwo }}</strong>
+                  </span>
+                </div>
+
+              }
+
+              <div class="login-field">
+                <label for="authSignupName">
+                  Full Name
+                </label>
+
+                <input
+                  id="authSignupName"
+                  type="text"
+                  [(ngModel)]="signupFullName"
+                  placeholder="Enter your full name"
+                  autocomplete="name"
+                  [disabled]="isSubmittingAuth"
+                />
+              </div>
+
+              <div class="login-field">
+                <label for="authSignupCnic">
+                  CNIC
+                </label>
+
+                <input
+                  id="authSignupCnic"
+                  type="text"
+                  [(ngModel)]="signupCnic"
+                  placeholder="Enter your CNIC"
+                  [disabled]="isSubmittingAuth"
+                />
+              </div>
+
+              <div class="login-field">
+                <label for="authSignupEmail">
+                  Email Address
+                </label>
+
+                <input
+                  id="authSignupEmail"
+                  type="email"
+                  [(ngModel)]="signupEmail"
+                  placeholder="Enter your email"
+                  autocomplete="email"
+                  [disabled]="isSubmittingAuth"
+                />
+              </div>
+
+              <div class="login-field">
+
+                <label for="authSignupCity">
+                  City
+                </label>
+
+                <select
+                  id="authSignupCity"
+                  [(ngModel)]="signupCityId"
+                  [disabled]="isSubmittingAuth || isLoadingCities"
+                >
+                  <option [ngValue]="null">
+                    Select your city
+                  </option>
+
+                  @for (city of cities; track city.id) {
+                    <option [ngValue]="city.id">
+                      {{ city.name }}
+                    </option>
+                  }
+
+                </select>
+
+              </div>
+
+              <div class="login-field">
+
+                <label for="authSignupAddress">
+                  Address
+                </label>
+
+                <input
+                  id="authSignupAddress"
+                  type="text"
+                  [(ngModel)]="signupAddress"
+                  placeholder="Enter your address"
+                  [disabled]="isSubmittingAuth"
+                />
+
+              </div>
+
+              <div class="login-field">
+
+                <label for="authSignupPassword">
+                  Password
+                </label>
+
+                <div class="password-wrapper">
+
+                  <input
+                    id="authSignupPassword"
+                    [type]="showSignupPassword ? 'text' : 'password'"
+                    [(ngModel)]="signupPassword"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    [disabled]="isSubmittingAuth"
+                  />
+
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    (click)="toggleSignupPassword()"
+                    [disabled]="isSubmittingAuth"
+                  >
+                    {{ showSignupPassword ? '🙈' : '👁️' }}
+                  </button>
+
+                </div>
+
+              </div>
+
+              <div class="login-field">
+
+                <label for="authSignupConfirmPassword">
+                  Confirm Password
+                </label>
+
+                <div class="password-wrapper">
+
+                  <input
+                    id="authSignupConfirmPassword"
+                    [type]="showSignupConfirmPassword ? 'text' : 'password'"
+                    [(ngModel)]="signupConfirmPassword"
+                    placeholder="Confirm your password"
+                    autocomplete="new-password"
+                    [disabled]="isSubmittingAuth"
+                  />
+
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    (click)="toggleSignupConfirmPassword()"
+                    [disabled]="isSubmittingAuth"
+                  >
+                    {{ showSignupConfirmPassword ? '🙈' : '👁️' }}
+                  </button>
+
+                </div>
+
+              </div>
+
+              <div class="login-field">
+
+                <label for="authSignupOtp2">
+                  OTP #2
+                </label>
+
+                <input
+                  id="authSignupOtp2"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="8"
+                  [(ngModel)]="signupOtpTwo"
+                  placeholder="Enter OTP #2"
+                  [disabled]="isSubmittingAuth"
+                />
+
+              </div>
+
+              <label class="terms-row">
+
+                <input
+                  type="checkbox"
+                  [(ngModel)]="signupAcceptedTerms"
+                  [disabled]="isSubmittingAuth"
+                />
+
+                <span>
+                  I agree to the
+                  <button
+                    type="button"
+                    class="inline-auth-link"
+                    (click)="$event.stopPropagation()"
+                  >
+                    Terms & Conditions
+                  </button>
+                </span>
+
+              </label>
+
+              <button
+                type="button"
+                class="login-button"
+                (click)="completeSignup()"
+                [disabled]="isSubmittingAuth"
+              >
+
+                @if (isSubmittingAuth) {
+                  <span class="button-spinner"></span>
+                  Creating account...
+                }
+
+                @else {
+                  Create Account
+                }
+
+              </button>
+
+              <p class="auth-bottom-text">
+                Already have an account?
+
+                <button
+                  type="button"
+                  class="inline-auth-link"
+                  (click)="switchAuthMode('login')"
+                  [disabled]="isSubmittingAuth"
+                >
+                  Login
+                </button>
+              </p>
+
+            </div>
+
+          }
+
+        }
+
+
+        <!-- ===================================
+             FORGOT PASSWORD
+        ==================================== -->
+
+        @else {
+
+          <div class="login-form forgot-form">
+
+            <div class="forgot-icon">
+              🔐
+            </div>
+
+            <p class="forgot-description">
+              Enter the email address or username linked to your Foodie account and we’ll help you reset your password.
+            </p>
+
+            <div class="login-field">
+
+              <label for="checkoutForgotIdentifier">
+                Email or Username
+              </label>
+
+              <input
+                id="checkoutForgotIdentifier"
+                type="text"
+                [(ngModel)]="forgotIdentifier"
+                placeholder="Enter your email or username"
+                autocomplete="username"
+                [disabled]="isSubmittingAuth"
+                (keyup.enter)="forgotPasswordFromPopup()"
+              />
+
+            </div>
+
+            <button
+              type="button"
+              class="login-button"
+              (click)="forgotPasswordFromPopup()"
+              [disabled]="isSubmittingAuth"
+            >
+
+              @if (isSubmittingAuth) {
+
+                <span class="button-spinner"></span>
+
+                Sending...
+
+              }
+
+              @else {
+
+                Send Reset Link
+
+              }
+
+            </button>
+
+            <button
+              type="button"
+              class="back-auth-button"
+              (click)="switchAuthMode('login')"
+              [disabled]="isSubmittingAuth"
+            >
+              ← Back to Login
+            </button>
+
+          </div>
+
+        }
+
+      </div>
+
+    </div>
+
+  }
+
+
+```

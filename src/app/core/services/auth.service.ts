@@ -1,455 +1,214 @@
-import {
-  Injectable,
-  Inject,
-  PLATFORM_ID
-} from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 
-import {
-  isPlatformBrowser
-} from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 
-import {
-  HttpClient
-} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
-import {
-  Observable,
-  tap
-} from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
-import {
-  LoginRequest
-} from '../../shared/models/login-request.model';
+import { LoginRequest } from '../../shared/models/login-request.model';
+import { LoginResponse } from '../../shared/models/login-response.model';
+import { User } from '../../shared/models/user.model';
+import { environment } from '../../../environments/environment';
 
-import {
-  LoginResponse
-} from '../../shared/models/login-response.model';
+export interface OtpResponse {
+  responseStatus: number;
+  responseCode?: number;
+  message?: string;
+  data?: {
+    userName?: string;
+    otp?: string;
+  };
+}
 
-import {
-  User
-} from '../../shared/models/user.model';
-
-import {
-  environment
-} from '../../../environments/environment';
-
+export interface RegisterResponse {
+  responseStatus: number;
+  responseCode?: number;
+  message?: string;
+  data?: {
+    user?: User;
+    token?: string;
+    refreshToken?: string;
+  };
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly apiUrl = `${environment.apiUrl}/User`;
 
-
-  // =========================================
-  // API
-  // =========================================
-
-  private readonly apiUrl =
-    `${environment.apiUrl}/User`;
-
-
-  // =========================================
-  // STORAGE KEYS
-  // =========================================
-
-  private readonly tokenKey =
-    'foodie_access_token';
-
-  private readonly refreshTokenKey =
-    'foodie_refresh_token';
-
-  private readonly userKey =
-    'foodie_user';
-
-
-  // =========================================
-  // CONSTRUCTOR
-  // =========================================
+  private readonly tokenKey = 'foodie_access_token';
+  private readonly refreshTokenKey = 'foodie_refresh_token';
+  private readonly userKey = 'foodie_user';
 
   constructor(
-
-    private http:
-      HttpClient,
-
-    @Inject(PLATFORM_ID)
-    private platformId:
-      object
-
+    private readonly http: HttpClient,
+    @Inject(PLATFORM_ID) private readonly platformId: object
   ) {}
 
-
-  // =========================================
-  // CHECK BROWSER
-  // =========================================
-
   private isBrowser(): boolean {
-
-    return isPlatformBrowser(
-      this.platformId
-    );
-
+    return isPlatformBrowser(this.platformId);
   }
 
-
-  // =========================================
-  // LOGIN
-  // =========================================
-
-  login(
-    request: LoginRequest
-  ): Observable<LoginResponse> {
-
+  login(request: LoginRequest): Observable<LoginResponse> {
     return this.http
-
-      .post<LoginResponse>(
-        `${this.apiUrl}/login`,
-        request
-      )
-
+      .post<LoginResponse>(`${this.apiUrl}/login`, request)
       .pipe(
-
-        tap(
-          (
-            response: LoginResponse
-          ) => {
-
-            // ---------------------------------
-            // ONLY STORE AUTH DATA IN BROWSER
-            // ---------------------------------
-
-            if (
-              response.responseStatus === 1 &&
-              response.data &&
-              this.isBrowser()
-            ) {
-
-              this.storeAuthentication(
-                response
-              );
-
-            }
-
+        tap((response) => {
+          if (
+            response.responseStatus === 1 &&
+            response.data &&
+            this.isBrowser()
+          ) {
+            this.storeAuthentication(response);
           }
-        )
-
+        })
       );
-
   }
 
-
-  // =========================================
-  // STORE AUTHENTICATION
-  // =========================================
-
-  private storeAuthentication(
-    response: LoginResponse
-  ): void {
-
-    if (
-      !this.isBrowser()
-    ) {
-
-      return;
-
-    }
-
-
-    // =======================================
-    // ACCESS TOKEN
-    // =======================================
-
-    if (
-      response.data?.token
-    ) {
-
-      localStorage.setItem(
-
-        this.tokenKey,
-
-        response.data.token
-
-      );
-
-    }
-
-
-    // =======================================
-    // REFRESH TOKEN
-    // =======================================
-
-    if (
-      response.data?.refreshToken
-    ) {
-
-      localStorage.setItem(
-
-        this.refreshTokenKey,
-
-        response.data.refreshToken
-
-      );
-
-    }
-
-
-    // =======================================
-    // USER
-    // =======================================
-
-    if (
-      response.data?.user
-    ) {
-
-      localStorage.setItem(
-
-        this.userKey,
-
-        JSON.stringify(
-          response.data.user
-        )
-
-      );
-
-    }
-
-
-    console.log(
-      'Authentication stored successfully.'
+  requestOtp(cellNumber: string): Observable<OtpResponse> {
+    return this.http.post<OtpResponse>(
+      `${this.apiUrl}/otp`,
+      { cellNumber }
     );
-
   }
 
+  validateOtp(
+    request: {
+      userName: string;
+      otp: string;
+      type: number;
+    }
+  ): Observable<OtpResponse> {
+    return this.http.post<OtpResponse>(
+      `${this.apiUrl}/validateotp`,
+      request
+    );
+  }
 
-  // =========================================
-  // GET TOKEN
-  // =========================================
+  register(formData: FormData): Observable<RegisterResponse> {
+    return this.http
+      .post<RegisterResponse>(this.apiUrl, formData)
+      .pipe(
+        tap((response) => {
+          if (
+            response.responseStatus === 1 &&
+            response.data &&
+            this.isBrowser()
+          ) {
+            this.storeRegistrationAuthentication(response);
+          }
+        })
+      );
+  }
+
+  private storeAuthentication(response: LoginResponse): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+
+    if (response.data?.token) {
+      localStorage.setItem(this.tokenKey, response.data.token);
+    }
+
+    if (response.data?.refreshToken) {
+      localStorage.setItem(
+        this.refreshTokenKey,
+        response.data.refreshToken
+      );
+    }
+
+    if (response.data?.user) {
+      localStorage.setItem(
+        this.userKey,
+        JSON.stringify(response.data.user)
+      );
+    }
+  }
+
+  private storeRegistrationAuthentication(
+    response: RegisterResponse
+  ): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+
+    if (response.data?.token) {
+      localStorage.setItem(this.tokenKey, response.data.token);
+    }
+
+    if (response.data?.refreshToken) {
+      localStorage.setItem(
+        this.refreshTokenKey,
+        response.data.refreshToken
+      );
+    }
+
+    if (response.data?.user) {
+      localStorage.setItem(
+        this.userKey,
+        JSON.stringify(response.data.user)
+      );
+    }
+  }
 
   getToken(): string | null {
-
-    if (
-      !this.isBrowser()
-    ) {
-
-      return null;
-
-    }
-
-
-    return localStorage.getItem(
-      this.tokenKey
-    );
-
+    return this.isBrowser()
+      ? localStorage.getItem(this.tokenKey)
+      : null;
   }
-
-
-  // =========================================
-  // GET REFRESH TOKEN
-  // =========================================
 
   getRefreshToken(): string | null {
-
-    if (
-      !this.isBrowser()
-    ) {
-
-      return null;
-
-    }
-
-
-    return localStorage.getItem(
-      this.refreshTokenKey
-    );
-
+    return this.isBrowser()
+      ? localStorage.getItem(this.refreshTokenKey)
+      : null;
   }
-
-
-  // =========================================
-  // GET CURRENT USER
-  // =========================================
 
   getCurrentUser(): User | null {
-
-    if (
-      !this.isBrowser()
-    ) {
-
+    if (!this.isBrowser()) {
       return null;
-
     }
 
+    const value = localStorage.getItem(this.userKey);
 
-    const user =
-      localStorage.getItem(
-        this.userKey
-      );
-
-
-    if (
-      !user
-    ) {
-
+    if (!value) {
       return null;
-
     }
-
 
     try {
-
-      return JSON.parse(
-        user
-      ) as User;
-
-    }
-    catch (
-      error
-    ) {
-
-      console.error(
-        'Unable to parse stored user:',
-        error
-      );
-
-
+      return JSON.parse(value) as User;
+    } catch {
       return null;
-
     }
-
   }
-
-
-  // =========================================
-  // LOGIN STATUS
-  // =========================================
 
   isLoggedIn(): boolean {
-
-    if (
-      !this.isBrowser()
-    ) {
-
-      return false;
-
-    }
-
-
-    const token =
-      this.getToken();
-
-
-    return !!(
-      token &&
-      token.trim().length > 0
-    );
-
+    return !!this.getToken();
   }
-
-
-  // =========================================
-  // GET USER ID
-  // =========================================
 
   getUserId(): number | null {
+    const user = this.getCurrentUser() as
+      | (User & { userId?: number })
+      | null;
 
-    const user =
-      this.getCurrentUser();
+    const id = Number(user?.id ?? user?.userId);
 
-
-    if (
-      !user
-    ) {
-
-      return null;
-
-    }
-
-
-    /*
-     * Depending on your User model,
-     * the property may be id or userId.
-     */
-
-    const userObject =
-      user as User & {
-        id?: number;
-        userId?: number;
-      };
-
-
-    if (
-      userObject.id !== undefined &&
-      userObject.id !== null
-    ) {
-
-      return Number(
-        userObject.id
-      );
-
-    }
-
-
-    if (
-      userObject.userId !== undefined &&
-      userObject.userId !== null
-    ) {
-
-      return Number(
-        userObject.userId
-      );
-
-    }
-
-
-    return null;
-
+    return Number.isFinite(id) && id > 0 ? id : null;
   }
-
-
-  // =========================================
-  // LOGOUT
-  // =========================================
 
   logout(): void {
-
-    if (
-      !this.isBrowser()
-    ) {
-
+    if (!this.isBrowser()) {
       return;
-
     }
 
-
-    localStorage.removeItem(
-      this.tokenKey
-    );
-
-
-    localStorage.removeItem(
-      this.refreshTokenKey
-    );
-
-
-    localStorage.removeItem(
-      this.userKey
-    );
-
-
-    console.log(
-      'User logged out successfully.'
-    );
-
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.userKey);
   }
-
-
-  // =========================================
-  // CLEAR AUTHENTICATION
-  // =========================================
 
   clearAuthentication(): void {
-
     this.logout();
-
   }
-
 }
+

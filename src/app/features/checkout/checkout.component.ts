@@ -36,6 +36,10 @@ import {
 } from '../../core/services/auth.service';
 
 import {
+  AuthPopupComponent
+} from '../../shared/components/auth-popup/auth-popup.component';
+
+import {
   CartItem
 } from '../../shared/models/cart-item.model';
 
@@ -53,7 +57,8 @@ import {
 
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    AuthPopupComponent
   ],
 
   templateUrl:
@@ -155,40 +160,6 @@ export class CheckoutComponent
 
 
   // =========================================
-  // LOGIN POPUP STATE
-  // =========================================
-
-  showLoginPopup = false;
-
-  authMode:
-    'login' |
-    'signup' |
-    'forgot' = 'login';
-
-  isSubmittingAuth = false;
-  isLoggingIn = false;
-
-  loginUserName = '';
-  loginPassword = '';
-  loginErrorMessage = '';
-  authSuccessMessage = '';
-
-  showLoginPassword = false;
-
-  signupFullName = '';
-  signupEmail = '';
-  signupPhone = '';
-  signupPassword = '';
-  signupConfirmPassword = '';
-  signupAcceptedTerms = false;
-
-  showSignupPassword = false;
-  showSignupConfirmPassword = false;
-
-  forgotIdentifier = '';
-
-
-  // =========================================
   // SERVICES
   // =========================================
 
@@ -213,656 +184,60 @@ export class CheckoutComponent
 
 
   // =========================================
-  // LOGIN POPUP
   // =========================================
+  // REUSABLE AUTH POPUP
+  // =========================================
+
+  showLoginPopup = false;
 
   openLoginPopup(): void {
-
-    if (
-      this.authService.isLoggedIn()
-    ) {
-
-      return;
-
+    if (!this.authService.isLoggedIn()) {
+      this.showLoginPopup = true;
     }
-
-    this.resetAuthModal();
-
-    this.showLoginPopup =
-      true;
-
   }
-
-
-  // =========================================
-  // RESET AUTH MODAL
-  // =========================================
-
-  private resetAuthModal(): void {
-
-    this.authMode =
-      'login';
-
-    this.loginErrorMessage =
-      '';
-
-    this.authSuccessMessage =
-      '';
-
-    this.showLoginPassword =
-      false;
-
-    this.showSignupPassword =
-      false;
-
-    this.showSignupConfirmPassword =
-      false;
-
-  }
-
-
-  // =========================================
-  // SWITCH AUTH MODE
-  // =========================================
-
-  switchAuthMode(
-    mode:
-      'login' |
-      'signup' |
-      'forgot'
-  ): void {
-
-    if (
-      this.isSubmittingAuth
-    ) {
-
-      return;
-
-    }
-
-    this.authMode =
-      mode;
-
-    this.loginErrorMessage =
-      '';
-
-    this.authSuccessMessage =
-      '';
-
-  }
-
-
-  // =========================================
-  // CLOSE LOGIN POPUP
-  // =========================================
 
   closeLoginPopup(): void {
-
-    if (
-      this.isSubmittingAuth ||
-      this.isLoggingIn
-    ) {
-
-      return;
-
-    }
-
-    this.showLoginPopup =
-      false;
-
-    this.loginErrorMessage =
-      '';
-
-    this.authSuccessMessage =
-      '';
-
+    this.showLoginPopup = false;
   }
 
-
-  // =========================================
-  // LOGIN PASSWORD VISIBILITY
-  // =========================================
-
-  toggleLoginPassword(): void {
-
-    this.showLoginPassword =
-      !this.showLoginPassword;
-
-  }
-
-
-  // =========================================
-  // SIGNUP PASSWORD VISIBILITY
-  // =========================================
-
-  toggleSignupPassword(): void {
-
-    this.showSignupPassword =
-      !this.showSignupPassword;
-
-  }
-
-
-  toggleSignupConfirmPassword(): void {
-
-    this.showSignupConfirmPassword =
-      !this.showSignupConfirmPassword;
-
-  }
-
-
-  // =========================================
-  // LOGIN FROM CHECKOUT POPUP
-  // =========================================
-
-  loginFromPopup(): void {
-
-    this.loginErrorMessage =
-      '';
-
-    this.authSuccessMessage =
-      '';
-
-    if (
-      !this.loginUserName.trim()
-    ) {
-
-      this.loginErrorMessage =
-        'Please enter your username.';
-
-      return;
-
-    }
-
-    if (
-      !this.loginPassword
-    ) {
-
-      this.loginErrorMessage =
-        'Please enter your password.';
-
-      return;
-
-    }
-
-    if (
-      this.isSubmittingAuth ||
-      this.isLoggingIn
-    ) {
-
-      return;
-
-    }
-
-    this.isLoggingIn =
-      true;
-
-    this.isSubmittingAuth =
-      true;
-
-    const request = {
-
-      userName:
-        this.loginUserName.trim(),
-
-      password:
-        this.loginPassword,
-
-      fmcToken:
-        'string',
-
-      deviceModel:
-        'Web Browser'
-
-    };
-
-    console.log(
-      'Logging in from checkout popup...'
-    );
-
-    this.authService
-      .login(request)
-      .subscribe({
-
-        next:
-          (response) => {
-
-            console.log(
-              'Checkout Login Response:',
-              response
-            );
-
-            if (
-              !response ||
-              response.responseStatus !== 1
-            ) {
-
-              this.isLoggingIn =
-                false;
-
-              this.isSubmittingAuth =
-                false;
-
-              this.loginErrorMessage =
-                response?.message ||
-                'Login failed. Please check your credentials.';
-
-              return;
-
-            }
-
-            console.log(
-              'Login successful from checkout.'
-            );
-
-            this.cartService
-              .syncGuestCart()
-              .subscribe({
-
-                next:
-                  () => {
-
-                    console.log(
-                      'Guest cart synchronization completed.'
-                    );
-
-                    this.isLoggingIn =
-                      false;
-
-                    this.isSubmittingAuth =
-                      false;
-
-                    this.showLoginPopup =
-                      false;
-
-                    this.loginPassword =
-                      '';
-
-                    this.loginErrorMessage =
-                      '';
-
-                    this.authSuccessMessage =
-                      '';
-
-                    this.loadCheckout();
-
-                  },
-
-                error:
-                  (error: unknown) => {
-
-                    console.error(
-                      'Guest cart synchronization failed:',
-                      error
-                    );
-
-                    this.isLoggingIn =
-                      false;
-
-                    this.isSubmittingAuth =
-                      false;
-
-                    this.loginErrorMessage =
-                      this.getErrorMessage(
-                        error,
-                        'Login successful, but we could not synchronize your cart. Please try again.'
-                      );
-
-                  }
-
-              });
-
+  onAuthenticated(): void {
+    this.showLoginPopup = false;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.isSyncingLocation = true;
+
+    this.locationService.syncGuestLocationToBackend().subscribe({
+      next: (syncedLocation) => {
+        if (syncedLocation) {
+          this.userLocation = syncedLocation;
+        }
+
+        this.cartService.syncGuestCart().subscribe({
+          next: () => {
+            this.isSyncingLocation = false;
+            this.loadCheckout();
           },
-
-        error:
-          (error: unknown) => {
-
-            console.error(
-              'Checkout Login API Error:',
-              error
+          error: (error: unknown) => {
+            this.isSyncingLocation = false;
+            this.errorMessage = this.getErrorMessage(
+              error,
+              'Authentication succeeded, but we could not synchronize your cart. Please try again.'
             );
-
-            this.isLoggingIn =
-              false;
-
-            this.isSubmittingAuth =
-              false;
-
-            this.loginErrorMessage =
-              this.getErrorMessage(
-                error,
-                'Unable to login. Please check your username and password.'
-              );
-
+            this.loadCheckout();
           }
-
-      });
-
+        });
+      },
+      error: (error: unknown) => {
+        this.isSyncingLocation = false;
+        this.errorMessage = this.getErrorMessage(
+          error,
+          'Authentication succeeded, but we could not save your delivery location. Please try again.'
+        );
+      }
+    });
   }
 
 
-  // =========================================
-  // SIGN UP FROM CHECKOUT POPUP
-  // =========================================
-
-  signupFromPopup(): void {
-
-    this.loginErrorMessage =
-      '';
-
-    this.authSuccessMessage =
-      '';
-
-    const fullName =
-      this.signupFullName.trim();
-
-    const email =
-      this.signupEmail.trim();
-
-    const phone =
-      this.signupPhone.trim();
-
-    if (!fullName) {
-
-      this.loginErrorMessage =
-        'Please enter your full name.';
-
-      return;
-
-    }
-
-    if (!email) {
-
-      this.loginErrorMessage =
-        'Please enter your email address.';
-
-      return;
-
-    }
-
-    if (!this.isValidEmail(email)) {
-
-      this.loginErrorMessage =
-        'Please enter a valid email address.';
-
-      return;
-
-    }
-
-    if (!phone) {
-
-      this.loginErrorMessage =
-        'Please enter your phone number.';
-
-      return;
-
-    }
-
-    if (this.signupPassword.length < 6) {
-
-      this.loginErrorMessage =
-        'Password must be at least 6 characters.';
-
-      return;
-
-    }
-
-    if (
-      this.signupPassword !==
-      this.signupConfirmPassword
-    ) {
-
-      this.loginErrorMessage =
-        'Passwords do not match.';
-
-      return;
-
-    }
-
-    if (!this.signupAcceptedTerms) {
-
-      this.loginErrorMessage =
-        'Please accept the Terms & Conditions to continue.';
-
-      return;
-
-    }
-
-    if (this.isSubmittingAuth) {
-
-      return;
-
-    }
-
-    this.isSubmittingAuth =
-      true;
-
-    const registerMethod =
-      (this.authService as any).register;
-
-    if (typeof registerMethod !== 'function') {
-
-      this.isSubmittingAuth =
-        false;
-
-      this.loginErrorMessage =
-        'Sign up is not connected to the authentication API yet. Please use the existing Sign Up page.';
-
-      return;
-
-    }
-
-    const request = {
-
-      fullName,
-
-      name: fullName,
-
-      email,
-
-      userName: email,
-
-      phoneNumber: phone,
-
-      phone,
-
-      password:
-        this.signupPassword,
-
-      confirmPassword:
-        this.signupConfirmPassword
-
-    };
-
-    registerMethod
-      .call(this.authService, request)
-      .subscribe({
-
-        next:
-          (response: any) => {
-
-            this.isSubmittingAuth =
-              false;
-
-            if (
-              !response ||
-              response.responseStatus !== 1
-            ) {
-
-              this.loginErrorMessage =
-                response?.message ||
-                'Unable to create your account.';
-
-              return;
-
-            }
-
-            this.authMode =
-              'login';
-
-            this.loginUserName =
-              email;
-
-            this.loginPassword =
-              '';
-
-            this.signupPassword =
-              '';
-
-            this.signupConfirmPassword =
-              '';
-
-            this.loginErrorMessage =
-              '';
-
-            this.authSuccessMessage =
-              response.message ||
-              'Account created successfully. Please log in to continue your order.';
-
-          },
-
-        error:
-          (error: unknown) => {
-
-            this.isSubmittingAuth =
-              false;
-
-            this.loginErrorMessage =
-              this.getErrorMessage(
-                error,
-                'Unable to create your account.'
-              );
-
-          }
-
-      });
-
-  }
-
-
-  // =========================================
-  // FORGOT PASSWORD FROM CHECKOUT POPUP
-  // =========================================
-
-  forgotPasswordFromPopup(): void {
-
-    this.loginErrorMessage =
-      '';
-
-    this.authSuccessMessage =
-      '';
-
-    const identifier =
-      this.forgotIdentifier.trim();
-
-    if (!identifier) {
-
-      this.loginErrorMessage =
-        'Please enter your email or username.';
-
-      return;
-
-    }
-
-    if (this.isSubmittingAuth) {
-
-      return;
-
-    }
-
-    const auth =
-      this.authService as any;
-
-    const resetMethod =
-      auth.forgotPassword ||
-      auth.requestPasswordReset ||
-      auth.resetPasswordRequest;
-
-    if (typeof resetMethod !== 'function') {
-
-      this.loginErrorMessage =
-        'Forgot password is not connected to the authentication API yet. Please use the existing Forgot Password option on the login page.';
-
-      return;
-
-    }
-
-    this.isSubmittingAuth =
-      true;
-
-    const request = {
-
-      userName:
-        identifier,
-
-      email:
-        identifier
-
-    };
-
-    resetMethod
-      .call(auth, request)
-      .subscribe({
-
-        next:
-          (response: any) => {
-
-            this.isSubmittingAuth =
-              false;
-
-            if (
-              !response ||
-              response.responseStatus !== 1
-            ) {
-
-              this.loginErrorMessage =
-                response?.message ||
-                'Unable to process your password reset request.';
-
-              return;
-
-            }
-
-            this.authSuccessMessage =
-              response.message ||
-              'Password reset instructions have been sent successfully.';
-
-          },
-
-        error:
-          (error: unknown) => {
-
-            this.isSubmittingAuth =
-              false;
-
-            this.loginErrorMessage =
-              this.getErrorMessage(
-                error,
-                'Unable to process your password reset request.'
-              );
-
-          }
-
-      });
-
-  }
-
-
-  // =========================================
-  // EMAIL VALIDATION
-  // =========================================
-
-  private isValidEmail(
-    email: string
-  ): boolean {
-
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      .test(email);
-
-  }
-
-
-  // =========================================
   // LOAD CHECKOUT
   // =========================================
 
