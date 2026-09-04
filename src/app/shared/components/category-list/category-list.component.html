@@ -1,134 +1,129 @@
-<section class="category-section">
+<!-- =========================================
+     CATEGORY CAROUSEL
+========================================= -->
+
+<div class="category-carousel">
+
+  <!-- =======================================
+       LEFT BUTTON
+  ======================================== -->
+
+  <button
+    type="button"
+    class="carousel-arrow left-arrow"
+    (click)="scrollLeft()"
+    aria-label="Scroll cuisines left"
+  >
+    ‹
+  </button>
 
 
-  <!-- =========================================
-       HEADER
-  ========================================== -->
+  <!-- =======================================
+       SCROLLABLE CATEGORY LIST
+  ======================================== -->
 
-  <div class="category-header">
+  <div
+    #categoryList
+    class="category-list"
+  >
 
-    <h2>
-      🍽️ Cuisines for you
-    </h2>
+    <!-- =====================================
+         LOADING
+    ====================================== -->
 
+    @if (isLoading) {
 
-    <button
-      type="button"
-      class="see-all-button"
-    >
-      See all
-    </button>
+      <div class="category-status">
+        Loading cuisines...
+      </div>
 
-  </div>
-
-
-  <!-- =========================================
-       CAROUSEL
-  ========================================== -->
-
-  <div class="category-carousel">
+    }
 
 
-    <!-- =======================================
-         LEFT BUTTON
-    ======================================== -->
+    <!-- =====================================
+         ERROR
+    ====================================== -->
 
-    <button
-      type="button"
+    @else if (errorMessage) {
 
-      class="carousel-arrow left-arrow"
+      <div class="category-status category-error">
+        {{ errorMessage }}
+      </div>
 
-      (click)="scrollLeft()"
-
-      aria-label="Scroll cuisines left"
-    >
-      ‹
-    </button>
+    }
 
 
-    <!-- =======================================
-         SCROLLABLE LIST
-    ======================================== -->
+    <!-- =====================================
+         EMPTY
+    ====================================== -->
 
-    <div
-      #categoryList
-      class="category-list"
-    >
+    @else if (categories.length === 0) {
 
+      <div class="category-status">
+        No cuisines available.
+      </div>
+
+    }
+
+
+    <!-- =====================================
+         CATEGORY LIST
+    ====================================== -->
+
+    @else {
 
       @for (
         category of categories;
-        track category.name
+        track category.id
       ) {
-
 
         <button
           type="button"
-
           class="category-item"
-
-          (click)="selectCategory(category.name)"
+          (click)="selectCategory(category)"
         >
 
+          <!-- ===============================
+               CATEGORY ICON
+          ================================= -->
 
           <div class="category-image">
 
-
-            @if (category.image) {
-
-              <img
-                [src]="category.image"
-                [alt]="category.name"
-              />
-
-            }
-
-            @else {
-
-              <div
-                class="category-image-placeholder"
-              >
-                {{ category.icon }}
-              </div>
-
-            }
-
+            <div class="category-image-placeholder">
+              {{ getCategoryIcon(category.name) }}
+            </div>
 
           </div>
 
+
+          <!-- ===============================
+               CATEGORY NAME
+          ================================= -->
 
           <span class="category-name">
             {{ category.name }}
           </span>
 
-
         </button>
-
 
       }
 
-
-    </div>
-
-
-    <!-- =======================================
-         RIGHT BUTTON
-    ======================================== -->
-
-    <button
-      type="button"
-
-      class="carousel-arrow right-arrow"
-
-      (click)="scrollRight()"
-
-      aria-label="Scroll cuisines right"
-    >
-      ›
-    </button>
-
+    }
 
   </div>
 
 
-</section>
+  <!-- =======================================
+       RIGHT BUTTON
+  ======================================== -->
+
+  <button
+    type="button"
+    class="carousel-arrow right-arrow"
+    (click)="scrollRight()"
+    aria-label="Scroll cuisines right"
+  >
+    ›
+  </button>
+
+</div>

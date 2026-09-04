@@ -1,0 +1,449 @@
+<div class="categories-page">
+
+  <!-- =========================================
+       PAGE HEADER
+       ========================================= -->
+
+  <section class="page-header">
+
+    <div class="header-content">
+
+      <a
+        routerLink="/"
+        class="back-button"
+      >
+        ← Back
+      </a>
+
+      <div class="header-title">
+
+        <span class="header-icon">
+          🍽️
+        </span>
+
+        <div>
+          <h1>Food Categories</h1>
+
+          <p>
+            Explore delicious food by category
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================================
+       CATEGORY SECTION
+       ========================================= -->
+
+  <section class="category-section">
+
+    <div class="section-heading">
+
+      <div>
+        <h2>
+          Browse Categories
+        </h2>
+
+        <p>
+          Select a category to see its food
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- =======================================
+         CATEGORY LOADING
+         ======================================= -->
+
+    @if (isLoadingCategories) {
+
+      <div class="loading-state">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading categories...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- =======================================
+         CATEGORY ERROR
+         ======================================= -->
+
+    @if (!isLoadingCategories && errorMessage) {
+
+      <div class="error-state">
+
+        <span>⚠️</span>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- =======================================
+         CATEGORY LIST
+         ======================================= -->
+
+    @if (
+      !isLoadingCategories &&
+      !errorMessage &&
+      categories.length > 0
+    ) {
+
+      <div class="categories-grid">
+
+        @for (
+          category of categories;
+          track category.id
+        ) {
+
+          <button
+            type="button"
+            class="category-card"
+            [class.active]="
+              selectedCategoryId === category.id
+            "
+            (click)="selectCategory(category)"
+          >
+
+            <div class="category-icon">
+
+              {{ getCategoryIcon(category.name) }}
+
+            </div>
+
+            <div class="category-info">
+
+              <h3>
+                {{ category.name }}
+              </h3>
+
+              @if (
+                selectedCategoryId === category.id
+              ) {
+
+                <span class="selected-label">
+                  Selected
+                </span>
+
+              }
+
+            </div>
+
+          </button>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+
+  <!-- =========================================
+       SELECTED CATEGORY HEADER
+       ========================================= -->
+
+  @if (selectedCategoryId !== null) {
+
+    <section class="food-section">
+
+      <div class="food-section-header">
+
+        <div>
+
+          <div class="selected-category-title">
+
+            <span class="selected-category-icon">
+              {{ getCategoryIcon(selectedCategoryName) }}
+            </span>
+
+            <h2>
+              {{ selectedCategoryName }}
+            </h2>
+
+          </div>
+
+          <p>
+            Delicious food available in this category
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="clear-category-button"
+          (click)="showAllCategories()"
+        >
+          Show All Categories
+        </button>
+
+      </div>
+
+
+      <!-- =======================================
+           FOOD LOADING
+           ======================================= -->
+
+      @if (isLoadingFood) {
+
+        <div class="food-loading">
+
+          <div class="spinner"></div>
+
+          <p>
+            Loading food items...
+          </p>
+
+        </div>
+
+      }
+
+
+      <!-- =======================================
+           FOOD ERROR
+           ======================================= -->
+
+      @if (
+        !isLoadingFood &&
+        foodErrorMessage
+      ) {
+
+        <div class="error-state food-error">
+
+          <span>⚠️</span>
+
+          <p>
+            {{ foodErrorMessage }}
+          </p>
+
+        </div>
+
+      }
+
+
+      <!-- =======================================
+           NO FOOD ITEMS
+           ======================================= -->
+
+      @if (
+        !isLoadingFood &&
+        !foodErrorMessage &&
+        foodItems.length === 0
+      ) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            🍽️
+          </div>
+
+          <h3>
+            No Food Items Found
+          </h3>
+
+          <p>
+            There are currently no food items
+            available in
+            {{ selectedCategoryName }}.
+          </p>
+
+        </div>
+
+      }
+
+
+      <!-- =======================================
+           FOOD ITEMS
+           ======================================= -->
+
+      @if (
+        !isLoadingFood &&
+        !foodErrorMessage &&
+        foodItems.length > 0
+      ) {
+
+        <div class="food-grid">
+
+          @for (
+            item of foodItems;
+            track item.id
+          ) {
+
+            <article class="food-card">
+
+              <!-- =================================
+                   FOOD IMAGE
+                   ================================= -->
+
+              <div class="food-image">
+
+                @if (getFoodImage(item)) {
+
+                  <img
+                    [src]="getFoodImage(item)"
+                    [alt]="item.name"
+                    loading="lazy"
+                  />
+
+                } @else {
+
+                  <div class="food-image-placeholder">
+
+                    <span>
+                      {{ getCategoryIcon(selectedCategoryName) }}
+                    </span>
+
+                  </div>
+
+                }
+
+
+                <!-- DISCOUNT BADGE -->
+
+                @if (hasDiscount(item)) {
+
+                  <span class="discount-badge">
+                    Sale
+                  </span>
+
+                }
+
+              </div>
+
+
+              <!-- =================================
+                   FOOD CONTENT
+                   ================================= -->
+
+              <div class="food-content">
+
+                <h3 class="food-name">
+                  {{ item.name }}
+                </h3>
+
+
+                @if (item.description) {
+
+                  <p class="food-description">
+                    {{ item.description }}
+                  </p>
+
+                }
+
+
+                <!-- RATING -->
+
+                <div class="food-rating">
+
+                  <span class="star">
+                    ★
+                  </span>
+
+                  <span>
+                    {{ item.rating || 0 }}
+                  </span>
+
+                  @if (item.raters > 0) {
+
+                    <span class="raters">
+                      ({{ item.raters }})
+                    </span>
+
+                  }
+
+                </div>
+
+
+                <!-- PRICE -->
+
+                <div class="food-price-row">
+
+                  <div class="price-container">
+
+                    @if (hasDiscount(item)) {
+
+                      <span class="original-price">
+                        {{ item.priceLabel || ('Rs. ' + item.price) }}
+                      </span>
+
+                    }
+
+                    <span class="current-price">
+                      {{
+                        item.discountPriceLabel ||
+                        ('Rs. ' + getFoodPrice(item))
+                      }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <!-- =================================
+                     VIEW / ADD BUTTON
+                     ================================= -->
+
+                @if (
+                  item.businessLocations &&
+                  item.businessLocations.length > 0
+                ) {
+
+                  <a
+                    class="add-food-button"
+                    [routerLink]="[
+                      '/restaurant',
+                      item.businessLocations[0].id,
+                      'menu'
+                    ]"
+                    [queryParams]="{
+                      addItem: item.id
+                    }"
+                  >
+                    View & Add
+                  </a>
+
+                } @else {
+
+                  <button
+                    type="button"
+                    class="add-food-button disabled"
+                    disabled
+                  >
+                    Not Available
+                  </button>
+
+                }
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+  }
+
+</div>

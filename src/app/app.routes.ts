@@ -63,6 +63,19 @@ export const routes: Routes = [
 
 
   // ==========================
+  // CATEGORIES
+  // ==========================
+
+  {
+    path: 'categories',
+
+    loadComponent: () =>
+      import('./features/categories/categories.component')
+        .then(m => m.CategoriesComponent)
+  },
+
+
+  // ==========================
   // RESTAURANTS
   // ==========================
 

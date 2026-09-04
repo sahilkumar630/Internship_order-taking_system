@@ -1,15 +1,7 @@
 <div class="home-page">
 
-
   <!-- =========================================
-       HEADER
-  ========================================== -->
-
-  
-
-
-  <!-- =========================================
-       SEARCH
+       SEARCH / HEADER
   ========================================== -->
 
   <app-search-bar />
@@ -23,70 +15,61 @@
 
 
     <!-- =========================================
-         WELCOME
+         HERO SECTION
     ========================================== -->
 
-    <section class="welcome-section">
+    <section class="hero-section">
 
-      <h1>
-        Welcome to Foodie 🍔
-      </h1>
+      <div class="hero-content">
 
-      <p>
-        Discover delicious food near you
-      </p>
+        <div class="hero-text">
 
-    </section>
+          <span class="hero-small-text">
+            Welcome to Foodie 🍔
+          </span>
 
+          <h1>
+            Delicious Food
+            <span>Delivered to You</span>
+          </h1>
 
-    <!-- =========================================
-         PROMOTIONAL BANNER
-    ========================================== -->
+          <p>
+            Discover the best restaurants near you
+            and enjoy your favorite meals.
+          </p>
 
-    <section class="promotion-banner">
+          <button
+            type="button"
+            class="hero-button"
+            (click)="goToRestaurants()"
+          >
+            Explore Restaurants
+          </button>
 
-
-      <!-- =======================================
-           PROMOTION CONTENT
-      ======================================== -->
-
-      <div class="promotion-content">
-
-        <span class="discount">
-          30% OFF
-        </span>
-
-
-        <h2>
-          Your First Order
-        </h2>
+        </div>
 
 
-        <p>
-          Enjoy delicious food with an amazing discount.
-        </p>
+        <div class="hero-food">
 
+          <div class="hero-food-circle">
+            🍛
+          </div>
 
-        <button
-          type="button"
-          (click)="goToRestaurants()"
-        >
-          Order Now
-        </button>
+          <span class="hero-floating top">
+            🍕
+          </span>
 
-      </div>
+          <span class="hero-floating left">
+            🍔
+          </span>
 
+          <span class="hero-floating right">
+            🍗
+          </span>
 
-      <!-- =======================================
-           PROMOTION IMAGE
-      ======================================== -->
-
-      <div class="promotion-image">
-
-        🍔
+        </div>
 
       </div>
-
 
     </section>
 
@@ -94,46 +77,77 @@
     <!-- =========================================
          CUISINES FOR YOU
          
-         Always visible.
-         Does NOT require location.
-         
-         CategoryListComponent contains:
-         - Cuisines heading
-         - Food images
-         - Horizontal scrolling
-         - Navigation arrows
+         LOGIC UNCHANGED
+         CategoryListComponent handles:
+         - API
+         - images
+         - categories
+         - scrolling
+         - arrows
     ========================================== -->
 
     <section class="section cuisines-section">
 
+      <div class="section-header">
+
+        <div class="section-title">
+
+          <span class="section-icon">
+            🍽️
+          </span>
+
+          <h2>
+            Cuisines for you
+          </h2>
+
+        </div>
+
+    <!-- GO TO ALL CATEGORIES -->
+
+      <a
+        routerLink="/categories"
+        class="see-all-link"
+      >
+        See all
+      </a>
+
+      </div>
+
+
+    <div class="category-container">
+
       <app-category-list />
 
-    </section>
+    </div>
+
+  </section>
 
 
     <!-- =========================================
          TOP DEALS
          
-         Always visible.
-         Does NOT require location.
+         LOGIC UNCHANGED
     ========================================== -->
 
-    <section class="section">
-
-
-      <!-- =======================================
-           SECTION HEADER
-      ======================================== -->
+    <section class="section deals-section">
 
       <div class="section-header">
 
-        <h2>
-          🔥 Top Deals For You
-        </h2>
+        <div class="section-title">
 
+          <span class="section-icon">
+            🔥
+          </span>
+
+          <h2>
+            Top Deals For You
+          </h2>
+
+        </div>
 
         <a
           routerLink="/deals"
+          class="see-all-link"
         >
           See all
         </a>
@@ -141,84 +155,91 @@
       </div>
 
 
-      <!-- =======================================
-           DEAL CARDS
-      ======================================== -->
-
-      <div class="deals-placeholder">
+      <div class="deals-grid">
 
 
-        <!-- =====================================
-             BURGER DEAL
-        ====================================== -->
+        <!-- DEAL 1 -->
 
         <div class="deal-card">
 
-          <span class="deal-icon">
+          <div class="deal-icon">
             🍔
-          </span>
+          </div>
 
+          <div class="deal-content">
 
-          <strong>
-            40% OFF
-          </strong>
+            <span class="deal-label">
+              SPECIAL OFFER
+            </span>
 
+            <strong>
+              40% OFF
+            </strong>
 
-          <p>
-            On selected burgers
-          </p>
+            <p>
+              On selected burgers
+            </p>
+
+          </div>
 
         </div>
 
 
-        <!-- =====================================
-             PIZZA DEAL
-        ====================================== -->
+        <!-- DEAL 2 -->
 
         <div class="deal-card">
 
-          <span class="deal-icon">
+          <div class="deal-icon">
             🍕
-          </span>
+          </div>
 
+          <div class="deal-content">
 
-          <strong>
-            Buy 1 Get 1
-          </strong>
+            <span class="deal-label">
+              HOT DEAL
+            </span>
 
+            <strong>
+              Buy 1 Get 1
+            </strong>
 
-          <p>
-            On selected pizzas
-          </p>
+            <p>
+              On selected pizzas
+            </p>
+
+          </div>
 
         </div>
 
 
-        <!-- =====================================
-             DELIVERY DEAL
-        ====================================== -->
+        <!-- DEAL 3 -->
 
         <div class="deal-card">
 
-          <span class="deal-icon">
+          <div class="deal-icon">
             🛵
-          </span>
+          </div>
 
+          <div class="deal-content">
 
-          <strong>
-            Free Delivery
-          </strong>
+            <span class="deal-label">
+              DELIVERY OFFER
+            </span>
 
+            <strong>
+              Free Delivery
+            </strong>
 
-          <p>
-            On orders above Rs. 999
-          </p>
+            <p>
+              On orders above Rs. 999
+            </p>
+
+          </div>
 
         </div>
 
 
       </div>
-
 
     </section>
 
@@ -226,8 +247,7 @@
     <!-- =========================================
          LOCATION BASED CONTENT
          
-         Only appears when the user has
-         selected a location.
+         LOGIC UNCHANGED
     ========================================== -->
 
     @if (selectedLocation) {
@@ -239,12 +259,19 @@
 
       <section class="section">
 
-
         <div class="section-header">
 
-          <h2>
-            🍔 Popular Food Near You
-          </h2>
+          <div class="section-title">
+
+            <span class="section-icon">
+              🍔
+            </span>
+
+            <h2>
+              Popular Food Near You
+            </h2>
+
+          </div>
 
         </div>
 
@@ -254,7 +281,6 @@
         ====================================== -->
 
         @if (isLoadingFood) {
-
 
           <div class="loading-message">
 
@@ -266,7 +292,6 @@
 
           </div>
 
-
         }
 
 
@@ -276,13 +301,11 @@
 
         @else if (foodErrorMessage) {
 
-
           <div class="error-message">
 
             <p>
               {{ foodErrorMessage }}
             </p>
-
 
             <button
               type="button"
@@ -294,7 +317,6 @@
 
           </div>
 
-
         }
 
 
@@ -304,60 +326,51 @@
 
         @else if (foodItems.length > 0) {
 
-
           <div class="food-grid">
-
 
             @for (
               item of foodItems;
               track item.id
             ) {
 
-
               <div class="food-card">
 
-
-                <!-- =============================
-                     FOOD IMAGE
-                ============================== -->
+                <!-- FOOD IMAGE -->
 
                 <div class="food-image">
 
-
                   @if (item.image) {
-
 
                     <img
                       [src]="item.image"
                       [alt]="item.name"
                     />
 
-
                   }
-
 
                   @else {
 
-
-                    <div
-                      class="food-image-placeholder"
-                    >
+                    <div class="food-image-placeholder">
                       🍔
                     </div>
 
-
                   }
 
+
+                  <!-- RATING BADGE -->
+
+                  <div class="food-rating-badge">
+
+                    ⭐ {{ item.rating || 0 }}
+
+                  </div>
 
                 </div>
 
 
-                <!-- =============================
-                     FOOD CONTENT
-                ============================== -->
+                <!-- FOOD CONTENT -->
 
                 <div class="food-content">
-
 
                   <h3>
                     {{ item.name }}
@@ -366,110 +379,70 @@
 
                   @if (item.itemCategory) {
 
-
                     <p class="food-category">
                       {{ item.itemCategory }}
                     </p>
 
-
                   }
 
 
-                  <!-- ===========================
-                       RATING
-                  ============================ -->
+                  <div class="food-bottom">
 
-                  <div class="food-rating">
+                    <!-- PRICE -->
 
-                    ⭐ {{ item.rating || 0 }}
+                    <div class="food-price">
 
+                      @if (
+                        item.discountPrice > 0 &&
+                        item.discountPrice < item.price
+                      ) {
 
-                    @if (item.raters) {
+                        <strong>
+                          {{ item.discountPriceLabel }}
+                        </strong>
 
-                      <span>
-                        ({{ item.raters }})
-                      </span>
+                        <span class="original-price">
+                          {{ item.priceLabel }}
+                        </span>
 
-                    }
+                      }
 
-                  </div>
+                      @else {
 
+                        <strong>
+                          {{ item.priceLabel }}
+                        </strong>
 
-                  <!-- ===========================
-                       PRICE
-                  ============================ -->
+                      }
 
-                  <div class="food-price">
-
-
-                    @if (
-                      item.discountPrice > 0 &&
-                      item.discountPrice < item.price
-                    ) {
-
-
-                      <strong>
-                        {{ item.discountPriceLabel }}
-                      </strong>
+                    </div>
 
 
-                      <span
-                        class="original-price"
-                      >
-                        {{ item.priceLabel }}
-                      </span>
+                    <!-- VIEW & ADD -->
 
-
-                    }
-
-
-                    @else {
-
-
-                      <strong>
-                        {{ item.priceLabel }}
-                      </strong>
-
-
-                    }
-
+                    <a
+                      class="add-food-button"
+                      [routerLink]="[
+                        '/restaurant',
+                        item.restaurantId,
+                        'menu'
+                      ]"
+                      [queryParams]="{
+                        addItem: item.id
+                      }"
+                    >
+                      Add
+                    </a>
 
                   </div>
-
-
-                  <!-- ===========================
-                       VIEW & ADD
-                  ============================ -->
-
-                  <button
-                    type="button"
-                    class="add-food-button"
-
-                    [routerLink]="[
-                      '/restaurant',
-                      item.restaurantId,
-                      'menu'
-                    ]"
-
-                    [queryParams]="{
-                      addItem: item.id
-                    }"
-                  >
-                    View & Add
-                  </button>
-
 
                 </div>
 
-
               </div>
-
 
             }
 
-
           </div>
-
 
         }
 
@@ -480,7 +453,6 @@
 
         @else {
 
-
           <div class="empty-message">
 
             <p>
@@ -489,35 +461,34 @@
 
           </div>
 
-
         }
-
 
       </section>
 
 
       <!-- =======================================
            ALL RESTAURANTS
-           
-           Only shown when location exists.
       ======================================== -->
 
-      <section class="section">
-
-
-        <!-- =====================================
-             SECTION HEADER
-        ====================================== -->
+      <section class="section restaurants-section">
 
         <div class="section-header">
 
-          <h2>
-            🍴 All Restaurants
-          </h2>
+          <div class="section-title">
 
+            <span class="section-icon">
+              🍴
+            </span>
+
+            <h2>
+              Nearby Restaurants
+            </h2>
+
+          </div>
 
           <a
             routerLink="/restaurants"
+            class="see-all-link"
           >
             See all
           </a>
@@ -531,7 +502,6 @@
 
         @if (isLoadingRestaurants) {
 
-
           <div class="loading-message">
 
             <span class="loading-spinner"></span>
@@ -542,7 +512,6 @@
 
           </div>
 
-
         }
 
 
@@ -552,13 +521,11 @@
 
         @else if (restaurantErrorMessage) {
 
-
           <div class="error-message">
 
             <p>
               {{ restaurantErrorMessage }}
             </p>
-
 
             <button
               type="button"
@@ -570,7 +537,6 @@
 
           </div>
 
-
         }
 
 
@@ -580,26 +546,20 @@
 
         @else if (restaurants.length > 0) {
 
-
           <div class="restaurant-grid">
-
 
             @for (
               restaurant of restaurants;
               track restaurant.id
             ) {
 
-
               <app-restaurant-card
                 [restaurant]="restaurant"
               />
 
-
             }
 
-
           </div>
-
 
         }
 
@@ -610,7 +570,6 @@
 
         @else {
 
-
           <div class="empty-message">
 
             <p>
@@ -619,17 +578,13 @@
 
           </div>
 
-
         }
 
-
       </section>
-
 
     }
 
 
   </main>
-
 
 </div>

@@ -4,43 +4,9 @@
 
 .home-page {
   min-height: 100vh;
-
   background: #f8f7fc;
-
   color: #241b2f;
-
-  padding-bottom: 40px;
-}
-
-
-/* =========================================
-   CUISINES FOR YOU
-========================================= */
-
-.cuisines-section {
-  max-width: 1200px;
-
-  margin: 0 auto;
-
-  padding: 0 25px 10px;
-
-  box-sizing: border-box;
-}
-
-
-.cuisines-section .section-header {
-  margin-bottom: 15px;
-}
-
-
-.cuisines-section .section-header h2 {
-  margin: 0;
-
-  color: #241b2f;
-
-  font-size: 20px;
-
-  font-weight: 700;
+  padding-bottom: 50px;
 }
 
 
@@ -49,51 +15,43 @@
 ========================================= */
 
 .home-content {
-  max-width: 1200px;
-
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto;
-
-  padding: 25px;
-
+  padding: 25px 30px 50px;
   box-sizing: border-box;
 }
 
 
 /* =========================================
-   WELCOME
+   HERO SECTION
 ========================================= */
 
-.welcome-section {
-  margin-bottom: 25px;
+.hero-section {
+  width: 100%;
+  min-height: 290px;
+
+  margin-bottom: 35px;
+
+  overflow: hidden;
+
+  border-radius: 24px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #eee1ff 0%,
+      #f3e8ff 45%,
+      #e8d5ff 100%
+    );
+
+  box-shadow:
+    0 12px 35px rgba(123, 44, 191, 0.12);
 }
 
 
-.welcome-section h1 {
-  margin: 0;
-
-  color: #241b2f;
-
-  font-size: 28px;
-
-  font-weight: 700;
-}
-
-
-.welcome-section p {
-  margin: 7px 0 0;
-
-  color: #888;
-
-  font-size: 14px;
-}
-
-
-/* =========================================
-   PROMOTION BANNER
-========================================= */
-
-.promotion-banner {
-  min-height: 190px;
+.hero-content {
+  min-height: 290px;
 
   display: flex;
 
@@ -101,87 +59,84 @@
 
   justify-content: space-between;
 
-  overflow: hidden;
-
-  margin-bottom: 35px;
-
-  padding: 30px 40px;
+  padding: 35px 55px;
 
   box-sizing: border-box;
+}
 
-  border-radius: 22px;
+
+.hero-text {
+  max-width: 650px;
+}
+
+
+.hero-small-text {
+  display: inline-block;
+
+  margin-bottom: 10px;
+
+  color: #7b2cbf;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+
+.hero-text h1 {
+  margin: 0;
+
+  color: #241b2f;
+
+  font-size: 46px;
+
+  line-height: 1.08;
+
+  font-weight: 800;
+
+  letter-spacing: -1px;
+}
+
+
+.hero-text h1 span {
+  display: block;
+
+  color: #7b2cbf;
+}
+
+
+.hero-text p {
+  max-width: 580px;
+
+  margin: 16px 0 22px;
+
+  color: #6d5a78;
+
+  font-size: 15px;
+
+  line-height: 1.6;
+}
+
+
+/* =========================================
+   HERO BUTTON
+========================================= */
+
+.hero-button {
+  padding: 13px 24px;
+
+  border: none;
+
+  border-radius: 11px;
 
   background:
     linear-gradient(
       135deg,
-      #5a189a,
-      #7b2cbf,
+      #6a1b9a,
       #9d4edd
     );
 
   color: white;
-
-  box-shadow:
-    0 12px 30px rgba(123, 44, 191, 0.22);
-}
-
-
-/* =========================================
-   PROMOTION CONTENT
-========================================= */
-
-.promotion-content {
-  max-width: 500px;
-}
-
-
-.discount {
-  display: block;
-
-  margin-bottom: 5px;
-
-  font-size: 34px;
-
-  font-weight: 800;
-}
-
-
-.promotion-content h2 {
-  margin: 0 0 8px;
-
-  font-size: 22px;
-
-  font-weight: 700;
-
-  text-transform: uppercase;
-}
-
-
-.promotion-content p {
-  margin: 0 0 20px;
-
-  color: #eee;
-
-  font-size: 14px;
-
-  line-height: 1.5;
-}
-
-
-/* =========================================
-   ORDER NOW BUTTON
-========================================= */
-
-.promotion-content button {
-  padding: 12px 22px;
-
-  border: none;
-
-  border-radius: 10px;
-
-  background: white;
-
-  color: #6a1b9a;
 
   font-size: 13px;
 
@@ -189,33 +144,38 @@
 
   cursor: pointer;
 
+  box-shadow:
+    0 7px 18px rgba(123, 44, 191, 0.25);
+
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 
-.promotion-content button:hover {
+.hero-button:hover {
   transform: translateY(-2px);
 
   box-shadow:
-    0 7px 18px rgba(0, 0, 0, 0.15);
+    0 10px 24px rgba(123, 44, 191, 0.30);
 }
 
 
-.promotion-content button:active {
+.hero-button:active {
   transform: translateY(0);
 }
 
 
 /* =========================================
-   PROMOTION IMAGE
+   HERO FOOD
 ========================================= */
 
-.promotion-image {
-  width: 150px;
+.hero-food {
+  position: relative;
 
-  height: 150px;
+  width: 270px;
+
+  height: 220px;
 
   display: flex;
 
@@ -224,12 +184,73 @@
   justify-content: center;
 
   flex-shrink: 0;
+}
+
+
+.hero-food-circle {
+  width: 190px;
+
+  height: 190px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
 
   border-radius: 50%;
 
-  background: rgba(255, 255, 255, 0.15);
+  background: white;
 
-  font-size: 90px;
+  font-size: 110px;
+
+  box-shadow:
+    0 15px 35px rgba(90, 24, 154, 0.18);
+}
+
+
+.hero-floating {
+  position: absolute;
+
+  width: 48px;
+
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: white;
+
+  font-size: 24px;
+
+  box-shadow:
+    0 7px 20px rgba(0, 0, 0, 0.10);
+}
+
+
+.hero-floating.top {
+  top: 0;
+
+  right: 35px;
+}
+
+
+.hero-floating.left {
+  left: 0;
+
+  bottom: 20px;
+}
+
+
+.hero-floating.right {
+  right: 0;
+
+  bottom: 30px;
 }
 
 
@@ -238,7 +259,7 @@
 ========================================= */
 
 .section {
-  margin-bottom: 40px;
+  margin-bottom: 38px;
 }
 
 
@@ -257,18 +278,34 @@
 }
 
 
-.section-header h2 {
+.section-title {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.section-title h2 {
   margin: 0;
 
   color: #241b2f;
 
-  font-size: 20px;
+  font-size: 22px;
 
-  font-weight: 700;
+  font-weight: 800;
 }
 
 
-.section-header a {
+.section-icon {
+  font-size: 24px;
+
+  line-height: 1;
+}
+
+
+.see-all-link {
   color: #7b2cbf;
 
   font-size: 13px;
@@ -282,10 +319,161 @@
 }
 
 
-.section-header a:hover {
+.see-all-link:hover {
   color: #5a189a;
 
   text-decoration: underline;
+}
+
+
+/* =========================================
+   CUISINES
+========================================= */
+
+.cuisines-section {
+  padding: 0;
+
+  overflow: hidden;
+}
+
+
+.category-container {
+  width: 100%;
+
+  overflow: hidden;
+
+  border-radius: 20px;
+
+  background: transparent;
+}
+
+
+/*
+   CategoryListComponent remains responsible
+   for its own category logic and scrolling.
+*/
+
+.category-container app-category-list {
+  display: block;
+
+  width: 100%;
+}
+
+
+/* =========================================
+   TOP DEALS
+========================================= */
+
+.deals-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+
+.deal-card {
+  min-height: 135px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  border-radius: 18px;
+
+  background: white;
+
+  box-shadow:
+    0 6px 22px rgba(0, 0, 0, 0.055);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.deal-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.09);
+}
+
+
+/* =========================================
+   DEAL ICON
+========================================= */
+
+.deal-icon {
+  width: 68px;
+
+  height: 68px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 18px;
+
+  background: #f3e8ff;
+
+  font-size: 38px;
+}
+
+
+/* =========================================
+   DEAL CONTENT
+========================================= */
+
+.deal-content {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+}
+
+
+.deal-label {
+  margin-bottom: 5px;
+
+  color: #9d4edd;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.6px;
+}
+
+
+.deal-content strong {
+  color: #7b2cbf;
+
+  font-size: 17px;
+
+  font-weight: 800;
+}
+
+
+.deal-content p {
+  margin: 5px 0 0;
+
+  color: #888;
+
+  font-size: 12px;
 }
 
 
@@ -294,7 +482,7 @@
 ========================================= */
 
 .loading-message {
-  min-height: 140px;
+  min-height: 150px;
 
   display: flex;
 
@@ -351,7 +539,7 @@
 ========================================= */
 
 .error-message {
-  padding: 18px;
+  padding: 22px;
 
   display: flex;
 
@@ -381,13 +569,13 @@
 
 
 /* =========================================
-   EMPTY MESSAGE
+   EMPTY
 ========================================= */
 
 .empty-message {
-  padding: 30px 20px;
+  padding: 35px 20px;
 
-  border-radius: 16px;
+  border-radius: 18px;
 
   background: white;
 
@@ -412,7 +600,7 @@
 ========================================= */
 
 .retry-button {
-  padding: 9px 17px;
+  padding: 9px 18px;
 
   border: none;
 
@@ -441,13 +629,8 @@
 }
 
 
-.retry-button:active {
-  transform: translateY(0);
-}
-
-
 /* =========================================
-   POPULAR FOOD GRID
+   POPULAR FOOD
 ========================================= */
 
 .food-grid {
@@ -460,10 +643,6 @@
 }
 
 
-/* =========================================
-   FOOD CARD
-========================================= */
-
 .food-card {
   overflow: hidden;
 
@@ -472,7 +651,7 @@
   background: white;
 
   box-shadow:
-    0 5px 20px rgba(0, 0, 0, 0.06);
+    0 6px 22px rgba(0, 0, 0, 0.055);
 
   transition:
     transform 0.2s ease,
@@ -484,7 +663,7 @@
   transform: translateY(-4px);
 
   box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.10);
+    0 12px 28px rgba(0, 0, 0, 0.10);
 }
 
 
@@ -493,9 +672,11 @@
 ========================================= */
 
 .food-image {
+  position: relative;
+
   width: 100%;
 
-  height: 180px;
+  height: 175px;
 
   overflow: hidden;
 
@@ -523,7 +704,7 @@
 
 
 /* =========================================
-   FOOD IMAGE PLACEHOLDER
+   FOOD PLACEHOLDER
 ========================================= */
 
 .food-image-placeholder {
@@ -542,11 +723,39 @@
 
 
 /* =========================================
+   FOOD RATING BADGE
+========================================= */
+
+.food-rating-badge {
+  position: absolute;
+
+  top: 10px;
+
+  left: 10px;
+
+  padding: 6px 9px;
+
+  border-radius: 20px;
+
+  background: white;
+
+  color: #5c465f;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =========================================
    FOOD CONTENT
 ========================================= */
 
 .food-content {
-  padding: 15px;
+  padding: 14px;
 }
 
 
@@ -557,7 +766,7 @@
 
   font-size: 16px;
 
-  font-weight: 700;
+  font-weight: 800;
 
   white-space: nowrap;
 
@@ -572,7 +781,7 @@
 ========================================= */
 
 .food-category {
-  margin: 5px 0 8px;
+  margin: 5px 0 12px;
 
   color: #888;
 
@@ -581,20 +790,17 @@
 
 
 /* =========================================
-   FOOD RATING
+   FOOD BOTTOM
 ========================================= */
 
-.food-rating {
-  margin-bottom: 8px;
+.food-bottom {
+  display: flex;
 
-  color: #6d5a78;
+  align-items: center;
 
-  font-size: 12px;
-}
+  justify-content: space-between;
 
-
-.food-rating span {
-  color: #999;
+  gap: 10px;
 }
 
 
@@ -607,9 +813,7 @@
 
   align-items: center;
 
-  gap: 8px;
-
-  margin-bottom: 12px;
+  gap: 7px;
 }
 
 
@@ -625,22 +829,18 @@
 .original-price {
   color: #aaa;
 
-  font-size: 11px;
+  font-size: 10px;
 
   text-decoration: line-through;
 }
 
 
 /* =========================================
-   ADD FOOD BUTTON
+   ADD BUTTON
 ========================================= */
 
 .add-food-button {
-  width: 100%;
-
-  padding: 10px;
-
-  border: none;
+  padding: 8px 14px;
 
   border-radius: 9px;
 
@@ -648,11 +848,9 @@
 
   color: white;
 
-  font-size: 12px;
+  font-size: 11px;
 
   font-weight: 700;
-
-  cursor: pointer;
 
   text-decoration: none;
 
@@ -669,14 +867,14 @@
 }
 
 
-.add-food-button:active {
-  transform: translateY(0);
+/* =========================================
+   RESTAURANTS
+========================================= */
+
+.restaurants-section {
+  margin-bottom: 20px;
 }
 
-
-/* =========================================
-   RESTAURANT GRID
-========================================= */
 
 .restaurant-grid {
   display: grid;
@@ -684,106 +882,7 @@
   grid-template-columns:
     repeat(2, minmax(0, 1fr));
 
-  gap: 18px;
-}
-
-
-/* =========================================
-   DEALS
-========================================= */
-
-.deals-placeholder {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap: 15px;
-}
-
-
-/* =========================================
-   DEAL CARD
-========================================= */
-
-.deal-card {
-  min-height: 150px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 20px;
-
-  box-sizing: border-box;
-
-  border-radius: 18px;
-
-  background: white;
-
-  text-align: center;
-
-  box-shadow:
-    0 5px 20px rgba(0, 0, 0, 0.05);
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-
-.deal-card:hover {
-  transform: translateY(-3px);
-
-  box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.08);
-}
-
-
-/* =========================================
-   DEAL ICON
-========================================= */
-
-.deal-icon {
-  display: block;
-
-  margin-bottom: 10px;
-
-  font-size: 40px;
-
-  line-height: 1;
-}
-
-
-/* =========================================
-   DEAL TITLE
-========================================= */
-
-.deal-card strong {
-  color: #7b2cbf;
-
-  font-size: 15px;
-
-  font-weight: 700;
-}
-
-
-/* =========================================
-   DEAL DESCRIPTION
-========================================= */
-
-.deal-card p {
-  margin: 7px 0 0;
-
-  color: #888;
-
-  font-size: 12px;
-
-  line-height: 1.4;
+  gap: 20px;
 }
 
 
@@ -792,6 +891,35 @@
 ========================================= */
 
 @media (max-width: 1000px) {
+
+  .home-content {
+    padding: 22px;
+  }
+
+
+  .hero-content {
+    padding: 30px 40px;
+  }
+
+
+  .hero-text h1 {
+    font-size: 38px;
+  }
+
+
+  .hero-food {
+    width: 220px;
+  }
+
+
+  .hero-food-circle {
+    width: 160px;
+
+    height: 160px;
+
+    font-size: 90px;
+  }
+
 
   .food-grid {
     grid-template-columns:
@@ -802,7 +930,7 @@
 
 
 /* =========================================
-   TABLET
+   TABLET / MOBILE
 ========================================= */
 
 @media (max-width: 768px) {
@@ -812,14 +940,60 @@
   }
 
 
-  .cuisines-section {
-    padding:
-      0 20px 5px;
+  .hero-section {
+    min-height: auto;
+
+    border-radius: 20px;
   }
 
 
-  .promotion-banner {
-    padding: 25px;
+  .hero-content {
+    min-height: auto;
+
+    padding: 30px;
+
+    gap: 20px;
+  }
+
+
+  .hero-text h1 {
+    font-size: 32px;
+  }
+
+
+  .hero-text p {
+    font-size: 13px;
+  }
+
+
+  .hero-food {
+    width: 170px;
+
+    height: 170px;
+  }
+
+
+  .hero-food-circle {
+    width: 125px;
+
+    height: 125px;
+
+    font-size: 70px;
+  }
+
+
+  .hero-floating {
+    width: 38px;
+
+    height: 38px;
+
+    font-size: 18px;
+  }
+
+
+  .deals-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
 
@@ -830,12 +1004,6 @@
 
 
   .restaurant-grid {
-    grid-template-columns:
-      1fr 1fr;
-  }
-
-
-  .deals-placeholder {
     grid-template-columns:
       1fr 1fr;
   }
@@ -854,94 +1022,84 @@
   }
 
 
-  /* -----------------------------------------
-     CUISINES
-  ----------------------------------------- */
+  .hero-content {
+    padding: 25px;
 
-  .cuisines-section {
-    padding:
-      0 15px 5px;
+    flex-direction: column;
+
+    align-items: flex-start;
   }
 
 
-  .cuisines-section .section-header h2 {
-    font-size: 18px;
+  .hero-text {
+    max-width: 100%;
   }
 
 
-  /* -----------------------------------------
-     WELCOME
-  ----------------------------------------- */
-
-  .welcome-section {
-    margin-bottom: 20px;
+  .hero-text h1 {
+    font-size: 28px;
   }
 
 
-  .welcome-section h1 {
-    font-size: 23px;
-  }
-
-
-  .welcome-section p {
-    font-size: 13px;
-  }
-
-
-  /* -----------------------------------------
-     PROMOTION
-  ----------------------------------------- */
-
-  .promotion-banner {
-    min-height: 200px;
-
-    padding: 22px;
-
-    border-radius: 18px;
-  }
-
-
-  .promotion-content {
-    max-width: 65%;
-  }
-
-
-  .discount {
-    font-size: 24px;
-  }
-
-
-  .promotion-content h2 {
-    font-size: 17px;
-  }
-
-
-  .promotion-content p {
-    margin-bottom: 15px;
-
+  .hero-text p {
     font-size: 12px;
   }
 
 
-  .promotion-content button {
-    padding: 10px 17px;
+  .hero-food {
+    align-self: center;
 
+    width: 180px;
+
+    height: 150px;
+  }
+
+
+  .hero-food-circle {
+    width: 115px;
+
+    height: 115px;
+
+    font-size: 65px;
+  }
+
+
+  .section-title h2 {
+    font-size: 18px;
+  }
+
+
+  .section-icon {
+    font-size: 20px;
+  }
+
+
+  .see-all-link {
     font-size: 11px;
   }
 
 
-  .promotion-image {
-    width: 90px;
-
-    height: 90px;
-
-    font-size: 50px;
+  .deals-grid {
+    grid-template-columns:
+      1fr;
   }
 
 
-  /* -----------------------------------------
-     FOOD
-  ----------------------------------------- */
+  .deal-card {
+    min-height: 110px;
+
+    padding: 15px;
+  }
+
+
+  .deal-icon {
+    width: 58px;
+
+    height: 58px;
+
+    font-size: 30px;
+  }
+
 
   .food-grid {
     grid-template-columns:
@@ -952,12 +1110,12 @@
 
 
   .food-image {
-    height: 140px;
+    height: 135px;
   }
 
 
   .food-content {
-    padding: 12px;
+    padding: 11px;
   }
 
 
@@ -967,58 +1125,25 @@
 
 
   .food-category {
-    font-size: 11px;
-  }
-
-
-  .food-rating {
-    font-size: 11px;
+    font-size: 10px;
   }
 
 
   .food-price strong {
-    font-size: 13px;
+    font-size: 12px;
   }
 
 
   .add-food-button {
-    padding: 9px 6px;
+    padding: 7px 10px;
 
-    font-size: 11px;
+    font-size: 10px;
   }
 
-
-  /* -----------------------------------------
-     RESTAURANTS
-  ----------------------------------------- */
 
   .restaurant-grid {
     grid-template-columns:
       1fr;
-  }
-
-
-  /* -----------------------------------------
-     DEALS
-  ----------------------------------------- */
-
-  .deals-placeholder {
-    grid-template-columns:
-      1fr;
-  }
-
-
-  /* -----------------------------------------
-     SECTION HEADER
-  ----------------------------------------- */
-
-  .section-header h2 {
-    font-size: 18px;
-  }
-
-
-  .section-header a {
-    font-size: 12px;
   }
 
 }

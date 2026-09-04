@@ -1,8 +1,21 @@
 import {
   Component,
   ElementRef,
-  ViewChild
+  EventEmitter,
+  OnInit,
+  Output,
+  ViewChild,
+  inject
 } from '@angular/core';
+
+import {
+  Router
+} from '@angular/router';
+
+import {
+  FoodCategory,
+  FoodCategoryService
+} from '../../../core/services/food-category.service';
 
 
 @Component({
@@ -16,7 +29,19 @@ import {
   styleUrl:
     './category-list.component.css'
 })
-export class CategoryListComponent {
+export class CategoryListComponent
+  implements OnInit {
+
+
+  // =========================================
+  // SERVICES
+  // =========================================
+
+  private readonly foodCategoryService =
+    inject(FoodCategoryService);
+
+  private readonly router =
+    inject(Router);
 
 
   // =========================================
@@ -28,75 +53,330 @@ export class CategoryListComponent {
 
 
   // =========================================
+  // CATEGORY SELECTED EVENT
+  // =========================================
+
+  @Output()
+  categorySelected =
+    new EventEmitter<FoodCategory>();
+
+
+  // =========================================
   // CATEGORIES
   // =========================================
 
-  categories = [
+  categories: FoodCategory[] = [];
 
-    {
-      name: 'Fast Food',
-      icon: '🍟',
-      image:
-        'https://images.deliveryhero.io/image/fd-pk/Products/97755546.jpg'
-    },
 
-    {
-      name: 'Biryani',
-      icon: '🍛',
-      image:
-        'https://images.deliveryhero.io/image/fd-pk/LH/idop-listing.jpg'
-    },
+  // =========================================
+  // LOADING
+  // =========================================
 
-    {
-      name: 'Pizza',
-      icon: '🍕',
-      image:
-        'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=500&q=80'
-    },
+  isLoading = false;
 
-    {
-      name: 'BBQ',
-      icon: '🍗',
-      image:
-        'https://images.deliveryhero.io/image/fd-pk/Products/97755546.jpg'
-    },
 
-    {
-      name: 'Burgers',
-      icon: '🍔',
-      image:
-        'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80'
-    },
+  // =========================================
+  // ERROR
+  // =========================================
 
-    {
-      name: 'Halwa Puri',
-      icon: '🥘',
-      image:
-        'https://www.thebrokebackpacker.com/wp-content/uploads/2022/04/Shutterstock-Pakistan-Halwa-Puri.jpg'
-    },
+  errorMessage = '';
 
-    {
-      name: 'Paratha',
-      icon: '🫓',
-      image:
-        'https://images.deliveryhero.io/image/fd-pk/products/98716233.jpg'
-    },
 
-    {
-      name: 'Desserts',
-      icon: '🍮',
-      image:
-        'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=500&q=80'
-    },
+  // =========================================
+  // INITIALIZATION
+  // =========================================
 
-    {
-      name: 'Drinks',
-      icon: '🥤',
-      image:
-        'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=500&q=80'
+  ngOnInit(): void {
+
+    this.loadCategories();
+
+  }
+
+
+  // =========================================
+  // LOAD FOOD CATEGORIES
+  // =========================================
+
+  loadCategories(): void {
+
+    this.isLoading = true;
+
+    this.errorMessage = '';
+
+
+    console.log(
+      '========================================'
+    );
+
+    console.log(
+      'LOADING FOOD CATEGORIES'
+    );
+
+    console.log(
+      '========================================'
+    );
+
+
+    this.foodCategoryService
+
+      .getFoodCategories(
+        undefined,
+        1
+      )
+
+      .subscribe({
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        next: (
+          categories: FoodCategory[]
+        ) => {
+
+          this.categories =
+            categories || [];
+
+          this.isLoading = false;
+
+
+          console.log(
+            'Food categories loaded:',
+            this.categories
+          );
+
+        },
+
+
+        // =====================================
+        // ERROR
+        // =====================================
+
+        error: (
+          error: unknown
+        ) => {
+
+          this.isLoading = false;
+
+          this.categories = [];
+
+
+          console.error(
+            'Food Category API Error:',
+            error
+          );
+
+
+          const apiError =
+            error as {
+              error?: {
+                message?: string;
+              };
+            };
+
+
+          this.errorMessage =
+            apiError?.error?.message ||
+            'Unable to load food categories.';
+
+        }
+
+      });
+
+  }
+
+
+  // =========================================
+  // GET CATEGORY ICON
+  // =========================================
+
+  getCategoryIcon(
+    categoryName: string
+  ): string {
+
+    const name =
+      (categoryName || '')
+        .toLowerCase()
+        .trim();
+
+
+    if (
+      name.includes('fast')
+    ) {
+
+      return '🍟';
+
     }
 
-  ];
+
+    if (
+      name.includes('chinese') ||
+      name.includes('chinees')
+    ) {
+
+      return '🥡';
+
+    }
+
+
+    if (
+      name.includes('desi')
+    ) {
+
+      return '🍛';
+
+    }
+
+
+    if (
+      name.includes('biryani')
+    ) {
+
+      return '🍚';
+
+    }
+
+
+    if (
+      name.includes('pizza')
+    ) {
+
+      return '🍕';
+
+    }
+
+
+    if (
+      name.includes('bbq')
+    ) {
+
+      return '🍗';
+
+    }
+
+
+    if (
+      name.includes('burger')
+    ) {
+
+      return '🍔';
+
+    }
+
+
+    if (
+      name.includes('dessert')
+    ) {
+
+      return '🍮';
+
+    }
+
+
+    if (
+      name.includes('drink')
+    ) {
+
+      return '🥤';
+
+    }
+
+
+    return '🍽️';
+
+  }
+
+
+  // =========================================
+  // SELECT CATEGORY
+  // =========================================
+
+  selectCategory(
+    category: FoodCategory
+  ): void {
+
+    if (!category) {
+
+      return;
+
+    }
+
+
+    console.log(
+      '========================================'
+    );
+
+    console.log(
+      'CATEGORY SELECTED'
+    );
+
+    console.log(
+      '========================================'
+    );
+
+    console.log(
+      'Category ID:',
+      category.id
+    );
+
+    console.log(
+      'Category Name:',
+      category.name
+    );
+
+
+    // =======================================
+    // EMIT CATEGORY
+    // =======================================
+
+    this.categorySelected.emit(
+      category
+    );
+
+
+    // =======================================
+    // NAVIGATE TO CATEGORY PAGE
+    // =======================================
+
+    this.router.navigate(
+      ['/categories'],
+      {
+        queryParams: {
+
+          categoryId:
+            category.id,
+
+          categoryName:
+            category.name
+
+        }
+
+      }
+    )
+
+      .then(
+        success => {
+
+          console.log(
+            'Category navigation result:',
+            success
+          );
+
+        }
+      )
+
+      .catch(
+        error => {
+
+          console.error(
+            'Category navigation error:',
+            error
+          );
+
+        }
+      );
+
+  }
 
 
   // =========================================
@@ -110,10 +390,6 @@ export class CategoryListComponent {
 
 
     if (!element) {
-
-      console.warn(
-        'Category list element not available.'
-      );
 
       return;
 
@@ -135,13 +411,6 @@ export class CategoryListComponent {
 
     });
 
-
-    console.log(
-      'Scrolling right:',
-      element.scrollLeft +
-      scrollAmount
-    );
-
   }
 
 
@@ -156,10 +425,6 @@ export class CategoryListComponent {
 
 
     if (!element) {
-
-      console.warn(
-        'Category list element not available.'
-      );
 
       return;
 
@@ -180,29 +445,6 @@ export class CategoryListComponent {
         'smooth'
 
     });
-
-
-    console.log(
-      'Scrolling left:',
-      element.scrollLeft -
-      scrollAmount
-    );
-
-  }
-
-
-  // =========================================
-  // SELECT CATEGORY
-  // =========================================
-
-  selectCategory(
-    category: string
-  ): void {
-
-    console.log(
-      'Selected category:',
-      category
-    );
 
   }
 
