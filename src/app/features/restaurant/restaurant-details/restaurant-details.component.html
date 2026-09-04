@@ -42,7 +42,9 @@
     <main class="details-content">
 
 
-      <!-- Title -->
+      <!-- ==========================
+           TITLE
+      =========================== -->
 
       <div class="restaurant-title">
 
@@ -58,6 +60,7 @@
 
         </div>
 
+
         <div class="rating">
 
           ⭐ {{ restaurant.rating }}
@@ -67,7 +70,9 @@
       </div>
 
 
-      <!-- Delivery Information -->
+      <!-- ==========================
+           DELIVERY INFORMATION
+      =========================== -->
 
       <div class="delivery-info">
 
@@ -115,7 +120,9 @@
       </div>
 
 
-      <!-- Discount -->
+      <!-- ==========================
+           DISCOUNT BANNER
+      =========================== -->
 
       <div class="discount-banner">
 
@@ -138,141 +145,274 @@
       </div>
 
 
-      <!-- Popular Items -->
+      <!-- ==========================
+           POPULAR DEALS
+      =========================== -->
 
       <section class="popular-section">
 
         <div class="section-header">
 
-          <h2>
-            Popular Items
-          </h2>
+          <div>
 
-        </div>
+            <h2>
+              🔥 Popular Deals
+            </h2>
 
-
-        <div class="food-list">
-
-          <div class="food-item">
-
-            <div class="food-image">
-              🍔
-            </div>
-
-            <div class="food-info">
-
-              <h3>
-                Classic Burger
-              </h3>
-
-              <p>
-                Juicy beef burger with cheese
-              </p>
-
-              <strong>
-                Rs. 650
-              </strong>
-
-            </div>
-
-            <button
-              class="add-button"
-              type="button"
-            >
-              +
-            </button>
-
-          </div>
-
-
-          <div class="food-item">
-
-            <div class="food-image">
-              🍕
-            </div>
-
-            <div class="food-info">
-
-              <h3>
-                Special Pizza
-              </h3>
-
-              <p>
-                Loaded pizza with fresh toppings
-              </p>
-
-              <strong>
-                Rs. 950
-              </strong>
-
-            </div>
-
-            <button
-              class="add-button"
-              type="button"
-            >
-              +
-            </button>
-
-          </div>
-
-
-          <div class="food-item">
-
-            <div class="food-image">
-              🍗
-            </div>
-
-            <div class="food-info">
-
-              <h3>
-                BBQ Platter
-              </h3>
-
-              <p>
-                Delicious grilled BBQ selection
-              </p>
-
-              <strong>
-                Rs. 1,250
-              </strong>
-
-            </div>
-
-            <button
-              class="add-button"
-              type="button"
-            >
-              +
-            </button>
+            <p>
+              Save more with our most loved deals
+            </p>
 
           </div>
 
         </div>
+
+
+        <!-- ==========================
+             DEALS LOADING
+        =========================== -->
+
+        @if (isLoadingDeals) {
+
+          <div class="deals-loading">
+
+            <div class="loading-spinner"></div>
+
+            <span>
+              Loading deals...
+            </span>
+
+          </div>
+
+        }
+
+
+        <!-- ==========================
+             DEALS ERROR
+        =========================== -->
+
+        @else if (dealsErrorMessage) {
+
+          <div class="deals-message">
+
+            <span>
+              ⚠️
+            </span>
+
+            <span>
+              {{ dealsErrorMessage }}
+            </span>
+
+          </div>
+
+        }
+
+
+        <!-- ==========================
+             DEAL LIST
+        =========================== -->
+
+        @else if (foodDeals.length > 0) {
+
+          <div class="food-list">
+
+            @for (
+              deal of foodDeals;
+              track deal.id
+            ) {
+
+              <div class="food-item">
+
+                <!-- ====================
+                     FOOD IMAGE
+                ===================== -->
+
+                <div class="food-image">
+
+                  @if (deal.image) {
+
+                    <img
+                      [src]="deal.image"
+                      [alt]="deal.name"
+                    >
+
+                  }
+
+                  @else {
+
+                    <span>
+                      🍽️
+                    </span>
+
+                  }
+
+                </div>
+
+
+                <!-- ====================
+                     FOOD INFORMATION
+                ===================== -->
+
+                <div class="food-info">
+
+                  <h3>
+                    {{ deal.name }}
+                  </h3>
+
+
+                  @if (deal.description) {
+
+                    <p>
+                      {{ deal.description }}
+                    </p>
+
+                  }
+
+                  @else {
+
+                    <p>
+                      {{ deal.itemCategory }}
+                    </p>
+
+                  }
+
+
+                  <div class="deal-meta">
+
+                    <span>
+                      🕐
+                      {{ deal.preparationTimeMinutes }} mins
+                    </span>
+
+                    <span>
+                      🍴
+                      {{ deal.itemCategory }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <!-- ====================
+                     PRICE
+                ===================== -->
+
+                <div class="deal-price">
+
+                  @if (hasDiscount(deal)) {
+
+                    <span class="discount-label">
+
+                      {{ getDiscountPercentage(deal) }}% OFF
+
+                    </span>
+
+                    <strong>
+                      {{ deal.discountPriceLabel }}
+                    </strong>
+
+                    <del>
+                      {{ deal.priceLabel }}
+                    </del>
+
+                  }
+
+                  @else {
+
+                    <strong>
+                      {{ deal.priceLabel }}
+                    </strong>
+
+                  }
+
+                </div>
+
+
+                <!-- ====================
+                     ADD BUTTON
+                ===================== -->
+
+                <button
+                  class="add-button"
+                  type="button"
+                  (click)="addDeal(deal)"
+                  [attr.aria-label]="'Add ' + deal.name"
+                >
+                  +
+                </button>
+
+              </div>
+
+            }
+
+          </div>
+
+        }
+
+
+        <!-- ==========================
+             NO DEALS
+        =========================== -->
+
+        @else {
+
+          <div class="no-deals">
+
+            <div class="no-deals-icon">
+              🍽️
+            </div>
+
+            <h3>
+              No deals available
+            </h3>
+
+            <p>
+              This restaurant currently has no
+              special deals.
+            </p>
+
+          </div>
+
+        }
 
       </section>
 
 
       <!-- ==========================
-           VIEW MENU
+           VIEW FULL MENU
       =========================== -->
 
-      <a
-        [routerLink]="[
-          '/restaurant',
-          restaurant.id,
-          'menu'
-        ]"
+      <button
+        type="button"
         class="menu-button"
+        (click)="viewFullMenu()"
       >
         View Full Menu
-      </a>
+      </button>
+
 
     </main>
 
   </div>
 
 }
+
+
+@else if (isLoading) {
+
+  <div class="not-found">
+
+    <div class="loading-spinner"></div>
+
+    <p>
+      Loading restaurant...
+    </p>
+
+  </div>
+
+}
+
 
 @else {
 
@@ -281,6 +421,14 @@
     <h2>
       Restaurant not found
     </h2>
+
+    @if (errorMessage) {
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+    }
 
     <a routerLink="/home">
       Back to Home
