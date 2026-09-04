@@ -1,57 +1,24 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import {
+  Injectable
+} from '@angular/core';
 
-import { environment } from '../../../environments/environment';
+import {
+  HttpClient,
+  HttpParams
+} from '@angular/common/http';
 
+import {
+  Observable,
+  map
+} from 'rxjs';
 
-// =========================================
-// FOOD ITEM MODEL
-// =========================================
-
-export interface FoodItem {
-
-  description: string;
-
-  itemCategory: string | null;
-
-  itemCategoryId: number;
-
-  preparationTimeMinutes: number;
-
-  price: number;
-
-  priceLabel: string;
-
-  discountPrice: number;
-
-  discountPriceLabel: string;
-
-  rating: number;
-
-  raters: number;
-
-  isDeal: boolean;
-
-  translations: FoodItemTranslation[];
-
-  businessLocations: FoodBusinessLocation[];
-
-  items: FoodItemDealChild[];
-
-  images: FoodItemImage[];
-
-  id: number;
-
-  name: string;
-
-  addedOn: string;
-
-}
+import {
+  environment
+} from '../../../environments/environment';
 
 
 // =========================================
-// TRANSLATION
+// FOOD ITEM TRANSLATION
 // =========================================
 
 export interface FoodItemTranslation {
@@ -81,7 +48,7 @@ export interface FoodItemTranslation {
 // BUSINESS LOCATION
 // =========================================
 
-export interface FoodBusinessLocation {
+export interface FoodItemBusinessLocation {
 
   id: number;
 
@@ -93,29 +60,61 @@ export interface FoodBusinessLocation {
 
 
 // =========================================
-// DEAL CHILD ITEM
-// =========================================
-
-export interface FoodItemDealChild {
-
-  id: number;
-
-  quantity: number;
-
-}
-
-
-// =========================================
-// IMAGE
+// FOOD ITEM IMAGE
 // =========================================
 
 export interface FoodItemImage {
 
+  id?: number;
+
+  name: string;
+
+  addedOn?: string | null;
+
+}
+
+
+// =========================================
+// FOOD ITEM
+// =========================================
+
+export interface FoodItem {
+
+  description: string;
+
+  itemCategory: string;
+
+  itemCategoryId: number;
+
+  preparationTimeMinutes: number;
+
+  price: number;
+
+  priceLabel: string;
+
+  discountPrice: number;
+
+  discountPriceLabel: string;
+
+  rating: number;
+
+  raters: number;
+
+  isDeal: boolean;
+
+  translations: FoodItemTranslation[];
+
+  businessLocations: FoodItemBusinessLocation[];
+
+  items: unknown[];
+
+  images: FoodItemImage[];
+
   id: number;
 
   name: string;
 
-  addedOn: string | null;
+  addedOn: string;
 
 }
 
@@ -146,26 +145,34 @@ interface FoodItemApiResponse {
 })
 export class FoodItemService {
 
+
+  // =======================================
+  // API URL
+  // =======================================
+
   private readonly apiUrl =
     `${environment.apiUrl}/FoodItem`;
 
+
+  // =======================================
+  // CONSTRUCTOR
+  // =======================================
 
   constructor(
     private readonly http: HttpClient
   ) {}
 
 
-  // =========================================
+  // =======================================
   // GET FOOD ITEMS
   //
   // GET /FoodItem
   //
-  // Parameters:
-  //
+  // Optional:
   // BusinessId
   // CategoryId
   // LanguageCode
-  // =========================================
+  // =======================================
 
   getFoodItems(
     businessId?: number,
@@ -173,17 +180,14 @@ export class FoodItemService {
     languageCode: number = 1
   ): Observable<FoodItem[]> {
 
+
     let params =
-      new HttpParams()
-        .set(
-          'LanguageCode',
-          languageCode.toString()
-        );
+      new HttpParams();
 
 
-    // =======================================
+    // =====================================
     // BUSINESS ID
-    // =======================================
+    // =====================================
 
     if (
       businessId !== undefined &&
@@ -200,9 +204,9 @@ export class FoodItemService {
     }
 
 
-    // =======================================
+    // =====================================
     // CATEGORY ID
-    // =======================================
+    // =====================================
 
     if (
       categoryId !== undefined &&
@@ -219,15 +223,26 @@ export class FoodItemService {
     }
 
 
+    // =====================================
+    // LANGUAGE
+    // =====================================
+
+    params =
+      params.set(
+        'LanguageCode',
+        languageCode.toString()
+      );
+
+
     console.log(
       'FoodItem API Parameters:',
-      {
-        BusinessId: businessId,
-        CategoryId: categoryId,
-        LanguageCode: languageCode
-      }
+      params.toString()
     );
 
+
+    // =====================================
+    // API REQUEST
+    // =====================================
 
     return this.http
 
@@ -245,9 +260,7 @@ export class FoodItemService {
 
             if (
               !response ||
-              !Array.isArray(
-                response.data
-              )
+              !Array.isArray(response.data)
             ) {
 
               return [];
@@ -261,6 +274,45 @@ export class FoodItemService {
         )
 
       );
+
+  }
+
+
+  // =======================================
+  // GET FOOD ITEMS BY CATEGORY
+  //
+  // This is the method our category
+  // menu will use.
+  // =======================================
+
+  getFoodItemsByCategory(
+    categoryId: number,
+    languageCode: number = 1
+  ): Observable<FoodItem[]> {
+
+    return this.getFoodItems(
+      undefined,
+      categoryId,
+      languageCode
+    );
+
+  }
+
+
+  // =======================================
+  // GET FOOD ITEMS BY BUSINESS
+  // =======================================
+
+  getFoodItemsByBusiness(
+    businessId: number,
+    languageCode: number = 1
+  ): Observable<FoodItem[]> {
+
+    return this.getFoodItems(
+      businessId,
+      undefined,
+      languageCode
+    );
 
   }
 

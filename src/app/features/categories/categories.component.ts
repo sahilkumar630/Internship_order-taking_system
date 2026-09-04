@@ -48,16 +48,14 @@ export class CategoriesComponent
   // CATEGORIES
   // =========================================
 
-  categories:
-    FoodCategory[] = [];
+  categories: FoodCategory[] = [];
 
 
   // =========================================
   // FOOD ITEMS
   // =========================================
 
-  foodItems:
-    FoodItem[] = [];
+  foodItems: FoodItem[] = [];
 
 
   // =========================================
@@ -67,37 +65,35 @@ export class CategoriesComponent
   selectedCategoryId:
     number | null = null;
 
-
-  selectedCategoryName =
-    '';
+  selectedCategoryName = '';
 
 
   // =========================================
   // CATEGORY LOADING
   // =========================================
 
-  isLoadingCategories =
-    false;
+  isLoadingCategories = false;
 
 
   // =========================================
   // FOOD LOADING
   // =========================================
 
-  isLoadingFood =
-    false;
+  isLoadingFood = false;
 
 
   // =========================================
-  // ERROR
+  // CATEGORY ERROR
   // =========================================
 
-  errorMessage =
-    '';
+  errorMessage = '';
 
 
-  foodErrorMessage =
-    '';
+  // =========================================
+  // FOOD ERROR
+  // =========================================
+
+  foodErrorMessage = '';
 
 
   // =========================================
@@ -135,49 +131,49 @@ export class CategoriesComponent
     // READ CATEGORY FROM URL
     // =======================================
 
-    this.route.queryParams
+    this.route.queryParams.subscribe(
+      params => {
 
-      .subscribe(
-        params => {
-
-          const categoryId =
-            Number(
-              params['categoryId']
-            );
+        const categoryId =
+          Number(
+            params['categoryId']
+          );
 
 
-          const categoryName =
-            String(
-              params['categoryName'] ||
-              ''
-            );
+        const categoryName =
+          String(
+            params['categoryName'] || ''
+          );
 
 
-          // ===================================
-          // CATEGORY SELECTED
-          // ===================================
+        // ===================================
+        // VALID CATEGORY
+        // ===================================
 
-          if (
-            Number.isFinite(categoryId) &&
-            categoryId > 0
-          ) {
+        if (
+          Number.isFinite(categoryId) &&
+          categoryId > 0
+        ) {
 
-            this.selectedCategoryId =
-              categoryId;
+          this.selectedCategoryId =
+            categoryId;
+
+          this.selectedCategoryName =
+            categoryName;
 
 
-            this.selectedCategoryName =
-              categoryName;
+          // =================================
+          // LOAD CATEGORY FOOD
+          // =================================
 
-
-            this.loadFoodItems(
-              categoryId
-            );
-
-          }
+          this.loadFoodItems(
+            categoryId
+          );
 
         }
-      );
+
+      }
+    );
 
   }
 
@@ -188,11 +184,22 @@ export class CategoriesComponent
 
   loadCategories(): void {
 
-    this.isLoadingCategories =
-      true;
+    this.isLoadingCategories = true;
 
-    this.errorMessage =
-      '';
+    this.errorMessage = '';
+
+
+    console.log(
+      '========================================'
+    );
+
+    console.log(
+      'LOADING FOOD CATEGORIES'
+    );
+
+    console.log(
+      '========================================'
+    );
 
 
     this.foodCategoryService
@@ -209,15 +216,20 @@ export class CategoriesComponent
         // =====================================
 
         next: (
-          categories:
-            FoodCategory[]
+          categories: FoodCategory[]
         ) => {
 
           this.categories =
-            categories;
+            categories || [];
 
           this.isLoadingCategories =
             false;
+
+
+          console.log(
+            'Categories loaded:',
+            this.categories
+          );
 
         },
 
@@ -233,8 +245,7 @@ export class CategoriesComponent
           this.isLoadingCategories =
             false;
 
-          this.categories =
-            [];
+          this.categories = [];
 
 
           console.error(
@@ -243,7 +254,16 @@ export class CategoriesComponent
           );
 
 
+          const apiError =
+            error as {
+              error?: {
+                message?: string;
+              };
+            };
+
+
           this.errorMessage =
+            apiError?.error?.message ||
             'Unable to load categories.';
 
         }
@@ -256,23 +276,33 @@ export class CategoriesComponent
   // =========================================
   // LOAD FOOD ITEMS BY CATEGORY
   //
+  // API:
+  //
   // GET /FoodItem
   //
   // CategoryId = selected category
+  // LanguageCode = 1
   // =========================================
 
   loadFoodItems(
     categoryId: number
   ): void {
 
-    this.isLoadingFood =
-      true;
+    if (
+      !Number.isFinite(categoryId) ||
+      categoryId <= 0
+    ) {
 
-    this.foodErrorMessage =
-      '';
+      return;
 
-    this.foodItems =
-      [];
+    }
+
+
+    this.isLoadingFood = true;
+
+    this.foodErrorMessage = '';
+
+    this.foodItems = [];
 
 
     console.log(
@@ -280,7 +310,11 @@ export class CategoriesComponent
     );
 
     console.log(
-      'LOADING FOOD ITEMS'
+      'LOADING CATEGORY FOOD MENU'
+    );
+
+    console.log(
+      '========================================'
     );
 
     console.log(
@@ -288,21 +322,12 @@ export class CategoriesComponent
       categoryId
     );
 
-    console.log(
-      '========================================'
-    );
-
 
     this.foodItemService
 
-      .getFoodItems(
-
-        undefined,
-
+      .getFoodItemsByCategory(
         categoryId,
-
         1
-
       )
 
       .subscribe({
@@ -312,8 +337,7 @@ export class CategoriesComponent
         // =====================================
 
         next: (
-          items:
-            FoodItem[]
+          items: FoodItem[]
         ) => {
 
           this.foodItems =
@@ -328,6 +352,11 @@ export class CategoriesComponent
             this.foodItems
           );
 
+          console.log(
+            'Food item count:',
+            this.foodItems.length
+          );
+
         },
 
 
@@ -342,8 +371,7 @@ export class CategoriesComponent
           this.isLoadingFood =
             false;
 
-          this.foodItems =
-            [];
+          this.foodItems = [];
 
 
           console.error(
@@ -379,6 +407,13 @@ export class CategoriesComponent
     category: FoodCategory
   ): void {
 
+    if (!category) {
+
+      return;
+
+    }
+
+
     this.selectedCategoryId =
       category.id;
 
@@ -388,16 +423,16 @@ export class CategoriesComponent
 
 
     // =======================================
-    // UPDATE URL
+    // CLEAR OLD FOOD ITEMS
     // =======================================
 
-    this.route.queryParams
-      .subscribe()
-      .unsubscribe();
+    this.foodItems = [];
+
+    this.foodErrorMessage = '';
 
 
     // =======================================
-    // LOAD FOOD ITEMS
+    // LOAD NEW CATEGORY FOOD
     // =======================================
 
     this.loadFoodItems(
@@ -416,10 +451,14 @@ export class CategoriesComponent
   ): string {
 
     const name =
-      categoryName
+      (categoryName || '')
         .toLowerCase()
         .trim();
 
+
+    // =======================================
+    // FAST FOOD
+    // =======================================
 
     if (
       name.includes('fast')
@@ -429,6 +468,10 @@ export class CategoriesComponent
 
     }
 
+
+    // =======================================
+    // CHINESE
+    // =======================================
 
     if (
       name.includes('chinese') ||
@@ -440,6 +483,10 @@ export class CategoriesComponent
     }
 
 
+    // =======================================
+    // DESI
+    // =======================================
+
     if (
       name.includes('desi')
     ) {
@@ -448,6 +495,10 @@ export class CategoriesComponent
 
     }
 
+
+    // =======================================
+    // BIRYANI
+    // =======================================
 
     if (
       name.includes('biryani')
@@ -458,6 +509,10 @@ export class CategoriesComponent
     }
 
 
+    // =======================================
+    // PIZZA
+    // =======================================
+
     if (
       name.includes('pizza')
     ) {
@@ -466,6 +521,10 @@ export class CategoriesComponent
 
     }
 
+
+    // =======================================
+    // BBQ
+    // =======================================
 
     if (
       name.includes('bbq')
@@ -476,6 +535,10 @@ export class CategoriesComponent
     }
 
 
+    // =======================================
+    // BURGER
+    // =======================================
+
     if (
       name.includes('burger')
     ) {
@@ -484,6 +547,10 @@ export class CategoriesComponent
 
     }
 
+
+    // =======================================
+    // DESSERT
+    // =======================================
 
     if (
       name.includes('dessert')
@@ -494,6 +561,10 @@ export class CategoriesComponent
     }
 
 
+    // =======================================
+    // DRINKS
+    // =======================================
+
     if (
       name.includes('drink')
     ) {
@@ -503,13 +574,17 @@ export class CategoriesComponent
     }
 
 
+    // =======================================
+    // DEFAULT
+    // =======================================
+
     return '🍽️';
 
   }
 
 
   // =========================================
-  // FOOD IMAGE
+  // GET FOOD IMAGE
   // =========================================
 
   getFoodImage(
@@ -517,47 +592,54 @@ export class CategoriesComponent
   ): string {
 
     if (
-      item.images &&
-      item.images.length > 0 &&
-      item.images[0]?.name
+      !item ||
+      !item.images ||
+      item.images.length === 0
     ) {
 
-      const image =
-        item.images[0].name;
-
-
-      // =====================================
-      // ABSOLUTE IMAGE URL
-      // =====================================
-
-      if (
-        image.startsWith('http')
-      ) {
-
-        return image;
-
-      }
-
-
-      // =====================================
-      // API IMAGE URL
-      // =====================================
-
-      return (
-        environment.tajImageApiUrl +
-        image
-      );
+      return '';
 
     }
 
 
-    return '';
+    const image =
+      item.images[0]?.name;
+
+
+    if (!image) {
+
+      return '';
+
+    }
+
+
+    // =======================================
+    // ABSOLUTE IMAGE URL
+    // =======================================
+
+    if (
+      image.startsWith('http')
+    ) {
+
+      return image;
+
+    }
+
+
+    // =======================================
+    // API IMAGE URL
+    // =======================================
+
+    return (
+      environment.tajImageApiUrl +
+      image
+    );
 
   }
 
 
   // =========================================
-  // GET FOOD ITEM PRICE
+  // GET FOOD PRICE
   // =========================================
 
   getFoodPrice(
@@ -596,7 +678,46 @@ export class CategoriesComponent
 
 
   // =========================================
-  // CLEAR CATEGORY
+  // GET RESTAURANT / BUSINESS LOCATION
+  // =========================================
+
+  getBusinessLocationId(
+    item: FoodItem
+  ): number | null {
+
+    if (
+      !item.businessLocations ||
+      item.businessLocations.length === 0
+    ) {
+
+      return null;
+
+    }
+
+
+    const id =
+      Number(
+        item.businessLocations[0]?.id
+      );
+
+
+    if (
+      !Number.isFinite(id) ||
+      id <= 0
+    ) {
+
+      return null;
+
+    }
+
+
+    return id;
+
+  }
+
+
+  // =========================================
+  // CLEAR SELECTED CATEGORY
   // =========================================
 
   showAllCategories(): void {
@@ -611,6 +732,9 @@ export class CategoriesComponent
 
     this.foodItems =
       [];
+
+    this.foodErrorMessage =
+      '';
 
   }
 
