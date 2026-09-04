@@ -1,0 +1,300 @@
+<div class="profile-page">
+
+
+  <!-- =========================================
+       PAGE HEADER
+  ========================================== -->
+
+  <div class="profile-header">
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="goBack()"
+      aria-label="Go back"
+    >
+      ←
+    </button>
+
+
+    <div class="header-title">
+
+      <h1>
+        My Profile
+      </h1>
+
+      <p>
+        Manage your account information
+      </p>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =========================================
+       PROFILE CARD
+  ========================================== -->
+
+  @if (currentUser) {
+
+    <div class="profile-card">
+
+
+      <!-- =====================================
+           PROFILE TOP
+      ====================================== -->
+
+      <div class="profile-top">
+
+        @if (profilePicture) {
+
+          <img
+            [src]="profilePicture"
+            [alt]="displayName"
+            class="profile-picture"
+          />
+
+        } @else {
+
+          <div class="profile-picture-placeholder">
+            👤
+          </div>
+
+        }
+
+
+        <div class="profile-name">
+
+          <h2>
+            {{ displayName }}
+          </h2>
+
+          <span>
+            {{ currentUser.membership || 'Foodie Member' }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- =====================================
+           ACCOUNT INFORMATION
+      ====================================== -->
+
+      <div class="section">
+
+        <h3>
+          Account Information
+        </h3>
+
+
+        <div class="details-grid">
+
+
+          <!-- NAME -->
+
+          <div class="detail">
+
+            <span class="detail-label">
+              Full Name
+            </span>
+
+            <strong>
+              {{ currentUser.name || '-' }}
+            </strong>
+
+          </div>
+
+
+
+          <!-- EMAIL -->
+
+          <div class="detail">
+
+            <span class="detail-label">
+              Email
+            </span>
+
+            <strong>
+              {{ currentUser.email || '-' }}
+            </strong>
+
+          </div>
+
+
+
+          <!-- CITY -->
+
+          <div class="detail">
+
+            <span class="detail-label">
+              City
+            </span>
+
+            <strong>
+              {{ currentUser.city || '-' }}
+            </strong>
+
+          </div>
+
+
+
+          <!-- ADDRESS -->
+
+          <div class="detail full-width">
+
+            <span class="detail-label">
+              Address
+            </span>
+
+            <strong>
+              {{ currentUser.address || 'No address saved' }}
+            </strong>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+
+      <!-- =====================================
+           FOODIE ACCOUNT
+      ====================================== -->
+
+      <div class="section">
+
+        <h3>
+          Foodie Account
+        </h3>
+
+
+        <div class="stats-grid">
+
+
+          <!-- POINTS -->
+
+          <div class="stat-card">
+
+            <span class="stat-icon">
+              ⭐
+            </span>
+
+            <div>
+
+              <span>
+                Points
+              </span>
+
+              <strong>
+                {{ currentUser.points }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- COINS -->
+
+          <div class="stat-card">
+
+            <span class="stat-icon">
+              🪙
+            </span>
+
+            <div>
+
+              <span>
+                Coins
+              </span>
+
+              <strong>
+                {{ currentUser.coins }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- BALANCE -->
+
+          <div class="stat-card">
+
+            <span class="stat-icon">
+              💰
+            </span>
+
+            <div>
+
+              <span>
+                Balance
+              </span>
+
+              <strong>
+                Rs. {{ currentUser.balance }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+
+      <!-- =====================================
+           ACTIONS
+      ====================================== -->
+
+      <div class="profile-actions">
+
+        <button
+          type="button"
+          class="address-button"
+          (click)="openAddresses()"
+        >
+
+          📍
+
+          <span>
+            Manage My Addresses
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="logout-button"
+          (click)="logout()"
+        >
+
+          🚪
+
+          <span>
+            Logout
+          </span>
+
+        </button>
+
+      </div>
+
+
+    </div>
+
+  }
+
+</div>

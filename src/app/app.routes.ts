@@ -8,6 +8,7 @@ export const routes: Routes = [
 
   {
     path: '',
+
     loadComponent: () =>
       import('./features/home/home.component')
         .then(m => m.HomeComponent)
@@ -20,6 +21,7 @@ export const routes: Routes = [
 
   {
     path: 'login',
+
     loadComponent: () =>
       import('./features/auth/login/login.component')
         .then(m => m.LoginComponent)
@@ -27,6 +29,7 @@ export const routes: Routes = [
 
   {
     path: 'register',
+
     loadComponent: () =>
       import('./features/auth/register/register.component')
         .then(m => m.RegisterComponent)
@@ -39,6 +42,7 @@ export const routes: Routes = [
 
   {
     path: 'location',
+
     loadComponent: () =>
       import('./features/location/location.component')
         .then(m => m.LocationComponent)
@@ -51,6 +55,7 @@ export const routes: Routes = [
 
   {
     path: 'home',
+
     loadComponent: () =>
       import('./features/home/home.component')
         .then(m => m.HomeComponent)
@@ -63,6 +68,7 @@ export const routes: Routes = [
 
   {
     path: 'restaurants',
+
     loadComponent: () =>
       import('./features/restaurant/restaurant-list/restaurant-list.component')
         .then(m => m.RestaurantListComponent)
@@ -70,6 +76,7 @@ export const routes: Routes = [
 
   {
     path: 'restaurant/:id',
+
     loadComponent: () =>
       import('./features/restaurant/restaurant-details/restaurant-details.component')
         .then(m => m.RestaurantDetailsComponent)
@@ -82,6 +89,7 @@ export const routes: Routes = [
 
   {
     path: 'restaurant/:id/menu',
+
     loadComponent: () =>
       import('./features/restaurant/menu/menu.component')
         .then(m => m.MenuComponent)
@@ -94,6 +102,7 @@ export const routes: Routes = [
 
   {
     path: 'deals',
+
     loadComponent: () =>
       import('./features/deals/deals.component')
         .then(m => m.DealsComponent)
@@ -106,6 +115,7 @@ export const routes: Routes = [
 
   {
     path: 'cart',
+
     loadComponent: () =>
       import('./features/cart/cart.component')
         .then(m => m.CartComponent)
@@ -118,6 +128,7 @@ export const routes: Routes = [
 
   {
     path: 'checkout',
+
     loadComponent: () =>
       import('./features/checkout/checkout.component')
         .then(m => m.CheckoutComponent)
@@ -130,6 +141,7 @@ export const routes: Routes = [
 
   {
     path: 'orders',
+
     loadComponent: () =>
       import('./features/orders/order-list/order-list.component')
         .then(m => m.OrderListComponent)
@@ -137,6 +149,7 @@ export const routes: Routes = [
 
   {
     path: 'orders/:id',
+
     loadComponent: () =>
       import('./features/orders/order-details/order-details.component')
         .then(m => m.OrderDetailsComponent)
@@ -144,9 +157,23 @@ export const routes: Routes = [
 
   {
     path: 'orders/:id/tracking',
+
     loadComponent: () =>
       import('./features/orders/order-tracking/order-tracking.component')
         .then(m => m.OrderTrackingComponent)
+  },
+
+
+  // ==========================
+  // PROFILE
+  // ==========================
+
+  {
+    path: 'profile',
+
+    loadComponent: () =>
+      import('./features/profile/profile.component')
+        .then(m => m.ProfileComponent)
   },
 
 
@@ -156,6 +183,7 @@ export const routes: Routes = [
 
   {
     path: '**',
+
     redirectTo: 'login'
   }
 

@@ -1,0 +1,517 @@
+/* =========================================
+   PROFILE PAGE
+========================================= */
+
+.profile-page {
+  min-height: 100vh;
+
+  padding: 40px 20px 60px;
+
+  box-sizing: border-box;
+
+  background: #f8f5fa;
+}
+
+
+/* =========================================
+   PROFILE HEADER
+========================================= */
+
+.profile-header {
+  width: min(900px, 100%);
+
+  margin: 0 auto 28px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+}
+
+
+/* =========================================
+   BACK BUTTON
+========================================= */
+
+.back-button {
+  width: 48px;
+
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #f0ddff;
+
+  color: #7b2cbf;
+
+  font-size: 24px;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+
+.back-button:hover {
+  background: #e5c8ff;
+
+  transform: translateX(-2px);
+}
+
+
+/* =========================================
+   HEADER TITLE
+========================================= */
+
+.header-title h1 {
+  margin: 0;
+
+  color: #241b2f;
+
+  font-family: Georgia, serif;
+
+  font-size: 32px;
+}
+
+
+.header-title p {
+  margin: 5px 0 0;
+
+  color: #918697;
+
+  font-size: 14px;
+}
+
+
+/* =========================================
+   PROFILE CARD
+========================================= */
+
+.profile-card {
+  width: min(900px, 100%);
+
+  margin: 0 auto;
+
+  padding: 30px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border: 1px solid #eee5f2;
+
+  border-radius: 24px;
+
+  box-shadow:
+    0 12px 35px rgba(60, 30, 80, 0.07);
+}
+
+
+/* =========================================
+   PROFILE TOP
+========================================= */
+
+.profile-top {
+  display: flex;
+
+  align-items: center;
+
+  gap: 20px;
+
+  padding-bottom: 28px;
+
+  border-bottom: 1px solid #eee7f2;
+}
+
+
+/* =========================================
+   PROFILE PICTURE
+========================================= */
+
+.profile-picture,
+.profile-picture-placeholder {
+  width: 92px;
+
+  height: 92px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+}
+
+
+.profile-picture {
+  display: block;
+
+  object-fit: cover;
+}
+
+
+.profile-picture-placeholder {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #f3e8ff;
+
+  color: #7b2cbf;
+
+  font-size: 38px;
+}
+
+
+/* =========================================
+   PROFILE NAME
+========================================= */
+
+.profile-name {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.profile-name h2 {
+  margin: 0;
+
+  color: #241b2f;
+
+  font-size: 24px;
+}
+
+
+.profile-name span {
+  width: fit-content;
+
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  background: #f3e8ff;
+
+  color: #7b2cbf;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================
+   SECTION
+========================================= */
+
+.section {
+  padding: 26px 0;
+
+  border-bottom: 1px solid #eee7f2;
+}
+
+
+.section h3 {
+  margin: 0 0 18px;
+
+  color: #33243d;
+
+  font-size: 17px;
+}
+
+
+/* =========================================
+   DETAILS GRID
+========================================= */
+
+.details-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+
+.detail {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  background: #faf8fb;
+}
+
+
+.detail.full-width {
+  grid-column: 1 / -1;
+}
+
+
+.detail-label {
+  color: #9b8ea2;
+
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+
+.detail strong {
+  color: #33243d;
+
+  font-size: 13px;
+
+  word-break: break-word;
+}
+
+
+/* =========================================
+   STATS GRID
+========================================= */
+
+.stats-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+
+.stat-card {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 16px;
+
+  border: 1px solid #eee5f2;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+}
+
+
+.stat-icon {
+  font-size: 22px;
+}
+
+
+.stat-card div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+
+.stat-card span:not(.stat-icon) {
+  color: #968a9d;
+
+  font-size: 11px;
+}
+
+
+.stat-card strong {
+  color: #7b2cbf;
+
+  font-size: 15px;
+}
+
+
+/* =========================================
+   ACTIONS
+========================================= */
+
+.profile-actions {
+  display: flex;
+
+  gap: 12px;
+
+  padding-top: 26px;
+}
+
+
+.address-button,
+.logout-button {
+  min-height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 0 20px;
+
+  border-radius: 12px;
+
+  font-family: inherit;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+
+/* =========================================
+   ADDRESS BUTTON
+========================================= */
+
+.address-button {
+  border: none;
+
+  background: #7b2cbf;
+
+  color: #ffffff;
+}
+
+
+.address-button:hover {
+  background: #6923a8;
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================
+   LOGOUT BUTTON
+========================================= */
+
+.logout-button {
+  border: 1px solid #e5d9ea;
+
+  background: #ffffff;
+
+  color: #b42318;
+}
+
+
+.logout-button:hover {
+  background: #fff4f3;
+
+  border-color: #e4b8b4;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .profile-page {
+    padding: 25px 14px 40px;
+  }
+
+
+  .profile-header {
+    gap: 12px;
+
+    margin-bottom: 20px;
+  }
+
+
+  .back-button {
+    width: 42px;
+
+    height: 42px;
+  }
+
+
+  .header-title h1 {
+    font-size: 25px;
+  }
+
+
+  .header-title p {
+    font-size: 12px;
+  }
+
+
+  .profile-card {
+    padding: 20px;
+
+    border-radius: 18px;
+  }
+
+
+  .profile-top {
+    gap: 14px;
+  }
+
+
+  .profile-picture,
+  .profile-picture-placeholder {
+    width: 70px;
+
+    height: 70px;
+  }
+
+
+  .profile-picture-placeholder {
+    font-size: 28px;
+  }
+
+
+  .profile-name h2 {
+    font-size: 19px;
+  }
+
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .detail.full-width {
+    grid-column: auto;
+  }
+
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .profile-actions {
+    flex-direction: column;
+  }
+
+
+  .address-button,
+  .logout-button {
+    width: 100%;
+  }
+
+}

@@ -2,7 +2,7 @@
 
 
   <!-- =========================================
-       CLICKABLE LOCATION
+       LOCATION
   ========================================== -->
 
   <button
@@ -12,21 +12,16 @@
     aria-label="Change delivery location"
   >
 
-    <!-- LOCATION ICON -->
-
     <span class="location-icon">
       📍
     </span>
 
-
-    <!-- LOCATION INFORMATION -->
 
     <span class="location-info">
 
       <span class="deliver-label">
         Deliver to
       </span>
-
 
       <strong>
         {{ locationDisplayName }}
@@ -35,38 +30,228 @@
     </span>
 
 
-    <!-- DROPDOWN ARROW -->
-
     <span class="arrow">
       ▾
     </span>
 
   </button>
 
-<button class="btnlogout">Logout</button>
+
+
   <!-- =========================================
-       NOTIFICATIONS
+       HEADER ACTIONS
   ========================================== -->
 
-  <button
-    type="button"
-    class="notification-button"
-    (click)="openNotifications()"
-    aria-label="Notifications"
-  >
-
-    🔔
+  <div class="header-actions">
 
 
-    @if (notificationCount > 0) {
+    <!-- =======================================
+         PROFILE
+    ======================================== -->
 
-      <span class="notification-badge">
-        {{ notificationCount }}
-      </span>
+    <div
+      class="profile-container"
+      (click)="$event.stopPropagation()"
+    >
 
-    }
+      <button
+        type="button"
+        class="profile-button"
+        (click)="toggleProfileMenu()"
+        aria-label="Open profile menu"
+        [attr.aria-expanded]="showProfileMenu"
+      >
 
-  </button>
+        @if (profilePicture) {
+
+          <img
+            [src]="profilePicture"
+            [alt]="userDisplayName"
+            class="profile-image"
+          />
+
+        } @else {
+
+          <span class="profile-icon">
+            👤
+          </span>
+
+        }
+
+      </button>
+
+
+
+      <!-- =====================================
+           PROFILE DROPDOWN
+      ====================================== -->
+
+      @if (showProfileMenu) {
+
+        <div class="profile-menu">
+
+
+          <!-- USER INFORMATION -->
+
+          <div class="profile-user">
+
+            @if (profilePicture) {
+
+              <img
+                [src]="profilePicture"
+                [alt]="userDisplayName"
+                class="profile-menu-image"
+              />
+
+            } @else {
+
+              <div class="profile-menu-icon">
+                👤
+              </div>
+
+            }
+
+
+            <div class="profile-user-info">
+
+              <strong>
+                {{ userDisplayName }}
+              </strong>
+
+              @if (userEmail) {
+
+                <span>
+                  {{ userEmail }}
+                </span>
+
+              }
+
+            </div>
+
+          </div>
+
+
+
+          <div class="profile-divider"></div>
+
+
+
+          <!-- MY PROFILE -->
+
+          <button
+            type="button"
+            class="profile-menu-item"
+            (click)="openProfile()"
+          >
+
+            <span class="menu-item-icon">
+              👤
+            </span>
+
+            <span>
+              My Profile
+            </span>
+
+          </button>
+
+
+
+          <!-- MY ADDRESSES -->
+
+          <button
+            type="button"
+            class="profile-menu-item"
+            (click)="openAddresses()"
+          >
+
+            <span class="menu-item-icon">
+              📍
+            </span>
+
+            <span>
+              My Addresses
+            </span>
+
+          </button>
+
+
+
+          <!-- MY ORDERS -->
+
+          <button
+            type="button"
+            class="profile-menu-item"
+            (click)="openOrders()"
+          >
+
+            <span class="menu-item-icon">
+              📦
+            </span>
+
+            <span>
+              My Orders
+            </span>
+
+          </button>
+
+
+
+          <div class="profile-divider"></div>
+
+
+
+          <!-- LOGOUT -->
+
+          <button
+            type="button"
+            class="profile-menu-item logout-item"
+            (click)="logout()"
+          >
+
+            <span class="menu-item-icon">
+              🚪
+            </span>
+
+            <span>
+              Logout
+            </span>
+
+          </button>
+
+
+        </div>
+
+      }
+
+    </div>
+
+
+
+    <!-- =======================================
+         NOTIFICATIONS
+    ======================================== -->
+
+    <button
+      type="button"
+      class="notification-button"
+      (click)="openNotifications()"
+      aria-label="Notifications"
+    >
+
+      🔔
+
+      @if (notificationCount > 0) {
+
+        <span class="notification-badge">
+          {{ notificationCount }}
+        </span>
+
+      }
+
+    </button>
+
+
+  </div>
 
 
 </header>
