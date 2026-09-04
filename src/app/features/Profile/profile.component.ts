@@ -124,18 +124,5 @@ export class ProfileComponent implements OnInit {
   }
 
 
-  // =========================================
-  // LOGOUT
-  // =========================================
-
-  logout(): void {
-
-    this.authService.logout();
-
-    this.router.navigate([
-      '/login'
-    ]);
-
-  }
 
 }

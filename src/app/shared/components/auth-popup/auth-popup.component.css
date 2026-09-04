@@ -64,6 +64,11 @@
   max-width: 430px;
 }
 
+/* Success screen gets a slightly smaller, cleaner popup */
+.login-popup.account-created-popup {
+  max-width: 430px;
+}
+
 @keyframes login-popup-in {
   from {
     opacity: 0;
@@ -220,6 +225,167 @@
 
 
 /* =========================================
+   ACCOUNT CREATED SUCCESS SCREEN
+========================================= */
+
+.account-created-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+
+  padding: 12px 4px 8px;
+
+  animation: success-content-in 0.35s ease;
+}
+
+@keyframes success-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Green check circle */
+
+.success-check-circle {
+  width: 82px;
+  height: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 4px auto 20px;
+
+  border-radius: 50%;
+
+  background: #e9f9ef;
+
+  color: #239653;
+
+  font-size: 43px;
+  font-weight: 900;
+
+  box-shadow:
+    0 0 0 9px #f5fcf7;
+}
+
+
+/* Success title */
+
+.account-created-success h1 {
+  margin: 0 0 10px;
+
+  color: #241b2f;
+
+  font-size: 27px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+
+/* Main success message */
+
+.success-main-message {
+  max-width: 320px;
+
+  margin: 0 auto;
+
+  color: #8b7f92;
+
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+
+/* Welcome message */
+
+.success-welcome-message {
+  margin: 12px 0 0;
+
+  color: #7b2cbf;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.success-welcome-message strong {
+  font-weight: 800;
+}
+
+
+/* Order message */
+
+.success-order-message {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  box-sizing: border-box;
+
+  margin: 22px 0 24px;
+  padding: 14px;
+
+  border: 1px solid #eee4f4;
+  border-radius: 14px;
+
+  background: #faf7fc;
+
+  color: #6f6277;
+
+  font-size: 12px;
+  line-height: 1.55;
+
+  text-align: left;
+}
+
+.success-order-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #f0e2fa;
+
+  font-size: 20px;
+}
+
+
+/* Continue button */
+
+.success-continue-button {
+  margin-top: 0;
+}
+
+.continue-arrow {
+  font-size: 18px;
+  line-height: 1;
+
+  transition: transform 0.2s ease;
+}
+
+.success-continue-button:hover:not(:disabled) .continue-arrow {
+  transform: translateX(4px);
+}
+
+
+/* =========================================
    AUTH FORM
 ========================================= */
 
@@ -258,6 +424,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 10px;
 }
 
@@ -444,6 +611,31 @@
 
 
 /* =========================================
+   BUTTON SPINNER
+========================================= */
+
+.button-spinner {
+  width: 16px;
+  height: 16px;
+
+  display: inline-block;
+
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+
+  border-radius: 50%;
+
+  animation: button-spinner-rotation 0.7s linear infinite;
+}
+
+@keyframes button-spinner-rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================
    DIVIDER
 ========================================= */
 
@@ -621,6 +813,42 @@
 
 
 /* =========================================
+   CITY SELECT
+========================================= */
+
+.login-field select {
+  width: 100%;
+  height: 49px;
+
+  padding: 0 14px;
+  box-sizing: border-box;
+
+  border: 1px solid #e0d6e7;
+  border-radius: 11px;
+
+  outline: none;
+
+  background: #fff;
+  color: #33243d;
+
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.login-field select:focus {
+  border-color: #9d4edd;
+
+  box-shadow:
+    0 0 0 4px rgba(157, 78, 221, 0.1);
+}
+
+.login-field select:disabled {
+  background: #f7f5f8;
+  cursor: not-allowed;
+}
+
+
+/* =========================================
    MOBILE AUTH POPUP
 ========================================= */
 
@@ -633,7 +861,8 @@
 
   .login-popup,
   .login-popup.signup-popup,
-  .login-popup.forgot-popup {
+  .login-popup.forgot-popup,
+  .login-popup.account-created-popup {
     max-width: none;
     max-height: calc(100vh - 20px);
 
@@ -666,13 +895,25 @@
     flex-basis: 32px;
   }
 
+  .success-check-circle {
+    width: 72px;
+    height: 72px;
+
+    font-size: 37px;
+
+    margin-bottom: 18px;
+  }
+
+  .account-created-success h1 {
+    font-size: 24px;
+  }
+
+  .success-main-message {
+    font-size: 12px;
+  }
+
+  .success-order-message {
+    font-size: 11px;
+  }
+
 }
-
-
-
-/* =========================================
-   CITY SELECT
-========================================= */
-.login-field select { width:100%; height:49px; padding:0 14px; box-sizing:border-box; border:1px solid #e0d6e7; border-radius:11px; outline:none; background:#fff; color:#33243d; font-family:inherit; font-size:13px; }
-.login-field select:focus { border-color:#9d4edd; box-shadow:0 0 0 4px rgba(157,78,221,.1); }
-.login-field select:disabled { background:#f7f5f8; cursor:not-allowed; }

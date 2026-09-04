@@ -276,7 +276,7 @@ export class HeaderComponent implements OnInit {
     this.currentUser = null;
 
     this.router.navigate([
-      '/login'
+      '/home'
     ]);
 
   }

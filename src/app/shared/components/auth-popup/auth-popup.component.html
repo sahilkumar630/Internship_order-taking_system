@@ -1,4 +1,3 @@
-
 @if (visible) {
 
   <div
@@ -10,79 +9,149 @@
       class="login-popup"
       [class.signup-popup]="authMode === 'signup'"
       [class.forgot-popup]="authMode === 'forgot'"
+      [class.account-created-popup]="accountCreatedSuccessfully"
       (click)="$event.stopPropagation()"
     >
 
+      <!-- ===================================
+           POPUP HEADER
+      ==================================== -->
 
-        <!-- ===================================
-             POPUP HEADER
-        ==================================== -->
+      <div class="login-popup-header">
 
-        <div class="login-popup-header">
+        <div class="auth-brand">
 
-          <div class="auth-brand">
+          <div class="auth-logo">
+            🍔
+          </div>
 
-            <div class="auth-logo">
-              🍔
-            </div>
+          <div>
 
-            <div>
+            @if (accountCreatedSuccessfully) {
 
-              @if (authMode === 'login') {
+              <h2>
+                Account Created! 🎉
+              </h2>
 
-                <h2>
-                  Welcome back! 👋
-                </h2>
+              <p>
+                Welcome to Foodie
+              </p>
 
-                <p>
-                  Login to continue your order
-                </p>
+            }
 
-              }
+            @else if (authMode === 'login') {
 
-              @else if (authMode === 'signup') {
+              <h2>
+                Welcome back! 👋
+              </h2>
 
-                <h2>
-                  Join Foodie 🎉
-                </h2>
+              <p>
+                Login to continue your order
+              </p>
 
-                <p>
-                  Create your account and start ordering
-                </p>
+            }
 
-              }
+            @else if (authMode === 'signup') {
 
-              @else {
+              <h2>
+                Join Foodie 🎉
+              </h2>
 
-                <h2>
-                  Forgot password?
-                </h2>
+              <p>
+                Create your account and start ordering
+              </p>
 
-                <p>
-                  We’ll help you get back into your account
-                </p>
+            }
 
-              }
+            @else {
 
-            </div>
+              <h2>
+                Forgot password?
+              </h2>
 
+              <p>
+                We’ll help you get back into your account
+              </p>
+
+            }
+
+          </div>
+
+        </div>
+
+        <button
+          type="button"
+          class="login-close-button"
+          aria-label="Close"
+          (click)="closePopup()"
+          [disabled]="isSubmittingAuth || isLoggingIn"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- ===================================
+           ACCOUNT CREATED SUCCESS SCREEN
+      ==================================== -->
+
+      @if (accountCreatedSuccessfully) {
+
+        <div class="account-created-success">
+
+          <div class="success-check-circle">
+            ✓
+          </div>
+
+          <h1>
+            Account Created!
+          </h1>
+
+          <p class="success-main-message">
+            Your Foodie account has been created successfully.
+          </p>
+
+          @if (signupFullName.trim()) {
+
+            <p class="success-welcome-message">
+              Welcome,
+              <strong>{{ signupFullName }}</strong>! 🎉
+            </p>
+
+          }
+
+          <div class="success-order-message">
+            <span class="success-order-icon">
+              🛍️
+            </span>
+
+            <span>
+              Your account is ready.
+              <br />
+              Let's start ordering your favorite food!
+            </span>
           </div>
 
           <button
             type="button"
-            class="login-close-button"
-            aria-label="Close"
-            (click)="closePopup()"
-            [disabled]="isSubmittingAuth || isLoggingIn"
+            class="login-button success-continue-button"
+            (click)="continueAfterAccountCreation()"
           >
-            ×
+            Continue to Order
+            <span class="continue-arrow">
+              →
+            </span>
           </button>
 
         </div>
 
+      }
+
+      @else {
 
         <!-- ===================================
-             AUTH SUCCESS
+             AUTH SUCCESS MESSAGE
         ==================================== -->
 
         @if (authSuccessMessage) {
@@ -236,7 +305,9 @@
 
 
             <p class="auth-bottom-text">
+
               New to Foodie?
+
               <button
                 type="button"
                 class="inline-auth-link"
@@ -245,6 +316,7 @@
               >
                 Sign up
               </button>
+
             </p>
 
           </div>
@@ -280,17 +352,22 @@
 
               </div>
 
+
               @if (devOtpOne) {
 
                 <div class="auth-success">
+
                   <span>✓</span>
+
                   <span>
                     DEV OTP #1:
                     <strong>{{ devOtpOne }}</strong>
                   </span>
+
                 </div>
 
               }
+
 
               <button
                 type="button"
@@ -300,18 +377,26 @@
               >
 
                 @if (isSubmittingAuth) {
+
                   <span class="button-spinner"></span>
+
                   Sending OTP...
+
                 }
 
                 @else {
+
                   Send OTP
+
                 }
 
               </button>
 
+
               <p class="auth-bottom-text">
+
                 Already have an account?
+
                 <button
                   type="button"
                   class="inline-auth-link"
@@ -320,11 +405,13 @@
                 >
                   Login
                 </button>
+
               </p>
 
             </div>
 
           }
+
 
           @else if (signupStep === 'otp1') {
 
@@ -349,17 +436,22 @@
 
               </div>
 
+
               @if (devOtpOne) {
 
                 <div class="auth-success">
+
                   <span>✓</span>
+
                   <span>
                     DEV OTP #1:
                     <strong>{{ devOtpOne }}</strong>
                   </span>
+
                 </div>
 
               }
+
 
               <button
                 type="button"
@@ -369,15 +461,21 @@
               >
 
                 @if (isSubmittingAuth) {
+
                   <span class="button-spinner"></span>
+
                   Verifying OTP...
+
                 }
 
                 @else {
+
                   Verify OTP #1
+
                 }
 
               </button>
+
 
               <button
                 type="button"
@@ -392,6 +490,7 @@
 
           }
 
+
           @else {
 
             <div class="login-form signup-form">
@@ -399,16 +498,21 @@
               @if (devOtpTwo) {
 
                 <div class="auth-success">
+
                   <span>✓</span>
+
                   <span>
                     DEV OTP #2:
                     <strong>{{ devOtpTwo }}</strong>
                   </span>
+
                 </div>
 
               }
 
+
               <div class="login-field">
+
                 <label for="authSignupName">
                   Full Name
                 </label>
@@ -421,9 +525,12 @@
                   autocomplete="name"
                   [disabled]="isSubmittingAuth"
                 />
+
               </div>
 
+
               <div class="login-field">
+
                 <label for="authSignupCnic">
                   CNIC
                 </label>
@@ -435,9 +542,12 @@
                   placeholder="Enter your CNIC"
                   [disabled]="isSubmittingAuth"
                 />
+
               </div>
 
+
               <div class="login-field">
+
                 <label for="authSignupEmail">
                   Email Address
                 </label>
@@ -450,7 +560,9 @@
                   autocomplete="email"
                   [disabled]="isSubmittingAuth"
                 />
+
               </div>
+
 
               <div class="login-field">
 
@@ -463,19 +575,23 @@
                   [(ngModel)]="signupCityId"
                   [disabled]="isSubmittingAuth || isLoadingCities"
                 >
+
                   <option [ngValue]="null">
                     Select your city
                   </option>
 
                   @for (city of cities; track city.id) {
+
                     <option [ngValue]="city.id">
                       {{ city.name }}
                     </option>
+
                   }
 
                 </select>
 
               </div>
+
 
               <div class="login-field">
 
@@ -492,6 +608,7 @@
                 />
 
               </div>
+
 
               <div class="login-field">
 
@@ -523,6 +640,7 @@
 
               </div>
 
+
               <div class="login-field">
 
                 <label for="authSignupConfirmPassword">
@@ -553,6 +671,7 @@
 
               </div>
 
+
               <div class="login-field">
 
                 <label for="authSignupOtp2">
@@ -571,6 +690,7 @@
 
               </div>
 
+
               <label class="terms-row">
 
                 <input
@@ -580,7 +700,9 @@
                 />
 
                 <span>
+
                   I agree to the
+
                   <button
                     type="button"
                     class="inline-auth-link"
@@ -588,9 +710,11 @@
                   >
                     Terms & Conditions
                   </button>
+
                 </span>
 
               </label>
+
 
               <button
                 type="button"
@@ -600,17 +724,24 @@
               >
 
                 @if (isSubmittingAuth) {
+
                   <span class="button-spinner"></span>
+
                   Creating account...
+
                 }
 
                 @else {
+
                   Create Account
+
                 }
 
               </button>
 
+
               <p class="auth-bottom-text">
+
                 Already have an account?
 
                 <button
@@ -621,6 +752,7 @@
                 >
                   Login
                 </button>
+
               </p>
 
             </div>
@@ -642,9 +774,12 @@
               🔐
             </div>
 
+
             <p class="forgot-description">
-              Enter the email address or username linked to your Foodie account and we’ll help you reset your password.
+              Enter the email address or username linked to your
+              Foodie account and we’ll help you reset your password.
             </p>
+
 
             <div class="login-field">
 
@@ -663,6 +798,7 @@
               />
 
             </div>
+
 
             <button
               type="button"
@@ -687,6 +823,7 @@
 
             </button>
 
+
             <button
               type="button"
               class="back-auth-button"
@@ -700,10 +837,10 @@
 
         }
 
-      </div>
+      }
 
     </div>
 
-  }
+  </div>
 
-
+}
